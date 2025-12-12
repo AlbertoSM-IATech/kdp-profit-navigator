@@ -5,6 +5,7 @@ import { PaperbackSection } from '@/components/kdp/PaperbackSection';
 import { PositioningSection } from '@/components/kdp/PositioningSection';
 import { ResultsTable } from '@/components/kdp/ResultsTable';
 import { ReportSection } from '@/components/kdp/ReportSection';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { BookOpen, Calculator } from 'lucide-react';
 
 const Index = () => {
@@ -26,18 +27,21 @@ const Index = () => {
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="container py-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Calculator className="h-6 w-6 text-primary" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Calculator className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-xl font-heading font-bold text-foreground">
+                  Calculadora KDP
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  Regalías, Breakeven y Posicionamiento
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-heading font-bold text-foreground">
-                Calculadora KDP
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Regalías, Breakeven y Posicionamiento
-              </p>
-            </div>
+            <ThemeToggle />
           </div>
         </div>
       </header>
