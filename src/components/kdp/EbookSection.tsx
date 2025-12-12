@@ -46,19 +46,19 @@ export const EbookSection = ({ data, results, globalData, onChange }: EbookSecti
       case 'good':
         return (
           <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium diagnosis-good border">
-            🟢 Campaña buena ({clics} clics)
+            🟢 Campaña buena (máx. {clics} clics)
           </span>
         );
       case 'warning':
         return (
           <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium diagnosis-warning border">
-            🟠 Límite aceptable ({clics} clics)
+            🟠 Límite aceptable (máx. {clics} clics)
           </span>
         );
       case 'bad':
         return (
           <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium diagnosis-bad border">
-            🔴 Mala campaña ({clics} clics)
+            🔴 Mala campaña (máx. {clics} clics)
           </span>
         );
     }
@@ -206,7 +206,7 @@ export const EbookSection = ({ data, results, globalData, onChange }: EbookSecti
                 </div>
                 
                 <div className="data-row">
-                  <span className="data-label">Clics por Venta</span>
+                  <span className="data-label">Clics máx. por Venta</span>
                   <span className={`data-value font-semibold ${getDiagnosticColor(results.diagnostico)}`}>
                     {results.clicsPorVenta}
                   </span>

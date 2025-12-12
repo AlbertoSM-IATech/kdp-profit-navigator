@@ -86,7 +86,7 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
 
   const getDiagnosticBadge = (diagnostico: string, margen: number, clics: number) => {
     const margenLabel = `${margen.toFixed(1)}% margen`;
-    const clicsLabel = `${clics} clics`;
+    const clicsLabel = `máx. ${clics} clics`;
     
     switch (diagnostico) {
       case 'good':
@@ -267,7 +267,7 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
                 </div>
                 
                 <div className="data-row">
-                  <span className="data-label">Clics por Venta</span>
+                  <span className="data-label">Clics máx. por Venta</span>
                   <span className="data-value font-semibold">{results.clicsPorVenta}</span>
                 </div>
 

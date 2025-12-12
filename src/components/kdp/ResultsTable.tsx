@@ -25,7 +25,8 @@ export const ResultsTable = ({ data, globalData }: ResultsTableProps) => {
   };
 
   const getClicksClass = (clicks: number) => {
-    if (clicks > 10) return 'bg-destructive/20 text-destructive font-semibold';
+    // More clicks allowed = better (healthier margin)
+    if (clicks < 10) return 'bg-destructive/20 text-destructive font-semibold';
     return 'bg-success/20 text-success font-semibold';
   };
 
@@ -70,7 +71,7 @@ export const ResultsTable = ({ data, globalData }: ResultsTableProps) => {
                   <TableHead className="font-heading font-semibold text-right">PVP</TableHead>
                   <TableHead className="font-heading font-semibold text-right">Regalías</TableHead>
                   <TableHead className="font-heading font-semibold text-right">Margen</TableHead>
-                  <TableHead className="font-heading font-semibold text-right">Clics/Venta</TableHead>
+                  <TableHead className="font-heading font-semibold text-right">Clics máx./Venta</TableHead>
                   <TableHead className="font-heading font-semibold text-center">Estado</TableHead>
                   <TableHead className="font-heading font-semibold">Recomendación</TableHead>
                 </TRow>
@@ -134,15 +135,15 @@ export const ResultsTable = ({ data, globalData }: ResultsTableProps) => {
         <div className="mt-4 flex flex-wrap gap-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-success"></span>
-            <span>Margen &gt; 40% / ≤10 clics</span>
+            <span>Margen &gt; 40% / ≥10 clics máx.</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-warning"></span>
-            <span>Margen 30-40%</span>
+            <span>Margen 30-40% / =10 clics</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-destructive"></span>
-            <span>Margen &lt; 30% / &gt;10 clics</span>
+            <span>Margen &lt; 30% / &lt;10 clics</span>
           </div>
         </div>
       </CardContent>
