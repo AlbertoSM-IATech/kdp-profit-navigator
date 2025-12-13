@@ -8,7 +8,7 @@ import {
   PositioningResults,
   TableRow,
 } from '@/types/kdp';
-import { getPresetById } from '@/data/paperbackPresets';
+import { calculatePrintingCost } from '@/data/printingCosts';
 
 export const useKdpCalculator = () => {
   // Global Data State
@@ -17,6 +17,7 @@ export const useKdpCalculator = () => {
     margenObjetivoPct: null,
     cpc: null,
     ventasDiariasCompetencia: null,
+    selectedFormat: null,
   });
 
   // eBook State
@@ -31,7 +32,6 @@ export const useKdpCalculator = () => {
   const [paperbackData, setPaperbackData] = useState<PaperbackData>({
     interior: null,
     size: null,
-    presetId: null,
     pvp: null,
     pages: null,
   });
@@ -96,18 +96,21 @@ export const useKdpCalculator = () => {
   // Paperback Calculations
   const paperbackResults = useMemo((): PaperbackResults | null => {
     const { marketplace, cpc, margenObjetivoPct } = globalData;
-    const { presetId, pvp, pages } = paperbackData;
+    const { interior, size, pvp, pages } = paperbackData;
 
-    if (!presetId || !pvp || !pages || cpc === null) return null;
+    if (!interior || !size || !pvp || !pages || cpc === null || !marketplace) return null;
 
-    const preset = getPresetById(presetId);
-    if (!preset) return null;
+    // Calculate printing costs using the new model
+    const printingResult = calculatePrintingCost(interior, size, pages);
+    
+    if (!printingResult.isValid) {
+      return null;
+    }
+
+    const gastosImpresion = printingResult.totalCost;
 
     // Royalty rate based on PVP
     const royaltyRate = pvp < 9.99 ? 0.50 : 0.60;
-
-    // Printing costs: pages * perPageCost + fixedCost
-    const gastosImpresion = (pages * preset.perPageCost) + preset.fixedCost;
 
     // Calculate price without VAT for ES marketplace (4% for books)
     const ivaPct = marketplace === 'ES' ? 4 : 0;
@@ -125,13 +128,23 @@ export const useKdpCalculator = () => {
     // Maximum clicks per sale (breakeven point)
     const clicsMaxPorVenta = tasaConvBreakeven > 0 ? Math.floor(1 / tasaConvBreakeven) : 0;
 
-    // Minimum target price
-    const margenObj = margenObjetivoPct ? margenObjetivoPct / 100 : 0.30;
-    const precioMinObjetivo = royaltyRate > margenObj
-      ? Math.ceil(gastosImpresion / (royaltyRate - margenObj)) - 0.01
-      : 0;
+    // Minimum target price calculation
+    let precioMinObjetivo: number | null = null;
+    let precioMinObjetivoError: string | null = null;
+    
+    if (margenObjetivoPct !== null) {
+      const margenObj = margenObjetivoPct / 100;
+      const denominator = royaltyRate - margenObj;
+      
+      if (denominator <= 0) {
+        precioMinObjetivoError = `Con este margen objetivo (${margenObjetivoPct}%) no es posible ser rentable con el ${(royaltyRate * 100).toFixed(0)}% de regalía.`;
+      } else {
+        // Formula: CEIL(gastosImpresion / (royaltyRate - margenObj)) - 0.01
+        precioMinObjetivo = Math.ceil(gastosImpresion / denominator) - 0.01;
+      }
+    }
 
-    // Diagnosis based on margin - more clicks allowed is BETTER
+    // Diagnosis based on margin and clicks
     let diagnostico: 'good' | 'warning' | 'bad' = 'good';
     const margenPct = margenBacos * 100;
     if (margenPct < 30 || clicsMaxPorVenta < 10) {
@@ -142,19 +155,23 @@ export const useKdpCalculator = () => {
 
     return {
       royaltyRate,
+      fixedCost: printingResult.fixedCost,
+      perPageCost: printingResult.perPageCost,
       gastosImpresion,
+      precioSinIva,
       regalias,
       margenBacos,
       tasaConvBreakeven,
       clicsPorVenta: clicsMaxPorVenta,
       precioMinObjetivo,
+      precioMinObjetivoError,
       diagnostico,
     };
   }, [globalData, paperbackData]);
 
   // Positioning Calculations
   const positioningResults = useMemo((): PositioningResults | null => {
-    const { cpc, ventasDiariasCompetencia, margenObjetivoPct } = globalData;
+    const { cpc, ventasDiariasCompetencia, selectedFormat } = globalData;
 
     if (cpc === null || ventasDiariasCompetencia === null) return null;
 
@@ -164,28 +181,26 @@ export const useKdpCalculator = () => {
 
     const advertencias: string[] = [];
 
-    // Check if conversion needed is too high
-    if (ebookResults) {
+    // Check based on selected format
+    if (selectedFormat === 'EBOOK' && ebookResults) {
       const conversionNeeded = ebookResults.tasaConvBreakeven;
       if (conversionNeeded > 0.10) {
-        advertencias.push(`La conversión necesaria para eBook (${(conversionNeeded * 100).toFixed(1)}%) supera la referencia del 10%.`);
+        advertencias.push(`La conversión necesaria (${(conversionNeeded * 100).toFixed(1)}%) supera la referencia del 10%.`);
       }
     }
 
-    if (paperbackResults) {
+    if (selectedFormat === 'PAPERBACK' && paperbackResults) {
       const conversionNeeded = paperbackResults.tasaConvBreakeven;
       if (conversionNeeded > 0.10) {
-        advertencias.push(`La conversión necesaria para Paperback (${(conversionNeeded * 100).toFixed(1)}%) supera la referencia del 10%.`);
+        advertencias.push(`La conversión necesaria (${(conversionNeeded * 100).toFixed(1)}%) supera la referencia del 10%.`);
       }
     }
 
     // Check if daily investment is disproportionate
-    const margenObj = margenObjetivoPct || 30;
-    const ebookRegalias = ebookResults?.regalias || 0;
-    const paperbackRegalias = paperbackResults?.regalias || 0;
-    const avgRegalias = (ebookRegalias + paperbackRegalias) / 2;
+    const activeResults = selectedFormat === 'EBOOK' ? ebookResults : paperbackResults;
+    const activeRegalias = activeResults?.regalias || 0;
     
-    if (avgRegalias > 0 && inversionDiaria > avgRegalias * ventasDiariasCompetencia * 0.5) {
+    if (activeRegalias > 0 && inversionDiaria > activeRegalias * ventasDiariasCompetencia * 0.5) {
       advertencias.push(`La inversión diaria (${inversionDiaria.toFixed(2)}€) puede ser desproporcionada respecto a las regalías esperadas.`);
     }
 
@@ -197,11 +212,12 @@ export const useKdpCalculator = () => {
     };
   }, [globalData, ebookResults, paperbackResults]);
 
-  // Table Data
+  // Table Data - Only shows the selected format
   const tableData = useMemo((): TableRow[] => {
     const rows: TableRow[] = [];
+    const { selectedFormat } = globalData;
 
-    if (ebookResults && ebookData.pvp) {
+    if (selectedFormat === 'EBOOK' && ebookResults && ebookData.pvp) {
       const margenPct = ebookResults.margenAcos * 100;
       let recomendacion = '';
       
@@ -224,13 +240,15 @@ export const useKdpCalculator = () => {
       });
     }
 
-    if (paperbackResults && paperbackData.pvp) {
+    if (selectedFormat === 'PAPERBACK' && paperbackResults && paperbackData.pvp) {
       const margenPct = paperbackResults.margenBacos * 100;
       let recomendacion = '';
       
       if (paperbackResults.diagnostico === 'bad') {
         if (margenPct < 30) {
-          recomendacion = `Subir PVP mínimo a ${paperbackResults.precioMinObjetivo.toFixed(2)}€ para alcanzar margen objetivo.`;
+          recomendacion = paperbackResults.precioMinObjetivo 
+            ? `Subir PVP mínimo a ${paperbackResults.precioMinObjetivo.toFixed(2)}€ para alcanzar margen objetivo.`
+            : 'Aumenta el PVP para mejorar el margen.';
         } else {
           recomendacion = `Solo puedes permitir ${paperbackResults.clicsPorVenta} clics máx. Reduce CPC o sube PVP.`;
         }
@@ -252,7 +270,7 @@ export const useKdpCalculator = () => {
     }
 
     return rows;
-  }, [ebookData.pvp, ebookResults, paperbackData.pvp, paperbackResults]);
+  }, [globalData.selectedFormat, ebookData.pvp, ebookResults, paperbackData.pvp, paperbackResults]);
 
   return {
     globalData,

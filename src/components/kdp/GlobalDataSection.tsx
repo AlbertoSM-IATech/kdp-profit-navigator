@@ -1,4 +1,4 @@
-import { GlobalData, Marketplace } from '@/types/kdp';
+import { GlobalData, Marketplace, FormatType } from '@/types/kdp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -9,7 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Globe, Target, MousePointer, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Globe, Target, MousePointer, TrendingUp, AlertTriangle, BookOpen, Book } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface GlobalDataSectionProps {
   data: GlobalData;
@@ -19,6 +20,10 @@ interface GlobalDataSectionProps {
 export const GlobalDataSection = ({ data, onChange }: GlobalDataSectionProps) => {
   const handleMarketplaceChange = (value: string) => {
     onChange({ ...data, marketplace: value as Marketplace });
+  };
+
+  const handleFormatChange = (value: string) => {
+    onChange({ ...data, selectedFormat: value as FormatType });
   };
 
   const handleNumberChange = (field: keyof GlobalData, value: string) => {
@@ -37,7 +42,41 @@ export const GlobalDataSection = ({ data, onChange }: GlobalDataSectionProps) =>
           Datos Globales
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
+        {/* Format Selector - PROMINENT */}
+        <div className="p-4 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl border border-primary/20">
+          <Label className="text-sm font-semibold text-foreground mb-3 block">
+            Formato a analizar
+          </Label>
+          <RadioGroup
+            value={data.selectedFormat || ''}
+            onValueChange={handleFormatChange}
+            className="flex gap-4"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="EBOOK" id="format-ebook" />
+              <Label 
+                htmlFor="format-ebook" 
+                className="flex items-center gap-2 cursor-pointer font-medium"
+              >
+                <BookOpen className="h-4 w-4 text-secondary" />
+                eBook
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="PAPERBACK" id="format-paperback" />
+              <Label 
+                htmlFor="format-paperback" 
+                className="flex items-center gap-2 cursor-pointer font-medium"
+              >
+                <Book className="h-4 w-4 text-primary" />
+                Paperback (Tapa Blanda)
+              </Label>
+            </div>
+          </RadioGroup>
+        </div>
+
+        {/* Other Global Inputs */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Marketplace */}
           <div className="space-y-2">
@@ -128,7 +167,7 @@ export const GlobalDataSection = ({ data, onChange }: GlobalDataSectionProps) =>
         </div>
 
         {/* Info note */}
-        <p className="text-xs text-muted-foreground mt-4 italic">
+        <p className="text-xs text-muted-foreground italic">
           * El margen objetivo es una recomendación, no una restricción. Se usará para calcular precios mínimos sugeridos.
         </p>
       </CardContent>

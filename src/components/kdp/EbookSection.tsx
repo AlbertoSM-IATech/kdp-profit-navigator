@@ -10,7 +10,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { BookOpen, Euro, Percent, HardDrive, Tv } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { BookOpen, Euro, Percent, HardDrive, Tv, HelpCircle } from 'lucide-react';
 
 interface EbookSectionProps {
   data: EbookData;
@@ -61,6 +67,17 @@ export const EbookSection = ({ data, results, globalData, onChange }: EbookSecti
             🔴 Mala campaña (máx. {clics} clics)
           </span>
         );
+    }
+  };
+
+  const getDiagnosticMessage = (diagnostico: string, clics: number) => {
+    switch (diagnostico) {
+      case 'good':
+        return `Puedes permitir hasta ${clics} clics por venta. Buen margen para escalar.`;
+      case 'warning':
+        return 'En el límite de breakeven (10 clics). Margen ajustado.';
+      case 'bad':
+        return `Con este PVP pierdes dinero incluso antes de invertir en Ads.`;
     }
   };
 
@@ -206,14 +223,32 @@ export const EbookSection = ({ data, results, globalData, onChange }: EbookSecti
                 </div>
                 
                 <div className="data-row">
-                  <span className="data-label">Clics máx. por Venta</span>
+                  <span className="data-label flex items-center gap-1">
+                    Clics máx. por Venta
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs p-3">
+                          <p className="text-sm">
+                            Para que una campaña sea saludable, lo recomendado es conseguir al menos 1 venta cada 10 clics (10% de conversión).
+                            Cuantos más clics máximos permitidos tenga tu libro, mayor margen de maniobra tendrás en Amazon Ads.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </span>
                   <span className={`data-value font-semibold ${getDiagnosticColor(results.diagnostico)}`}>
                     {results.clicsPorVenta}
                   </span>
                 </div>
 
-                <div className="pt-3 border-t border-border">
+                <div className="pt-3 border-t border-border space-y-2">
                   {getDiagnosticBadge(results.diagnostico, results.clicsPorVenta)}
+                  <p className="text-sm text-muted-foreground">
+                    {getDiagnosticMessage(results.diagnostico, results.clicsPorVenta)}
+                  </p>
                 </div>
               </div>
             ) : (
