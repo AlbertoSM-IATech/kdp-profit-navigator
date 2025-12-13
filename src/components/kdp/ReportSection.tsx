@@ -11,7 +11,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, Download, Printer, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
-import { getPresetById } from '@/data/paperbackPresets';
 
 interface ReportSectionProps {
   globalData: GlobalData;
@@ -22,6 +21,17 @@ interface ReportSectionProps {
   positioningResults: PositioningResults | null;
   tableData: TableRow[];
 }
+
+const interiorLabels: Record<string, string> = {
+  BN: 'Blanco y Negro',
+  COLOR_PREMIUM: 'Color Premium',
+  COLOR_STANDARD: 'Color Estándar',
+};
+
+const sizeLabels: Record<string, string> = {
+  SMALL: 'Pequeño',
+  LARGE: 'Grande',
+};
 
 export const ReportSection = ({
   globalData,
@@ -34,9 +44,10 @@ export const ReportSection = ({
 }: ReportSectionProps) => {
   const reportRef = useRef<HTMLDivElement>(null);
   const currencySymbol = globalData.marketplace === 'COM' ? '$' : '€';
-  const selectedPreset = paperbackData.presetId ? getPresetById(paperbackData.presetId) : null;
 
-  const hasData = ebookResults || paperbackResults;
+  const showEbook = globalData.selectedFormat === 'EBOOK' && ebookResults;
+  const showPaperback = globalData.selectedFormat === 'PAPERBACK' && paperbackResults;
+  const hasData = showEbook || showPaperback;
 
   const generateRisks = (): string[] => {
     const risks: string[] = [];
@@ -45,16 +56,16 @@ export const ReportSection = ({
       risks.push('El margen objetivo está por debajo del 30% recomendado.');
     }
 
-    if (ebookResults) {
+    if (showEbook && ebookResults) {
       if (ebookResults.diagnostico === 'bad') {
-        risks.push(`eBook: Se necesitan ${ebookResults.clicsPorVenta} clics por venta, lo que indica una campaña no rentable.`);
+        risks.push(`eBook: Solo puedes permitir ${ebookResults.clicsPorVenta} clics por venta, lo que indica una campaña no rentable.`);
       }
       if (ebookResults.regalias < 1) {
         risks.push('eBook: Las regalías por unidad son muy bajas (<1€). Considera aumentar el PVP.');
       }
     }
 
-    if (paperbackResults) {
+    if (showPaperback && paperbackResults) {
       if (paperbackResults.diagnostico === 'bad') {
         risks.push(`Paperback: Margen del ${(paperbackResults.margenBacos * 100).toFixed(1)}% o ${paperbackResults.clicsPorVenta} clics indica riesgo alto.`);
       }
@@ -73,15 +84,15 @@ export const ReportSection = ({
   const generateRecommendations = (): string[] => {
     const recs: string[] = [];
 
-    if (ebookResults?.diagnostico === 'bad') {
+    if (showEbook && ebookResults?.diagnostico === 'bad') {
       recs.push('Considera aumentar el PVP del eBook o reducir el CPC de tus campañas.');
     }
 
-    if (paperbackResults?.diagnostico === 'bad' && paperbackResults.precioMinObjetivo > 0) {
+    if (showPaperback && paperbackResults?.diagnostico === 'bad' && paperbackResults.precioMinObjetivo) {
       recs.push(`Aumenta el PVP del Paperback a al menos ${paperbackResults.precioMinObjetivo.toFixed(2)}${currencySymbol} para alcanzar el margen objetivo.`);
     }
 
-    if (ebookResults?.diagnostico === 'good' && paperbackResults?.diagnostico === 'good') {
+    if ((showEbook && ebookResults?.diagnostico === 'good') || (showPaperback && paperbackResults?.diagnostico === 'good')) {
       recs.push('Tu configuración actual es óptima. Mantén la estrategia y monitoriza las métricas semanalmente.');
     }
 
@@ -101,7 +112,6 @@ export const ReportSection = ({
   };
 
   const handleDownloadPDF = () => {
-    // Create a printable version
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
@@ -184,6 +194,9 @@ export const ReportSection = ({
               <p className="text-sm text-muted-foreground">
                 Fecha: {new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
+              <p className="text-sm text-muted-foreground">
+                Formato analizado: {globalData.selectedFormat === 'EBOOK' ? 'eBook' : 'Paperback'}
+              </p>
             </div>
 
             {/* Datos Globales */}
@@ -212,7 +225,7 @@ export const ReportSection = ({
             </div>
 
             {/* eBook Results */}
-            {ebookResults && (
+            {showEbook && ebookResults && (
               <div className="section">
                 <h2 className="text-lg font-heading font-semibold text-secondary border-b-2 border-secondary pb-1 mb-3">
                   Resultados eBook
@@ -235,7 +248,7 @@ export const ReportSection = ({
                     <span className="data-value">{(ebookResults.margenAcos * 100).toFixed(1)}%</span>
                   </div>
                   <div className="data-row">
-                    <span className="data-label">Clics por Venta</span>
+                    <span className="data-label">Clics máx. por Venta</span>
                     <span className={`data-value font-bold ${ebookResults.diagnostico === 'bad' ? 'text-destructive' : 'text-success'}`}>
                       {ebookResults.clicsPorVenta}
                     </span>
@@ -255,7 +268,7 @@ export const ReportSection = ({
             )}
 
             {/* Paperback Results */}
-            {paperbackResults && (
+            {showPaperback && paperbackResults && (
               <div className="section">
                 <h2 className="text-lg font-heading font-semibold text-secondary border-b-2 border-secondary pb-1 mb-3">
                   Resultados Paperback
@@ -268,6 +281,14 @@ export const ReportSection = ({
                   <div className="data-row">
                     <span className="data-label">Páginas</span>
                     <span className="data-value">{paperbackData.pages}</span>
+                  </div>
+                  <div className="data-row">
+                    <span className="data-label">Interior</span>
+                    <span className="data-value">{paperbackData.interior ? interiorLabels[paperbackData.interior] : '-'}</span>
+                  </div>
+                  <div className="data-row">
+                    <span className="data-label">Tamaño</span>
+                    <span className="data-value">{paperbackData.size ? sizeLabels[paperbackData.size] : '-'}</span>
                   </div>
                   <div className="data-row">
                     <span className="data-label">Gastos Impresión</span>
@@ -284,9 +305,15 @@ export const ReportSection = ({
                     <span className="data-value">{(paperbackResults.margenBacos * 100).toFixed(1)}%</span>
                   </div>
                   <div className="data-row">
-                    <span className="data-label">Clics por Venta</span>
+                    <span className="data-label">Clics máx. por Venta</span>
                     <span className="data-value font-bold">{paperbackResults.clicsPorVenta}</span>
                   </div>
+                  {paperbackResults.precioMinObjetivo && (
+                    <div className="data-row col-span-2 bg-primary/10 p-2 rounded">
+                      <span className="data-label font-semibold">Precio Mínimo Objetivo</span>
+                      <span className="data-value font-bold text-primary">{paperbackResults.precioMinObjetivo.toFixed(2)}{currencySymbol}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -355,7 +382,7 @@ export const ReportSection = ({
           <div className="flex flex-col items-center justify-center h-48 bg-muted/30 rounded-lg">
             <FileText className="h-12 w-12 text-muted-foreground/50 mb-3" />
             <p className="text-sm text-muted-foreground text-center">
-              Completa los datos de eBook y/o Paperback para generar el informe final
+              Selecciona un formato y completa los datos para generar el informe final
             </p>
           </div>
         )}

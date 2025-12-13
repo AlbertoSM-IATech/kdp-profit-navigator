@@ -9,9 +9,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Book, Palette, Ruler, FileText, Euro } from 'lucide-react';
-import { getPresetsForInteriorAndSize, getPresetById } from '@/data/paperbackPresets';
-import { useEffect } from 'react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Book, Palette, Ruler, FileText, Euro, HelpCircle, AlertCircle } from 'lucide-react';
+import { calculatePrintingCost, getMinPages } from '@/data/printingCosts';
 
 interface PaperbackSectionProps {
   data: PaperbackData;
@@ -27,33 +32,24 @@ const interiorLabels: Record<InteriorType, string> = {
 };
 
 const sizeLabels: Record<BookSize, string> = {
-  SMALL: 'Pequeño (hasta 15x21 cm)',
-  LARGE: 'Grande (hasta 21x28 cm)',
+  SMALL: 'Pequeño (<6x9")',
+  LARGE: 'Grande (≥6x9")',
 };
 
 export const PaperbackSection = ({ data, results, globalData, onChange }: PaperbackSectionProps) => {
   const currencySymbol = globalData.marketplace === 'COM' ? '$' : '€';
-  const availablePresets = getPresetsForInteriorAndSize(data.interior, data.size);
-  const selectedPreset = data.presetId ? getPresetById(data.presetId) : null;
-
-  // Auto-set PVP when preset changes
-  useEffect(() => {
-    if (selectedPreset && data.pvp === null) {
-      onChange({
-        ...data,
-        pvp: selectedPreset.suggestedPvp,
-        pages: Math.floor((selectedPreset.minPages + selectedPreset.maxPages) / 2),
-      });
-    }
-  }, [selectedPreset]);
+  
+  // Calculate printing cost for display
+  const printingResult = calculatePrintingCost(data.interior, data.size, data.pages);
+  const minPages = getMinPages(data.interior);
 
   const handleInteriorChange = (value: string) => {
+    const newInterior = value as InteriorType;
+    const newMinPages = getMinPages(newInterior);
     onChange({
       ...data,
-      interior: value as InteriorType,
-      presetId: null,
-      pvp: null,
-      pages: null,
+      interior: newInterior,
+      pages: data.pages && data.pages < newMinPages ? newMinPages : data.pages,
     });
   };
 
@@ -61,22 +57,7 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
     onChange({
       ...data,
       size: value as BookSize,
-      presetId: null,
-      pvp: null,
-      pages: null,
     });
-  };
-
-  const handlePresetChange = (value: string) => {
-    const preset = getPresetById(value);
-    if (preset) {
-      onChange({
-        ...data,
-        presetId: value,
-        pvp: preset.suggestedPvp,
-        pages: Math.floor((preset.minPages + preset.maxPages) / 2),
-      });
-    }
   };
 
   const handleNumberChange = (field: 'pvp' | 'pages', value: string) => {
@@ -108,6 +89,19 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
           </span>
         );
     }
+  };
+
+  const getDiagnosticMessage = (diagnostico: string, margen: number, clics: number) => {
+    if (diagnostico === 'bad') {
+      if (margen < 30) {
+        return 'Con este PVP pierdes dinero incluso antes de invertir en Ads.';
+      }
+      return `Solo puedes permitir ${clics} clics máx. Reduce CPC o sube PVP.`;
+    }
+    if (diagnostico === 'warning') {
+      return 'Este precio es válido, pero el margen es ajustado.';
+    }
+    return 'Buen equilibrio entre rentabilidad y escalabilidad.';
   };
 
   return (
@@ -161,31 +155,29 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
               </div>
             </div>
 
-            {/* Page Range Preset */}
+            {/* Pages and PVP - Visible when interior and size are selected */}
             {data.interior && data.size && (
-              <div className="space-y-2">
-                <Label htmlFor="preset" className="flex items-center gap-2 text-sm font-medium">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  Rango de Páginas
-                </Label>
-                <Select value={data.presetId || ''} onValueChange={handlePresetChange}>
-                  <SelectTrigger id="preset" className="input-focus">
-                    <SelectValue placeholder="Seleccionar rango..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border border-border">
-                    {availablePresets.map((preset) => (
-                      <SelectItem key={preset.id} value={preset.id}>
-                        {preset.pageRange} (sugerido: {preset.suggestedPvp}{currencySymbol})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {/* PVP and Pages */}
-            {selectedPreset && (
               <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="pages" className="flex items-center gap-2 text-sm font-medium">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    Nº Páginas
+                  </Label>
+                  <Input
+                    id="pages"
+                    type="number"
+                    step="1"
+                    min={minPages}
+                    placeholder={`Mín: ${minPages}`}
+                    value={data.pages ?? ''}
+                    onChange={(e) => handleNumberChange('pages', e.target.value)}
+                    className="input-focus"
+                  />
+                  {data.interior === 'COLOR_STANDARD' && (
+                    <p className="text-xs text-muted-foreground">Color Estándar requiere &gt;72 páginas</p>
+                  )}
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="pvp-paper" className="flex items-center gap-2 text-sm font-medium">
                     <Euro className="h-4 w-4 text-muted-foreground" />
@@ -196,39 +188,47 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
                     type="number"
                     step="0.01"
                     min="0"
-                    placeholder={`Sugerido: ${selectedPreset.suggestedPvp}`}
+                    placeholder="Ej: 12.99"
                     value={data.pvp ?? ''}
                     onChange={(e) => handleNumberChange('pvp', e.target.value)}
                     className="input-focus"
                   />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="pages" className="flex items-center gap-2 text-sm font-medium">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    Nº Páginas
-                  </Label>
-                  <Input
-                    id="pages"
-                    type="number"
-                    step="1"
-                    min={selectedPreset.minPages}
-                    max={selectedPreset.maxPages}
-                    placeholder={`${selectedPreset.minPages}-${selectedPreset.maxPages}`}
-                    value={data.pages ?? ''}
-                    onChange={(e) => handleNumberChange('pages', e.target.value)}
-                    className="input-focus"
-                  />
+                  <p className="text-xs text-muted-foreground">
+                    Regalía: {data.pvp && data.pvp >= 9.99 ? '60%' : '50%'}
+                  </p>
                 </div>
               </div>
             )}
 
-            {/* Preset info */}
-            {selectedPreset && (
-              <div className="p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground space-y-1">
-                <p>• Coste fijo: {selectedPreset.fixedCost.toFixed(2)}{currencySymbol}</p>
-                <p>• Coste por página: {selectedPreset.perPageCost.toFixed(3)}{currencySymbol}</p>
-                <p>• Regalías: {data.pvp && data.pvp >= 9.99 ? '60%' : '50%'} (según PVP)</p>
+            {/* Printing Cost Info - Read only */}
+            {data.interior && data.size && data.pages && printingResult.isValid && (
+              <div className="p-4 bg-muted/50 rounded-lg space-y-2">
+                <h5 className="text-sm font-semibold text-foreground">Costes de Impresión (solo lectura)</h5>
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground block text-xs">Coste Fijo</span>
+                    <span className="font-mono font-medium">{printingResult.fixedCost.toFixed(2)}{currencySymbol}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block text-xs">Precio/Página</span>
+                    <span className="font-mono font-medium">{printingResult.perPageCost.toFixed(3)}{currencySymbol}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block text-xs">Total Impresión</span>
+                    <span className="font-mono font-semibold text-primary">{printingResult.totalCost.toFixed(2)}{currencySymbol}</span>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Fórmula: ({data.pages} × {printingResult.perPageCost.toFixed(3)}) + {printingResult.fixedCost.toFixed(2)} = {printingResult.totalCost.toFixed(2)}{currencySymbol}
+                </p>
+              </div>
+            )}
+
+            {/* Error message for invalid configuration */}
+            {printingResult.errorMessage && (
+              <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                <p className="text-sm text-destructive">{printingResult.errorMessage}</p>
               </div>
             )}
           </div>
@@ -243,6 +243,13 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
                   <span className="data-label">Tasa de Regalías</span>
                   <span className="data-value">{(results.royaltyRate * 100).toFixed(0)}%</span>
                 </div>
+
+                {globalData.marketplace === 'ES' && (
+                  <div className="data-row">
+                    <span className="data-label">Precio sin IVA (4%)</span>
+                    <span className="data-value">{results.precioSinIva.toFixed(2)}{currencySymbol}</span>
+                  </div>
+                )}
                 
                 <div className="data-row">
                   <span className="data-label">Gastos de Impresión</span>
@@ -267,27 +274,65 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
                 </div>
                 
                 <div className="data-row">
-                  <span className="data-label">Clics máx. por Venta</span>
+                  <span className="data-label flex items-center gap-1">
+                    Clics máx. por Venta
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs p-3">
+                          <p className="text-sm">
+                            Para que una campaña sea saludable, lo recomendado es conseguir al menos 1 venta cada 10 clics (10% de conversión).
+                            Cuantos más clics máximos permitidos tenga tu libro, mayor margen de maniobra tendrás en Amazon Ads.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </span>
                   <span className="data-value font-semibold">{results.clicsPorVenta}</span>
                 </div>
 
-                {results.precioMinObjetivo > 0 && globalData.margenObjetivoPct && (
-                  <div className="data-row bg-warning/10 -mx-4 px-4 py-2">
-                    <span className="data-label">PVP Mín. para {globalData.margenObjetivoPct}% margen</span>
-                    <span className="data-value font-semibold text-warning">
-                      {results.precioMinObjetivo.toFixed(2)}{currencySymbol}
-                    </span>
+                {/* Precio Mínimo Objetivo - DESTACADO */}
+                {globalData.margenObjetivoPct && (
+                  <div className="mt-4 p-3 bg-primary/10 border border-primary/30 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm font-semibold text-primary">Precio Mínimo Objetivo</span>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <HelpCircle className="h-3.5 w-3.5 text-primary/70" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs p-3">
+                            <p className="text-sm">
+                              PVP mínimo recomendado para alcanzar el {globalData.margenObjetivoPct}% de margen objetivo.
+                              Fórmula: CEIL(Gastos impresión / (% regalía − margen objetivo)) − 0,01
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    {results.precioMinObjetivo !== null ? (
+                      <span className="text-2xl font-bold text-primary">
+                        {results.precioMinObjetivo.toFixed(2)}{currencySymbol}
+                      </span>
+                    ) : (
+                      <p className="text-sm text-destructive">{results.precioMinObjetivoError}</p>
+                    )}
                   </div>
                 )}
 
-                <div className="pt-3 border-t border-border">
+                <div className="pt-3 border-t border-border space-y-2">
                   {getDiagnosticBadge(results.diagnostico, results.margenBacos * 100, results.clicsPorVenta)}
+                  <p className="text-sm text-muted-foreground">
+                    {getDiagnosticMessage(results.diagnostico, results.margenBacos * 100, results.clicsPorVenta)}
+                  </p>
                 </div>
               </div>
             ) : (
               <div className="flex items-center justify-center h-48 bg-muted/30 rounded-lg">
                 <p className="text-sm text-muted-foreground text-center px-4">
-                  Selecciona tipo de interior, tamaño y rango de páginas para ver los resultados
+                  Selecciona tipo de interior, tamaño e introduce el número de páginas para ver los resultados
                 </p>
               </div>
             )}

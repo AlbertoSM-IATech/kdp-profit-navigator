@@ -5,6 +5,7 @@ import { PaperbackSection } from '@/components/kdp/PaperbackSection';
 import { PositioningSection } from '@/components/kdp/PositioningSection';
 import { ResultsTable } from '@/components/kdp/ResultsTable';
 import { ReportSection } from '@/components/kdp/ReportSection';
+import { PaperbackSimulator } from '@/components/kdp/PaperbackSimulator';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { BookOpen, Calculator } from 'lucide-react';
 
@@ -59,38 +60,51 @@ const Index = () => {
                 Calcula tus regalías y rentabilidad en Amazon KDP
               </h2>
               <p className="text-sm text-muted-foreground">
-                Esta herramienta te ayuda a analizar la viabilidad de tus libros en Amazon KDP, 
-                calculando regalías reales, puntos de equilibrio y estrategias de posicionamiento 
-                con campañas de publicidad.
+                Selecciona el formato a analizar, introduce tus datos y obtén un análisis completo 
+                de regalías, breakeven y estrategias de posicionamiento con Amazon Ads.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Global Data Section */}
+        {/* Global Data Section with Format Selector */}
         <GlobalDataSection data={globalData} onChange={setGlobalData} />
 
-        {/* eBook & Paperback Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        {/* Format-specific Section */}
+        {globalData.selectedFormat === 'EBOOK' && (
           <EbookSection
             data={ebookData}
             results={ebookResults}
             globalData={globalData}
             onChange={setEbookData}
           />
-          <PaperbackSection
-            data={paperbackData}
-            results={paperbackResults}
-            globalData={globalData}
-            onChange={setPaperbackData}
-          />
-        </div>
+        )}
 
-        {/* Positioning Section */}
-        <PositioningSection results={positioningResults} globalData={globalData} />
+        {globalData.selectedFormat === 'PAPERBACK' && (
+          <>
+            <PaperbackSection
+              data={paperbackData}
+              results={paperbackResults}
+              globalData={globalData}
+              onChange={setPaperbackData}
+            />
+            <PaperbackSimulator
+              data={paperbackData}
+              globalData={globalData}
+              onChange={setPaperbackData}
+            />
+          </>
+        )}
+
+        {/* Positioning Section - Only show if format is selected */}
+        {globalData.selectedFormat && (
+          <PositioningSection results={positioningResults} globalData={globalData} />
+        )}
 
         {/* Results Table */}
-        <ResultsTable data={tableData} globalData={globalData} />
+        {globalData.selectedFormat && (
+          <ResultsTable data={tableData} globalData={globalData} />
+        )}
 
         {/* Report Section */}
         <ReportSection
