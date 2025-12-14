@@ -1,4 +1,4 @@
-import { PaperbackData, PaperbackResults, GlobalData, InteriorType, BookSize } from '@/types/kdp';
+import { PaperbackData, PaperbackResults, GlobalData, InteriorType, BookSize, IvaType, MARKETPLACE_CONFIGS } from '@/types/kdp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -15,7 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Book, Palette, Ruler, FileText, Euro, HelpCircle, AlertCircle } from 'lucide-react';
+import { Book, Palette, Ruler, FileText, Euro, HelpCircle, AlertCircle, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
 import { calculatePrintingCost, getMinPages } from '@/data/printingCosts';
 
 interface PaperbackSectionProps {
@@ -32,12 +32,15 @@ const interiorLabels: Record<InteriorType, string> = {
 };
 
 const sizeLabels: Record<BookSize, string> = {
-  SMALL: 'Pequeño (<6x9")',
-  LARGE: 'Grande (≥6x9")',
+  SMALL: 'Pequeño (≤6x9")',
+  LARGE: 'Grande (>6x9")',
 };
 
 export const PaperbackSection = ({ data, results, globalData, onChange }: PaperbackSectionProps) => {
-  const currencySymbol = globalData.marketplace === 'COM' ? '$' : '€';
+  const config = globalData.marketplace ? MARKETPLACE_CONFIGS[globalData.marketplace] : null;
+  const currencySymbol = config?.currencySymbol || '€';
+  const isHardcover = globalData.selectedFormat === 'HARDCOVER';
+  const showIvaSelector = globalData.marketplace === 'ES';
   
   // Calculate printing cost for display
   const printingResult = calculatePrintingCost(data.interior, data.size, data.pages);
@@ -65,43 +68,35 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
     onChange({ ...data, [field]: numValue });
   };
 
-  const getDiagnosticBadge = (diagnostico: string, margen: number, clics: number) => {
-    const margenLabel = `${margen.toFixed(1)}% margen`;
-    const clicsLabel = `máx. ${clics} clics`;
-    
-    switch (diagnostico) {
-      case 'good':
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium diagnosis-good border">
-            🟢 Rentable ({margenLabel}, {clicsLabel})
-          </span>
-        );
-      case 'warning':
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium diagnosis-warning border">
-            🟠 Ajustable ({margenLabel}, {clicsLabel})
-          </span>
-        );
-      case 'bad':
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium diagnosis-bad border">
-            🔴 Riesgo alto ({margenLabel}, {clicsLabel})
-          </span>
-        );
+  const handleIvaChange = (value: string) => {
+    onChange({ ...data, ivaType: parseInt(value) as IvaType });
+  };
+
+  const getViabilityIcon = () => {
+    if (!results) return null;
+    switch (results.viabilityStatus) {
+      case 'viable': return <CheckCircle className="h-5 w-5 text-success" />;
+      case 'adjustable': return <AlertTriangle className="h-5 w-5 text-warning" />;
+      case 'not-viable': return <XCircle className="h-5 w-5 text-destructive" />;
     }
   };
 
-  const getDiagnosticMessage = (diagnostico: string, margen: number, clics: number) => {
-    if (diagnostico === 'bad') {
-      if (margen < 30) {
-        return 'Con este PVP pierdes dinero incluso antes de invertir en Ads.';
-      }
-      return `Solo puedes permitir ${clics} clics máx. Reduce CPC o sube PVP.`;
+  const getViabilityText = () => {
+    if (!results) return '';
+    switch (results.viabilityStatus) {
+      case 'viable': return 'Este precio permite invertir en Ads con margen';
+      case 'adjustable': return 'Ajustable, pero con riesgo medio';
+      case 'not-viable': return 'No viable para Ads, alto riesgo de pérdida';
     }
-    if (diagnostico === 'warning') {
-      return 'Este precio es válido, pero el margen es ajustado.';
+  };
+
+  const getViabilityBg = () => {
+    if (!results) return 'bg-muted';
+    switch (results.viabilityStatus) {
+      case 'viable': return 'bg-success/10 border-success/30';
+      case 'adjustable': return 'bg-warning/10 border-warning/30';
+      case 'not-viable': return 'bg-destructive/10 border-destructive/30';
     }
-    return 'Buen equilibrio entre rentabilidad y escalabilidad.';
   };
 
   return (
@@ -109,21 +104,23 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
       <CardHeader className="pb-4">
         <CardTitle className="section-header">
           <Book className="h-5 w-5 text-primary" />
-          Paperback (Tapa Blanda)
+          {isHardcover ? '📗 Hardcover' : '📕 Paperback'} — Configuración
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Inputs */}
+          {/* Inputs Column */}
           <div className="space-y-6">
-            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Configuración</h4>
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              Datos del libro
+            </h4>
             
             <div className="grid grid-cols-2 gap-4">
               {/* Interior Type */}
               <div className="space-y-2">
                 <Label htmlFor="interior" className="flex items-center gap-2 text-sm font-medium">
                   <Palette className="h-4 w-4 text-muted-foreground" />
-                  Interior
+                  Tipo impresión
                 </Label>
                 <Select value={data.interior || ''} onValueChange={handleInteriorChange}>
                   <SelectTrigger id="interior" className="input-focus">
@@ -157,10 +154,10 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
 
             {/* Pages and PVP - Visible when interior and size are selected */}
             {data.interior && data.size && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 animate-fade-in">
                 <div className="space-y-2">
                   <Label htmlFor="pages" className="flex items-center gap-2 text-sm font-medium">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <FileText className="h-4 w-4 text-primary" />
                     Nº Páginas
                   </Label>
                   <Input
@@ -171,7 +168,7 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
                     placeholder={`Mín: ${minPages}`}
                     value={data.pages ?? ''}
                     onChange={(e) => handleNumberChange('pages', e.target.value)}
-                    className="input-focus"
+                    className="input-focus border-primary/30"
                   />
                   {data.interior === 'COLOR_STANDARD' && (
                     <p className="text-xs text-muted-foreground">Color Estándar requiere &gt;72 páginas</p>
@@ -180,29 +177,66 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
 
                 <div className="space-y-2">
                   <Label htmlFor="pvp-paper" className="flex items-center gap-2 text-sm font-medium">
-                    <Euro className="h-4 w-4 text-muted-foreground" />
-                    PVP ({currencySymbol})
+                    <Euro className="h-4 w-4 text-primary" />
+                    PVP
                   </Label>
-                  <Input
-                    id="pvp-paper"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="Ej: 12.99"
-                    value={data.pvp ?? ''}
-                    onChange={(e) => handleNumberChange('pvp', e.target.value)}
-                    className="input-focus"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="pvp-paper"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="Ej: 12.99"
+                      value={data.pvp ?? ''}
+                      onChange={(e) => handleNumberChange('pvp', e.target.value)}
+                      className="input-focus pr-8 border-primary/30"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{currencySymbol}</span>
+                  </div>
                   <p className="text-xs text-muted-foreground">
-                    Regalía: {data.pvp && data.pvp >= 9.99 ? '60%' : '50%'}
+                    Regalía automática: {data.pvp && data.pvp >= 9.99 ? '60%' : '50%'}
                   </p>
                 </div>
               </div>
             )}
 
+            {/* IVA Selector - Only for ES */}
+            {data.interior && data.size && showIvaSelector && (
+              <div className="space-y-2 animate-fade-in">
+                <Label htmlFor="iva-paper" className="flex items-center gap-2 text-sm font-medium">
+                  IVA aplicable
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs p-3">
+                        <p className="text-sm">
+                          Amazon puede aplicar IVA general (21%) a libros de bajo contenido, cuadernos, 
+                          libros de actividades o productos con contenido mixto/multimedia.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </Label>
+                <Select
+                  value={data.ivaType.toString()}
+                  onValueChange={handleIvaChange}
+                >
+                  <SelectTrigger id="iva-paper" className="input-focus">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border border-border">
+                    <SelectItem value="4">4% (Libro estándar)</SelectItem>
+                    <SelectItem value="21">21% (Audiovisual/Bajo contenido)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             {/* Printing Cost Info - Read only */}
             {data.interior && data.size && data.pages && printingResult.isValid && (
-              <div className="p-4 bg-muted/50 rounded-lg space-y-2">
+              <div className="p-4 bg-muted/50 rounded-lg space-y-2 animate-fade-in">
                 <h5 className="text-sm font-semibold text-foreground">Costes de Impresión (solo lectura)</h5>
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
@@ -226,78 +260,109 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
 
             {/* Error message for invalid configuration */}
             {printingResult.errorMessage && (
-              <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg flex items-start gap-2">
+              <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg flex items-start gap-2 animate-fade-in">
                 <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
                 <p className="text-sm text-destructive">{printingResult.errorMessage}</p>
               </div>
             )}
           </div>
 
-          {/* Results */}
+          {/* Results Column */}
           <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Resultados</h4>
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              Resultados calculados
+            </h4>
             
             {results ? (
-              <div className="space-y-3 bg-muted/30 rounded-lg p-4">
-                <div className="data-row">
-                  <span className="data-label">Tasa de Regalías</span>
-                  <span className="data-value">{(results.royaltyRate * 100).toFixed(0)}%</span>
-                </div>
-
-                {globalData.marketplace === 'ES' && (
-                  <div className="data-row">
-                    <span className="data-label">Precio sin IVA (4%)</span>
-                    <span className="data-value">{results.precioSinIva.toFixed(2)}{currencySymbol}</span>
+              <div className="space-y-4">
+                {/* Viability Status - Big and prominent */}
+                <div className={`p-4 rounded-xl border ${getViabilityBg()}`}>
+                  <div className="flex items-center gap-3">
+                    {getViabilityIcon()}
+                    <div>
+                      <p className="font-semibold text-foreground">{getViabilityText()}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Riesgo: {results.riskLevel === 'low' ? 'Bajo' : results.riskLevel === 'medium' ? 'Medio' : 'Alto'}
+                      </p>
+                    </div>
                   </div>
-                )}
-                
-                <div className="data-row">
-                  <span className="data-label">Gastos de Impresión</span>
-                  <span className="data-value">{results.gastosImpresion.toFixed(2)}{currencySymbol}</span>
-                </div>
-                
-                <div className="data-row">
-                  <span className="data-label font-semibold">Regalías</span>
-                  <span className={`data-value text-lg font-bold ${results.regalias > 0 ? 'text-primary' : 'text-destructive'}`}>
-                    {results.regalias.toFixed(2)}{currencySymbol}
-                  </span>
-                </div>
-                
-                <div className="data-row">
-                  <span className="data-label">Margen BACOS</span>
-                  <span className="data-value">{(results.margenBacos * 100).toFixed(1)}%</span>
-                </div>
-                
-                <div className="data-row">
-                  <span className="data-label">Tasa Conv. Breakeven</span>
-                  <span className="data-value">{(results.tasaConvBreakeven * 100).toFixed(2)}%</span>
-                </div>
-                
-                <div className="data-row">
-                  <span className="data-label flex items-center gap-1">
-                    Clics máx. por Venta
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-xs p-3">
-                          <p className="text-sm">
-                            Para que una campaña sea saludable, lo recomendado es conseguir al menos 1 venta cada 10 clics (10% de conversión).
-                            Cuantos más clics máximos permitidos tenga tu libro, mayor margen de maniobra tendrás en Amazon Ads.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </span>
-                  <span className="data-value font-semibold">{results.clicsPorVenta}</span>
                 </div>
 
-                {/* Precio Mínimo Objetivo - DESTACADO */}
+                {/* Key Metrics Grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-muted/30 rounded-lg p-3 text-center">
+                    <span className="text-xs text-muted-foreground block mb-1">Regalía neta</span>
+                    <span className={`text-xl font-bold ${results.regalias > 0 ? 'text-primary' : 'text-destructive'}`}>
+                      {results.regalias.toFixed(2)}{currencySymbol}
+                    </span>
+                  </div>
+                  <div className="bg-muted/30 rounded-lg p-3 text-center">
+                    <span className="text-xs text-muted-foreground block mb-1">Margen real</span>
+                    <span className={`text-xl font-bold ${results.margenPct >= 30 ? 'text-success' : results.margenPct >= 20 ? 'text-warning' : 'text-destructive'}`}>
+                      {results.margenPct.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="bg-muted/30 rounded-lg p-3 text-center">
+                    <span className="text-xs text-muted-foreground block mb-1 flex items-center justify-center gap-1">
+                      Clics máx./Venta
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <HelpCircle className="h-3 w-3" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs p-3">
+                            <p className="text-sm">
+                              El mínimo recomendado es 1 venta cada 10 clics (10%).
+                              Permitir más clics por venta reduce el margen y aumenta el riesgo.
+                              Menos clics por venta indica una campaña saludable.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </span>
+                    <span className={`text-xl font-bold ${results.clicsMaxPorVenta >= 10 ? 'text-success' : 'text-destructive'}`}>
+                      {results.clicsMaxPorVenta}
+                    </span>
+                  </div>
+                  <div className="bg-muted/30 rounded-lg p-3 text-center">
+                    <span className="text-xs text-muted-foreground block mb-1">CPC máx. rentable</span>
+                    <span className="text-xl font-bold text-secondary">
+                      {results.cpcMaxRentable.toFixed(2)}{currencySymbol}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Detailed breakdown */}
+                <div className="bg-muted/20 rounded-lg p-4 space-y-2 text-sm">
+                  <div className="data-row">
+                    <span className="data-label">Tasa de Regalías</span>
+                    <span className="data-value">{(results.royaltyRate * 100).toFixed(0)}%</span>
+                  </div>
+                  {globalData.marketplace === 'ES' && (
+                    <div className="data-row">
+                      <span className="data-label">Precio sin IVA ({data.ivaType}%)</span>
+                      <span className="data-value">{results.precioSinIva.toFixed(2)}{currencySymbol}</span>
+                    </div>
+                  )}
+                  <div className="data-row">
+                    <span className="data-label">Gastos de Impresión</span>
+                    <span className="data-value">-{results.gastosImpresion.toFixed(2)}{currencySymbol}</span>
+                  </div>
+                  <div className="data-row">
+                    <span className="data-label">ROI por venta</span>
+                    <span className="data-value">{results.roiPorVenta.toFixed(1)}x</span>
+                  </div>
+                  <div className="data-row">
+                    <span className="data-label">Tasa conv. breakeven</span>
+                    <span className="data-value">{(results.tasaConvBreakeven * 100).toFixed(2)}%</span>
+                  </div>
+                </div>
+
+                {/* Minimum Target Price - PROMINENT */}
                 {globalData.margenObjetivoPct && (
-                  <div className="mt-4 p-3 bg-primary/10 border border-primary/30 rounded-lg">
+                  <div className="p-4 bg-primary/10 border border-primary/30 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm font-semibold text-primary">Precio Mínimo Objetivo</span>
+                      <span className="text-sm font-semibold text-primary">Precio mínimo objetivo</span>
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger>
@@ -305,34 +370,34 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs p-3">
                             <p className="text-sm">
-                              PVP mínimo recomendado para alcanzar el {globalData.margenObjetivoPct}% de margen objetivo.
-                              Fórmula: CEIL(Gastos impresión / (% regalía − margen objetivo)) − 0,01
+                              PVP mínimo recomendado para alcanzar el {globalData.margenObjetivoPct}% de margen objetivo
+                              y poder invertir en Ads sin perder dinero. Fórmula: CEIL(Coste impresión / (% regalía − margen objetivo)) − 0,01
                             </p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </div>
                     {results.precioMinObjetivo !== null ? (
-                      <span className="text-2xl font-bold text-primary">
-                        {results.precioMinObjetivo.toFixed(2)}{currencySymbol}
-                      </span>
+                      <div>
+                        <span className="text-2xl font-bold text-primary">
+                          {results.precioMinObjetivo.toFixed(2)}{currencySymbol}
+                        </span>
+                        {data.pvp && data.pvp < results.precioMinObjetivo && (
+                          <p className="text-xs text-destructive mt-1">
+                            ⚠️ Tu PVP actual está por debajo del mínimo recomendado
+                          </p>
+                        )}
+                      </div>
                     ) : (
                       <p className="text-sm text-destructive">{results.precioMinObjetivoError}</p>
                     )}
                   </div>
                 )}
-
-                <div className="pt-3 border-t border-border space-y-2">
-                  {getDiagnosticBadge(results.diagnostico, results.margenBacos * 100, results.clicsPorVenta)}
-                  <p className="text-sm text-muted-foreground">
-                    {getDiagnosticMessage(results.diagnostico, results.margenBacos * 100, results.clicsPorVenta)}
-                  </p>
-                </div>
               </div>
             ) : (
               <div className="flex items-center justify-center h-48 bg-muted/30 rounded-lg">
                 <p className="text-sm text-muted-foreground text-center px-4">
-                  Selecciona tipo de interior, tamaño e introduce el número de páginas para ver los resultados
+                  Selecciona tipo de impresión, tamaño e introduce los datos para ver resultados
                 </p>
               </div>
             )}

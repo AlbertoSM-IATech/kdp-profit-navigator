@@ -7,6 +7,7 @@ import {
   PaperbackResults,
   PositioningResults,
   TableRow,
+  MARKETPLACE_CONFIGS,
 } from '@/types/kdp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -43,11 +44,18 @@ export const ReportSection = ({
   tableData,
 }: ReportSectionProps) => {
   const reportRef = useRef<HTMLDivElement>(null);
-  const currencySymbol = globalData.marketplace === 'COM' ? '$' : '€';
+  const config = globalData.marketplace ? MARKETPLACE_CONFIGS[globalData.marketplace] : null;
+  const currencySymbol = config?.currencySymbol || '€';
 
   const showEbook = globalData.selectedFormat === 'EBOOK' && ebookResults;
-  const showPaperback = globalData.selectedFormat === 'PAPERBACK' && paperbackResults;
+  const showPaperback = (globalData.selectedFormat === 'PAPERBACK' || globalData.selectedFormat === 'HARDCOVER') && paperbackResults;
   const hasData = showEbook || showPaperback;
+
+  const getViabilityStatus = () => {
+    if (showEbook && ebookResults) return ebookResults.viabilityStatus;
+    if (showPaperback && paperbackResults) return paperbackResults.viabilityStatus;
+    return null;
+  };
 
   const generateRisks = (): string[] => {
     const risks: string[] = [];
@@ -58,19 +66,19 @@ export const ReportSection = ({
 
     if (showEbook && ebookResults) {
       if (ebookResults.diagnostico === 'bad') {
-        risks.push(`eBook: Solo puedes permitir ${ebookResults.clicsPorVenta} clics por venta, lo que indica una campaña no rentable.`);
+        risks.push(`eBook: Solo puedes permitir ${ebookResults.clicsMaxPorVenta} clics por venta.`);
       }
       if (ebookResults.regalias < 1) {
-        risks.push('eBook: Las regalías por unidad son muy bajas (<1€). Considera aumentar el PVP.');
+        risks.push('eBook: Las regalías por unidad son muy bajas (<1€).');
       }
     }
 
     if (showPaperback && paperbackResults) {
       if (paperbackResults.diagnostico === 'bad') {
-        risks.push(`Paperback: Margen del ${(paperbackResults.margenBacos * 100).toFixed(1)}% o ${paperbackResults.clicsPorVenta} clics indica riesgo alto.`);
+        risks.push(`Paperback: Margen del ${paperbackResults.margenPct.toFixed(1)}% o ${paperbackResults.clicsMaxPorVenta} clics indica riesgo alto.`);
       }
       if (paperbackResults.regalias < 0) {
-        risks.push('Paperback: Las regalías son negativas. El precio actual no cubre los costes de impresión.');
+        risks.push('Paperback: Las regalías son negativas.');
       }
     }
 
@@ -83,39 +91,36 @@ export const ReportSection = ({
 
   const generateRecommendations = (): string[] => {
     const recs: string[] = [];
+    const viability = getViabilityStatus();
 
-    if (showEbook && ebookResults?.diagnostico === 'bad') {
-      recs.push('Considera aumentar el PVP del eBook o reducir el CPC de tus campañas.');
+    if (viability === 'viable') {
+      recs.push('Tu configuración actual es viable. Mantén la estrategia y monitoriza las métricas.');
     }
 
-    if (showPaperback && paperbackResults?.diagnostico === 'bad' && paperbackResults.precioMinObjetivo) {
-      recs.push(`Aumenta el PVP del Paperback a al menos ${paperbackResults.precioMinObjetivo.toFixed(2)}${currencySymbol} para alcanzar el margen objetivo.`);
+    if (viability === 'adjustable') {
+      recs.push('Considera ajustar el PVP para mejorar el margen antes de invertir fuertemente en Ads.');
     }
 
-    if ((showEbook && ebookResults?.diagnostico === 'good') || (showPaperback && paperbackResults?.diagnostico === 'good')) {
-      recs.push('Tu configuración actual es óptima. Mantén la estrategia y monitoriza las métricas semanalmente.');
-    }
-
-    if (positioningResults && positioningResults.inversionDiaria > 50) {
-      recs.push('La inversión diaria estimada es alta. Considera empezar con un presupuesto reducido y escalar gradualmente.');
-    }
-
-    if (tableData.some(r => r.margen < 30)) {
-      recs.push('Revisa los productos con margen inferior al 30% antes de lanzar campañas agresivas.');
+    if (viability === 'not-viable') {
+      if (showPaperback && paperbackResults?.precioMinObjetivo) {
+        recs.push(`Aumenta el PVP a al menos ${paperbackResults.precioMinObjetivo.toFixed(2)}${currencySymbol}.`);
+      } else {
+        recs.push('Revisa el pricing o reduce el CPC objetivo.');
+      }
     }
 
     return recs;
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
+  const handlePrint = () => window.print();
 
   const handleDownloadPDF = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
     const content = reportRef.current?.innerHTML || '';
+    const viability = getViabilityStatus();
+    const viabilityText = viability === 'viable' ? '🟢 Viable' : viability === 'adjustable' ? '🟠 Ajustable' : '🔴 No viable';
     
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -123,35 +128,20 @@ export const ReportSection = ({
       <head>
         <title>Informe KDP - ${new Date().toLocaleDateString('es-ES')}</title>
         <style>
-          body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            line-height: 1.6;
-            color: #1F1F1F;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 40px 20px;
-          }
+          body { font-family: 'Inter', sans-serif; line-height: 1.6; color: #1F1F1F; max-width: 800px; margin: 0 auto; padding: 40px 20px; }
           h1 { color: #FB923C; font-size: 24px; margin-bottom: 8px; }
           h2 { color: #3B82F6; font-size: 18px; margin-top: 24px; border-bottom: 2px solid #3B82F6; padding-bottom: 4px; }
-          h3 { font-size: 14px; margin-top: 16px; }
           .section { margin-bottom: 24px; }
-          .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-          .data-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #eee; }
-          .data-label { color: #666; }
-          .data-value { font-weight: 600; }
-          .risk { color: #EF4444; }
-          .success { color: #22C55E; }
-          .warning { color: #F59E0B; }
-          ul { margin: 8px 0; padding-left: 20px; }
-          li { margin: 4px 0; }
+          .data-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #eee; }
+          .viability { font-size: 20px; font-weight: bold; margin: 16px 0; }
           .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #ddd; font-size: 12px; color: #999; }
         </style>
       </head>
       <body>
+        <h1>Análisis de Viabilidad KDP — ${globalData.selectedFormat} — ${config?.name || 'N/A'}</h1>
+        <p class="viability">Estado: ${viabilityText}</p>
         ${content}
-        <div class="footer">
-          Generado con Calculadora KDP - ${new Date().toLocaleDateString('es-ES')} ${new Date().toLocaleTimeString('es-ES')}
-        </div>
+        <div class="footer">Generado con Publify — ${new Date().toLocaleDateString('es-ES')}</div>
       </body>
       </html>
     `);
@@ -188,161 +178,42 @@ export const ReportSection = ({
       <CardContent>
         {hasData ? (
           <div ref={reportRef} className="space-y-6">
-            {/* Header */}
             <div>
               <h1 className="text-2xl font-heading font-bold text-primary">Informe de Análisis KDP</h1>
               <p className="text-sm text-muted-foreground">
-                Fecha: {new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Formato analizado: {globalData.selectedFormat === 'EBOOK' ? 'eBook' : 'Paperback'}
+                Fecha: {new Date().toLocaleDateString('es-ES')} — Formato: {globalData.selectedFormat}
               </p>
             </div>
 
-            {/* Datos Globales */}
-            <div className="section">
-              <h2 className="text-lg font-heading font-semibold text-secondary border-b-2 border-secondary pb-1 mb-3">
-                Configuración General
-              </h2>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="data-row">
-                  <span className="data-label">Marketplace</span>
-                  <span className="data-value">{globalData.marketplace === 'ES' ? 'Amazon España' : 'Amazon USA'}</span>
-                </div>
-                <div className="data-row">
-                  <span className="data-label">Margen Objetivo</span>
-                  <span className="data-value">{globalData.margenObjetivoPct ?? '-'}%</span>
-                </div>
-                <div className="data-row">
-                  <span className="data-label">CPC</span>
-                  <span className="data-value">{globalData.cpc?.toFixed(2) ?? '-'}{currencySymbol}</span>
-                </div>
-                <div className="data-row">
-                  <span className="data-label">Ventas Diarias Competencia</span>
-                  <span className="data-value">{globalData.ventasDiariasCompetencia ?? '-'}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* eBook Results */}
+            {/* Key Results */}
             {showEbook && ebookResults && (
               <div className="section">
-                <h2 className="text-lg font-heading font-semibold text-secondary border-b-2 border-secondary pb-1 mb-3">
-                  Resultados eBook
-                </h2>
+                <h2 className="text-lg font-heading font-semibold text-secondary border-b-2 border-secondary pb-1 mb-3">Resultados eBook</h2>
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="data-row">
-                    <span className="data-label">PVP</span>
-                    <span className="data-value">{ebookData.pvp?.toFixed(2)}{currencySymbol}</span>
-                  </div>
-                  <div className="data-row">
-                    <span className="data-label">Tasa de Regalías</span>
-                    <span className="data-value">{ebookData.royaltyRate}%</span>
-                  </div>
-                  <div className="data-row">
-                    <span className="data-label">Regalías por Venta</span>
-                    <span className="data-value font-bold text-secondary">{ebookResults.regalias.toFixed(2)}{currencySymbol}</span>
-                  </div>
-                  <div className="data-row">
-                    <span className="data-label">Margen ACOS</span>
-                    <span className="data-value">{(ebookResults.margenAcos * 100).toFixed(1)}%</span>
-                  </div>
-                  <div className="data-row">
-                    <span className="data-label">Clics máx. por Venta</span>
-                    <span className={`data-value font-bold ${ebookResults.diagnostico === 'bad' ? 'text-destructive' : 'text-success'}`}>
-                      {ebookResults.clicsPorVenta}
-                    </span>
-                  </div>
-                  <div className="data-row">
-                    <span className="data-label">Diagnóstico</span>
-                    <span className={`data-value font-bold ${
-                      ebookResults.diagnostico === 'good' ? 'text-success' :
-                      ebookResults.diagnostico === 'warning' ? 'text-warning' : 'text-destructive'
-                    }`}>
-                      {ebookResults.diagnostico === 'good' ? 'Campaña buena' :
-                       ebookResults.diagnostico === 'warning' ? 'Límite aceptable' : 'Mala campaña'}
-                    </span>
-                  </div>
+                  <div className="data-row"><span>PVP</span><span>{ebookData.pvp?.toFixed(2)}{currencySymbol}</span></div>
+                  <div className="data-row"><span>Regalías</span><span className="font-bold">{ebookResults.regalias.toFixed(2)}{currencySymbol}</span></div>
+                  <div className="data-row"><span>Margen</span><span>{ebookResults.margenPct.toFixed(1)}%</span></div>
+                  <div className="data-row"><span>Clics máx.</span><span>{ebookResults.clicsMaxPorVenta}</span></div>
                 </div>
               </div>
             )}
 
-            {/* Paperback Results */}
             {showPaperback && paperbackResults && (
               <div className="section">
-                <h2 className="text-lg font-heading font-semibold text-secondary border-b-2 border-secondary pb-1 mb-3">
-                  Resultados Paperback
-                </h2>
+                <h2 className="text-lg font-heading font-semibold text-secondary border-b-2 border-secondary pb-1 mb-3">Resultados Paperback</h2>
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="data-row">
-                    <span className="data-label">PVP</span>
-                    <span className="data-value">{paperbackData.pvp?.toFixed(2)}{currencySymbol}</span>
-                  </div>
-                  <div className="data-row">
-                    <span className="data-label">Páginas</span>
-                    <span className="data-value">{paperbackData.pages}</span>
-                  </div>
-                  <div className="data-row">
-                    <span className="data-label">Interior</span>
-                    <span className="data-value">{paperbackData.interior ? interiorLabels[paperbackData.interior] : '-'}</span>
-                  </div>
-                  <div className="data-row">
-                    <span className="data-label">Tamaño</span>
-                    <span className="data-value">{paperbackData.size ? sizeLabels[paperbackData.size] : '-'}</span>
-                  </div>
-                  <div className="data-row">
-                    <span className="data-label">Gastos Impresión</span>
-                    <span className="data-value">{paperbackResults.gastosImpresion.toFixed(2)}{currencySymbol}</span>
-                  </div>
-                  <div className="data-row">
-                    <span className="data-label">Regalías por Venta</span>
-                    <span className={`data-value font-bold ${paperbackResults.regalias > 0 ? 'text-primary' : 'text-destructive'}`}>
-                      {paperbackResults.regalias.toFixed(2)}{currencySymbol}
-                    </span>
-                  </div>
-                  <div className="data-row">
-                    <span className="data-label">Margen BACOS</span>
-                    <span className="data-value">{(paperbackResults.margenBacos * 100).toFixed(1)}%</span>
-                  </div>
-                  <div className="data-row">
-                    <span className="data-label">Clics máx. por Venta</span>
-                    <span className="data-value font-bold">{paperbackResults.clicsPorVenta}</span>
-                  </div>
-                  {paperbackResults.precioMinObjetivo && (
-                    <div className="data-row col-span-2 bg-primary/10 p-2 rounded">
-                      <span className="data-label font-semibold">Precio Mínimo Objetivo</span>
-                      <span className="data-value font-bold text-primary">{paperbackResults.precioMinObjetivo.toFixed(2)}{currencySymbol}</span>
-                    </div>
-                  )}
+                  <div className="data-row"><span>PVP</span><span>{paperbackData.pvp?.toFixed(2)}{currencySymbol}</span></div>
+                  <div className="data-row"><span>Regalías</span><span className="font-bold">{paperbackResults.regalias.toFixed(2)}{currencySymbol}</span></div>
+                  <div className="data-row"><span>Margen</span><span>{paperbackResults.margenPct.toFixed(1)}%</span></div>
+                  <div className="data-row"><span>Clics máx.</span><span>{paperbackResults.clicsMaxPorVenta}</span></div>
                 </div>
               </div>
             )}
 
-            {/* Positioning */}
-            {positioningResults && (
-              <div className="section">
-                <h2 className="text-lg font-heading font-semibold text-secondary border-b-2 border-secondary pb-1 mb-3">
-                  Análisis de Ads
-                </h2>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="data-row">
-                    <span className="data-label">Clics Diarios Estimados</span>
-                    <span className="data-value">{Math.ceil(positioningResults.clicsDiarios)}</span>
-                  </div>
-                  <div className="data-row">
-                    <span className="data-label">Inversión Diaria</span>
-                    <span className="data-value font-bold">{positioningResults.inversionDiaria.toFixed(2)}{currencySymbol}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Risks */}
             {risks.length > 0 && (
               <div className="section">
                 <h2 className="text-lg font-heading font-semibold text-destructive border-b-2 border-destructive pb-1 mb-3 flex items-center gap-2">
-                  <XCircle className="h-5 w-5" />
-                  Riesgos Detectados
+                  <XCircle className="h-5 w-5" /> Riesgos
                 </h2>
                 <ul className="space-y-2">
                   {risks.map((risk, idx) => (
@@ -355,35 +226,24 @@ export const ReportSection = ({
               </div>
             )}
 
-            {/* Recommendations */}
             <div className="section">
               <h2 className="text-lg font-heading font-semibold text-success border-b-2 border-success pb-1 mb-3 flex items-center gap-2">
-                <CheckCircle className="h-5 w-5" />
-                Recomendaciones
+                <CheckCircle className="h-5 w-5" /> Recomendaciones
               </h2>
               <ul className="space-y-2">
-                {recommendations.length > 0 ? (
-                  recommendations.map((rec, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm">
-                      <CheckCircle className="h-4 w-4 text-success mt-0.5 shrink-0" />
-                      <span>{rec}</span>
-                    </li>
-                  ))
-                ) : (
-                  <li className="flex items-start gap-2 text-sm">
+                {recommendations.map((rec, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-success mt-0.5 shrink-0" />
-                    <span>Completa más datos para obtener recomendaciones personalizadas.</span>
+                    <span>{rec}</span>
                   </li>
-                )}
+                ))}
               </ul>
             </div>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-48 bg-muted/30 rounded-lg">
             <FileText className="h-12 w-12 text-muted-foreground/50 mb-3" />
-            <p className="text-sm text-muted-foreground text-center">
-              Selecciona un formato y completa los datos para generar el informe final
-            </p>
+            <p className="text-sm text-muted-foreground">Selecciona un formato y completa los datos</p>
           </div>
         )}
       </CardContent>
