@@ -106,8 +106,8 @@ export const ResultsTable = ({ data, globalData }: ResultsTableProps) => {
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
-                      <span className={`px-2 py-1 rounded ${getClicksClass(row.clicsPorVenta)}`}>
-                        {row.clicsPorVenta}
+                      <span className={`px-2 py-1 rounded ${getClicksClass(row.clicsMaxPorVenta)}`}>
+                        {row.clicsMaxPorVenta}
                       </span>
                     </TableCell>
                     <TableCell className="text-center">

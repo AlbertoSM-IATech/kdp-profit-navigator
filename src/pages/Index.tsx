@@ -77,6 +77,7 @@ const Index = () => {
                 data={paperbackData}
                 globalData={globalData}
                 onChange={setPaperbackData}
+                onGlobalChange={setGlobalData}
               />
             )}
           </>
