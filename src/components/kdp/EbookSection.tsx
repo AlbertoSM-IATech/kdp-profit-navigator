@@ -24,6 +24,19 @@ interface EbookSectionProps {
   onChange: (data: EbookData) => void;
 }
 
+// Helper to get clicks color with new thresholds: ≥14 green, 10-13 yellow, <10 red
+const getClicksColor = (clicks: number) => {
+  if (clicks >= 14) return 'text-success';
+  if (clicks >= 10) return 'text-warning';
+  return 'text-destructive';
+};
+
+const getClicksBg = (clicks: number) => {
+  if (clicks >= 14) return 'bg-success/20';
+  if (clicks >= 10) return 'bg-warning/20';
+  return 'bg-destructive/20';
+};
+
 export const EbookSection = ({ data, results, globalData, onChange }: EbookSectionProps) => {
   const config = globalData.marketplace ? MARKETPLACE_CONFIGS[globalData.marketplace] : null;
   const currencySymbol = config?.currencySymbol || '€';
@@ -77,6 +90,7 @@ export const EbookSection = ({ data, results, globalData, onChange }: EbookSecti
           <BookOpen className="h-5 w-5 text-secondary" />
           📘 eBook — Configuración
         </CardTitle>
+        <p className="text-sm text-muted-foreground">Datos del libro digital.</p>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -190,8 +204,9 @@ export const EbookSection = ({ data, results, globalData, onChange }: EbookSecti
           {/* Results Column */}
           <div className="space-y-4">
             <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Resultados calculados
+              Resultados
             </h4>
+            <p className="text-xs text-muted-foreground -mt-2">Cálculo automático con tus datos.</p>
             
             {results ? (
               <div className="space-y-4">
@@ -211,18 +226,54 @@ export const EbookSection = ({ data, results, globalData, onChange }: EbookSecti
                 {/* Key Metrics Grid */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-muted/30 rounded-lg p-3 text-center">
-                    <span className="text-xs text-muted-foreground block mb-1">Regalía neta</span>
+                    <span className="text-xs text-muted-foreground block mb-1 flex items-center justify-center gap-1">
+                      Regalía neta
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <HelpCircle className="h-3 w-3" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs p-3">
+                            <p className="text-sm">
+                              Importe que te queda por venta tras aplicar el % de regalía.
+                              <br /><br />
+                              <strong>eBook 70%:</strong> (Precio sin IVA × 70%) − Tarifa de entrega
+                              <br />
+                              <strong>eBook 35%:</strong> Precio sin IVA × 35%
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </span>
                     <span className={`text-xl font-bold ${results.regalias > 0 ? 'text-secondary' : 'text-destructive'}`}>
                       {results.regalias.toFixed(2)}{currencySymbol}
                     </span>
                   </div>
                   <div className="bg-muted/30 rounded-lg p-3 text-center">
-                    <span className="text-xs text-muted-foreground block mb-1">Margen real</span>
+                    <span className="text-xs text-muted-foreground block mb-1 flex items-center justify-center gap-1">
+                      Margen real (BACOS)
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <HelpCircle className="h-3 w-3" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs p-3">
+                            <p className="text-sm">
+                              <strong>BACOS</strong> = Margen real después del coste de ventas.
+                              <br /><br />
+                              Fórmula: (Regalía neta) / (Precio sin IVA)
+                              <br /><br />
+                              Es el porcentaje de cada venta que realmente te queda para margen operativo (antes de estructura).
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </span>
                     <span className={`text-xl font-bold ${results.margenPct >= 30 ? 'text-success' : results.margenPct >= 20 ? 'text-warning' : 'text-destructive'}`}>
                       {results.margenPct.toFixed(1)}%
                     </span>
                   </div>
-                  <div className="bg-muted/30 rounded-lg p-3 text-center">
+                  <div className={`rounded-lg p-3 text-center ${getClicksBg(results.clicsMaxPorVenta)}`}>
                     <span className="text-xs text-muted-foreground block mb-1 flex items-center justify-center gap-1">
                       Clics máx./Venta
                       <TooltipProvider>
@@ -232,15 +283,25 @@ export const EbookSection = ({ data, results, globalData, onChange }: EbookSecti
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs p-3">
                             <p className="text-sm">
-                              El mínimo recomendado es 1 venta cada 10 clics (10%).
-                              Permitir más clics por venta reduce el margen y aumenta el riesgo.
-                              Menos clics por venta indica una campaña saludable.
+                              Define el <strong>margen operativo</strong> como el número máximo de clics que te 
+                              puedes permitir para vender una unidad sin perder dinero.
+                              <br /><br />
+                              <strong>Cuantos más clics puedas permitirte, más sano es tu margen.</strong>
+                              <br /><br />
+                              Ejemplo: si el límite calculado es 14 clics, estás por encima del mínimo recomendado (10). 
+                              Cualquier venta dentro de esos 14 clics mejora tus resultados.
+                              <br /><br />
+                              Si el número es inferior a 10, ajusta precio, costes o CPC.
+                              <br /><br />
+                              <span className="text-success">🟢 ≥14: Buena campaña</span><br />
+                              <span className="text-warning">🟠 10-13: Límite aceptable</span><br />
+                              <span className="text-destructive">🔴 &lt;10: Campaña con riesgo</span>
                             </p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </span>
-                    <span className={`text-xl font-bold ${results.clicsMaxPorVenta >= 10 ? 'text-success' : 'text-destructive'}`}>
+                    <span className={`text-xl font-bold ${getClicksColor(results.clicsMaxPorVenta)}`}>
                       {results.clicsMaxPorVenta}
                     </span>
                   </div>
@@ -255,12 +316,10 @@ export const EbookSection = ({ data, results, globalData, onChange }: EbookSecti
                 {/* Detailed breakdown */}
                 <div className="bg-muted/20 rounded-lg p-4 space-y-2 text-sm">
                   {globalData.marketplace === 'ES' && (
-                    <>
-                      <div className="data-row">
-                        <span className="data-label">Precio sin IVA ({results.ivaPct}%)</span>
-                        <span className="data-value">{results.precioSinIva.toFixed(2)}{currencySymbol}</span>
-                      </div>
-                    </>
+                    <div className="data-row">
+                      <span className="data-label">Precio sin IVA ({results.ivaPct}%)</span>
+                      <span className="data-value">{results.precioSinIva.toFixed(2)}{currencySymbol}</span>
+                    </div>
                   )}
                   {showTamano && data.tamanoMb && results.deliveryCost > 0 && (
                     <div className="data-row">
@@ -278,11 +337,11 @@ export const EbookSection = ({ data, results, globalData, onChange }: EbookSecti
                   </div>
                 </div>
 
-                {/* Minimum Target Price */}
+                {/* Minimum Recommended Price */}
                 {globalData.margenObjetivoPct && (
                   <div className="p-4 bg-primary/10 border border-primary/30 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm font-semibold text-primary">Precio mínimo objetivo</span>
+                      <span className="text-sm font-semibold text-primary">Precio mínimo recomendado</span>
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger>
@@ -290,8 +349,10 @@ export const EbookSection = ({ data, results, globalData, onChange }: EbookSecti
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs p-3">
                             <p className="text-sm">
-                              PVP mínimo recomendado para alcanzar el {globalData.margenObjetivoPct}% de margen objetivo
+                              PVP mínimo recomendado para alcanzar tu margen objetivo (BACOS) 
                               y poder invertir en Ads sin perder dinero.
+                              <br /><br />
+                              Fórmula base: PsinIVA ≥ tarifa / (r − m) con validación de IVA.
                             </p>
                           </TooltipContent>
                         </Tooltip>

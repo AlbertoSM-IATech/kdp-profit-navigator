@@ -9,7 +9,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Globe, Target, MousePointer, TrendingUp, AlertTriangle, BookOpen, Book, BookMarked } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Globe, Target, MousePointer, TrendingUp, AlertTriangle, BookOpen, Book, BookMarked, HelpCircle } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface GlobalDataSectionProps {
@@ -40,8 +46,9 @@ export const GlobalDataSection = ({ data, onChange }: GlobalDataSectionProps) =>
       <CardHeader className="pb-4">
         <CardTitle className="section-header">
           <Globe className="h-5 w-5 text-primary" />
-          Datos Globales
+          Entradas del análisis
         </CardTitle>
+        <p className="text-sm text-muted-foreground">Datos reales que has introducido.</p>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Format Selector - PROMINENT - Step 1 */}
@@ -122,7 +129,20 @@ export const GlobalDataSection = ({ data, onChange }: GlobalDataSectionProps) =>
               <div className="space-y-2">
                 <Label htmlFor="margen" className="flex items-center gap-2 text-sm font-medium">
                   <Target className="h-4 w-4 text-muted-foreground" />
-                  Margen Objetivo (%)
+                  Margen Objetivo
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs p-3">
+                        <p className="text-sm">
+                          Porcentaje mínimo de margen real (BACOS) que quieres asegurar por venta 
+                          para poder reinvertir en Ads con bajo riesgo. Recomendado: ≥ 30%.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </Label>
                 <div className="relative">
                   <Input
@@ -151,6 +171,19 @@ export const GlobalDataSection = ({ data, onChange }: GlobalDataSectionProps) =>
                 <Label htmlFor="cpc" className="flex items-center gap-2 text-sm font-medium">
                   <MousePointer className="h-4 w-4 text-muted-foreground" />
                   CPC estimado
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs p-3">
+                        <p className="text-sm">
+                          Coste por clic estimado en tus campañas. Debes investigarlo por nicho/keyword. 
+                          No uses valores por defecto.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </Label>
                 <div className="relative">
                   <Input
@@ -171,7 +204,20 @@ export const GlobalDataSection = ({ data, onChange }: GlobalDataSectionProps) =>
               <div className="space-y-2">
                 <Label htmlFor="ventas" className="flex items-center gap-2 text-sm font-medium">
                   <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                  Ventas diarias competencia
+                  Ventas/día competencia
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs p-3">
+                        <p className="text-sm">
+                          Estimación de ventas diarias de los 2–3 líderes de tu nicho. Investígalo con 
+                          herramientas externas y con tu criterio. Sirve para calcular inversión mínima para competir.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </Label>
                 <Input
                   id="ventas"
