@@ -36,6 +36,19 @@ const sizeLabels: Record<BookSize, string> = {
   LARGE: 'Grande (>6x9")',
 };
 
+// Helper to get clicks color with new thresholds: ≥14 green, 10-13 yellow, <10 red
+const getClicksColor = (clicks: number) => {
+  if (clicks >= 14) return 'text-success';
+  if (clicks >= 10) return 'text-warning';
+  return 'text-destructive';
+};
+
+const getClicksBg = (clicks: number) => {
+  if (clicks >= 14) return 'bg-success/20';
+  if (clicks >= 10) return 'bg-warning/20';
+  return 'bg-destructive/20';
+};
+
 export const PaperbackSection = ({ data, results, globalData, onChange }: PaperbackSectionProps) => {
   const config = globalData.marketplace ? MARKETPLACE_CONFIGS[globalData.marketplace] : null;
   const currencySymbol = config?.currencySymbol || '€';
@@ -106,6 +119,7 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
           <Book className="h-5 w-5 text-primary" />
           {isHardcover ? '📗 Hardcover' : '📕 Paperback'} — Configuración
         </CardTitle>
+        <p className="text-sm text-muted-foreground">Datos del libro físico.</p>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -270,8 +284,9 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
           {/* Results Column */}
           <div className="space-y-4">
             <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Resultados calculados
+              Resultados
             </h4>
+            <p className="text-xs text-muted-foreground -mt-2">Cálculo automático con tus datos.</p>
             
             {results ? (
               <div className="space-y-4">
@@ -291,18 +306,52 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
                 {/* Key Metrics Grid */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-muted/30 rounded-lg p-3 text-center">
-                    <span className="text-xs text-muted-foreground block mb-1">Regalía neta</span>
+                    <span className="text-xs text-muted-foreground block mb-1 flex items-center justify-center gap-1">
+                      Regalía neta
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <HelpCircle className="h-3 w-3" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs p-3">
+                            <p className="text-sm">
+                              Importe que te queda por venta tras aplicar el % de regalía y descontar el coste de impresión.
+                              <br /><br />
+                              <strong>Papel:</strong> (Precio sin IVA × % regalía) − Coste de impresión
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </span>
                     <span className={`text-xl font-bold ${results.regalias > 0 ? 'text-primary' : 'text-destructive'}`}>
                       {results.regalias.toFixed(2)}{currencySymbol}
                     </span>
                   </div>
                   <div className="bg-muted/30 rounded-lg p-3 text-center">
-                    <span className="text-xs text-muted-foreground block mb-1">Margen real</span>
+                    <span className="text-xs text-muted-foreground block mb-1 flex items-center justify-center gap-1">
+                      Margen real (BACOS)
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <HelpCircle className="h-3 w-3" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs p-3">
+                            <p className="text-sm">
+                              <strong>BACOS</strong> = Margen real después del coste de ventas.
+                              <br /><br />
+                              Fórmula: (Regalía neta) / (Precio sin IVA)
+                              <br /><br />
+                              Es el porcentaje de cada venta que realmente te queda para margen operativo (antes de estructura).
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </span>
                     <span className={`text-xl font-bold ${results.margenPct >= 30 ? 'text-success' : results.margenPct >= 20 ? 'text-warning' : 'text-destructive'}`}>
                       {results.margenPct.toFixed(1)}%
                     </span>
                   </div>
-                  <div className="bg-muted/30 rounded-lg p-3 text-center">
+                  <div className={`rounded-lg p-3 text-center ${getClicksBg(results.clicsMaxPorVenta)}`}>
                     <span className="text-xs text-muted-foreground block mb-1 flex items-center justify-center gap-1">
                       Clics máx./Venta
                       <TooltipProvider>
@@ -312,15 +361,25 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs p-3">
                             <p className="text-sm">
-                              El mínimo recomendado es 1 venta cada 10 clics (10%).
-                              Permitir más clics por venta reduce el margen y aumenta el riesgo.
-                              Menos clics por venta indica una campaña saludable.
+                              Define el <strong>margen operativo</strong> como el número máximo de clics que te 
+                              puedes permitir para vender una unidad sin perder dinero.
+                              <br /><br />
+                              <strong>Cuantos más clics puedas permitirte, más sano es tu margen.</strong>
+                              <br /><br />
+                              Ejemplo: si el límite calculado es 14 clics, estás por encima del mínimo recomendado (10). 
+                              Cualquier venta dentro de esos 14 clics mejora tus resultados.
+                              <br /><br />
+                              Si el número es inferior a 10, ajusta precio, costes o CPC.
+                              <br /><br />
+                              <span className="text-success">🟢 ≥14: Buena campaña</span><br />
+                              <span className="text-warning">🟠 10-13: Límite aceptable</span><br />
+                              <span className="text-destructive">🔴 &lt;10: Campaña con riesgo</span>
                             </p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </span>
-                    <span className={`text-xl font-bold ${results.clicsMaxPorVenta >= 10 ? 'text-success' : 'text-destructive'}`}>
+                    <span className={`text-xl font-bold ${getClicksColor(results.clicsMaxPorVenta)}`}>
                       {results.clicsMaxPorVenta}
                     </span>
                   </div>
@@ -358,11 +417,11 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
                   </div>
                 </div>
 
-                {/* Minimum Target Price - PROMINENT */}
+                {/* Minimum Recommended Price - PROMINENT */}
                 {globalData.margenObjetivoPct && (
                   <div className="p-4 bg-primary/10 border border-primary/30 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm font-semibold text-primary">Precio mínimo objetivo</span>
+                      <span className="text-sm font-semibold text-primary">Precio mínimo recomendado</span>
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger>
@@ -370,8 +429,10 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs p-3">
                             <p className="text-sm">
-                              PVP mínimo recomendado para alcanzar el {globalData.margenObjetivoPct}% de margen objetivo
-                              y poder invertir en Ads sin perder dinero. Fórmula: CEIL(Coste impresión / (% regalía − margen objetivo)) − 0,01
+                              PVP mínimo recomendado para alcanzar tu margen objetivo (BACOS) 
+                              y poder invertir en Ads sin perder dinero.
+                              <br /><br />
+                              Fórmula base (papel): PsinIVA ≥ C / (r − m) con validación de umbral de regalías e IVA.
                             </p>
                           </TooltipContent>
                         </Tooltip>

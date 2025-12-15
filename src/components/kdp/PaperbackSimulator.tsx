@@ -2,7 +2,13 @@ import { PaperbackData, GlobalData } from '@/types/kdp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { SlidersHorizontal, Euro, FileText, Target, MousePointer, DollarSign, Percent } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { SlidersHorizontal, Euro, FileText, Target, DollarSign, Percent, HelpCircle } from 'lucide-react';
 import { calculatePrintingCost } from '@/data/printingCosts';
 
 interface PaperbackSimulatorProps {
@@ -11,6 +17,19 @@ interface PaperbackSimulatorProps {
   onChange: (data: PaperbackData) => void;
   onGlobalChange: (data: GlobalData) => void;
 }
+
+// Helper to get clicks color with new thresholds: ≥14 green, 10-13 yellow, <10 red
+const getClicksColor = (clicks: number) => {
+  if (clicks >= 14) return 'text-success';
+  if (clicks >= 10) return 'text-warning';
+  return 'text-destructive';
+};
+
+const getClicksBg = (clicks: number) => {
+  if (clicks >= 14) return 'bg-success/20';
+  if (clicks >= 10) return 'bg-warning/20';
+  return 'bg-destructive/20';
+};
 
 export const PaperbackSimulator = ({ data, globalData, onChange, onGlobalChange }: PaperbackSimulatorProps) => {
   const currencySymbol = globalData.marketplace === 'COM' ? '$' : '€';
@@ -21,8 +40,9 @@ export const PaperbackSimulator = ({ data, globalData, onChange, onGlobalChange 
         <CardHeader className="pb-4">
           <CardTitle className="section-header">
             <SlidersHorizontal className="h-5 w-5 text-secondary" />
-            Simulador Interactivo
+            Simulador
           </CardTitle>
+          <p className="text-sm text-muted-foreground">Juega con ajustes; no altera tus datos.</p>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground text-center py-8">
@@ -45,21 +65,30 @@ export const PaperbackSimulator = ({ data, globalData, onChange, onGlobalChange 
   const ivaPct = globalData.marketplace === 'ES' ? 4 : 0;
   const precioSinIva = pvp / (1 + ivaPct / 100);
   const regalias = (precioSinIva * royaltyRate) - gastosImpresion;
-  const margenBacos = pvp > 0 ? (regalias / pvp) * 100 : 0;
-  const cpcMaxRentable = regalias > 0 ? regalias / 10 : 0; // Para 10 clics por venta
-  const tasaConvBreakeven = regalias > 0 && cpc > 0 ? cpc / regalias : 0;
-  const clicsMaxPorVenta = tasaConvBreakeven > 0 ? Math.floor(1 / tasaConvBreakeven) : 0;
+  
+  // BACOS = Regalía neta / Precio sin IVA
+  const margenBacos = precioSinIva > 0 ? (regalias / precioSinIva) * 100 : 0;
+  const cpcMaxRentable = regalias > 0 ? regalias / 10 : 0;
+  
+  // Clics máx. = FLOOR(Regalía neta / CPC)
+  const clicsMaxPorVenta = cpc > 0 && regalias > 0 ? Math.floor(regalias / cpc) : 0;
 
-  // Precio mínimo objetivo
+  // Precio mínimo recomendado
   const margenObj = margenObjetivo / 100;
   const denominator = royaltyRate - margenObj;
-  const precioMinObjetivo = denominator > 0 ? Math.ceil(gastosImpresion / denominator) - 0.01 : null;
+  let precioMinObjetivo: number | null = null;
+  
+  if (denominator > 0) {
+    const basePrice = gastosImpresion / denominator;
+    const priceWithIva = basePrice * (1 + ivaPct / 100);
+    precioMinObjetivo = Math.ceil(priceWithIva * 100) / 100;
+  }
 
-  // Risk level
+  // Risk level with new thresholds
   const getRiskLevel = () => {
     if (regalias <= 0) return { level: 'high', text: 'Alto', color: 'destructive' };
     if (clicsMaxPorVenta < 10 || margenBacos < 30) return { level: 'high', text: 'Alto', color: 'destructive' };
-    if (clicsMaxPorVenta === 10 || margenBacos <= 40) return { level: 'medium', text: 'Medio', color: 'warning' };
+    if (clicsMaxPorVenta < 14 || margenBacos <= 40) return { level: 'medium', text: 'Medio', color: 'warning' };
     return { level: 'low', text: 'Bajo', color: 'success' };
   };
 
@@ -70,7 +99,7 @@ export const PaperbackSimulator = ({ data, globalData, onChange, onGlobalChange 
     if (regalias < 0) return { text: 'Con este PVP pierdes dinero incluso antes de invertir en Ads.', color: 'text-destructive' };
     if (margenBacos < 30) return { text: 'Este precio te deja poco margen para Ads.', color: 'text-destructive' };
     if (clicsMaxPorVenta < 10) return { text: 'Margen muy ajustado para campañas de Ads.', color: 'text-destructive' };
-    if (clicsMaxPorVenta === 10) return { text: 'En el límite del breakeven. Margen ajustado.', color: 'text-warning' };
+    if (clicsMaxPorVenta < 14) return { text: 'Límite aceptable. Margen ajustable.', color: 'text-warning' };
     return { text: 'Configuración saludable para escalar.', color: 'text-success' };
   };
 
@@ -82,19 +111,17 @@ export const PaperbackSimulator = ({ data, globalData, onChange, onGlobalChange 
     return 'text-success';
   };
 
-  const getClicksColor = () => {
-    if (clicsMaxPorVenta > 10) return 'text-destructive';
-    if (clicsMaxPorVenta === 10) return 'text-warning';
-    return 'text-success';
-  };
-
   return (
     <Card className="animate-fade-in border-secondary/30">
       <CardHeader className="pb-4">
         <CardTitle className="section-header">
           <SlidersHorizontal className="h-5 w-5 text-secondary" />
-          Simulador Interactivo
+          Simulador
         </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Usa el simulador para probar ajustes (precio, páginas, CPC, margen objetivo) y ver el impacto en tiempo real. 
+          No modifica tus datos base: es un sandbox para decidir.
+        </p>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -209,19 +236,49 @@ export const PaperbackSimulator = ({ data, globalData, onChange, onGlobalChange 
                   </span>
                 </div>
                 <div className="text-center p-3 bg-background rounded-lg">
-                  <span className="text-xs text-muted-foreground block mb-1">Margen BACOS</span>
+                  <span className="text-xs text-muted-foreground block mb-1 flex items-center justify-center gap-1">
+                    Margen real (BACOS)
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <HelpCircle className="h-3 w-3" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs p-3">
+                          <p className="text-sm">
+                            BACOS = (Regalía neta) / (Precio sin IVA)
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </span>
                   <span className={`text-xl font-bold ${getMarginColor()}`}>
                     {margenBacos.toFixed(1)}%
                   </span>
                 </div>
-                <div className="text-center p-3 bg-background rounded-lg">
-                  <span className="text-xs text-muted-foreground block mb-1">Clics máx./Venta</span>
-                  <span className={`text-xl font-bold ${getClicksColor()}`}>
+                <div className={`text-center p-3 rounded-lg ${getClicksBg(clicsMaxPorVenta)}`}>
+                  <span className="text-xs text-muted-foreground block mb-1 flex items-center justify-center gap-1">
+                    Clics máx./Venta
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <HelpCircle className="h-3 w-3" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs p-3">
+                          <p className="text-sm">
+                            🟢 ≥14: Buena campaña<br />
+                            🟠 10-13: Límite aceptable<br />
+                            🔴 &lt;10: Campaña con riesgo
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </span>
+                  <span className={`text-xl font-bold ${getClicksColor(clicsMaxPorVenta)}`}>
                     {clicsMaxPorVenta > 0 ? clicsMaxPorVenta : '∞'}
                   </span>
                 </div>
                 <div className="text-center p-3 bg-background rounded-lg">
-                  <span className="text-xs text-muted-foreground block mb-1">PVP Mín. Objetivo</span>
+                  <span className="text-xs text-muted-foreground block mb-1">PVP Mín. Recomendado</span>
                   <span className="text-xl font-bold text-secondary">
                     {precioMinObjetivo ? `${precioMinObjetivo.toFixed(2)}${currencySymbol}` : '-'}
                   </span>
@@ -247,7 +304,7 @@ export const PaperbackSimulator = ({ data, globalData, onChange, onGlobalChange 
                 <span className="text-sm font-medium">Riesgo:</span>
                 <span className={`text-lg font-bold text-${risk.color}`}>{risk.text}</span>
               </div>
-              <p className={`text-sm font-medium text-${risk.color}`}>
+              <p className={`text-sm font-medium ${diagnostic.color}`}>
                 {diagnostic.text}
               </p>
             </div>

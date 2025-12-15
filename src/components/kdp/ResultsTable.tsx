@@ -8,6 +8,12 @@ import {
   TableHeader,
   TableRow as TRow,
 } from '@/components/ui/table';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { LayoutGrid, BookOpen, Book } from 'lucide-react';
 
 interface ResultsTableProps {
@@ -24,10 +30,11 @@ export const ResultsTable = ({ data, globalData }: ResultsTableProps) => {
     return 'bg-success/20 text-success font-semibold';
   };
 
+  // Updated clicks thresholds: ≥14 green, 10-13 yellow, <10 red
   const getClicksClass = (clicks: number) => {
-    // More clicks allowed = better (healthier margin)
-    if (clicks < 10) return 'bg-destructive/20 text-destructive font-semibold';
-    return 'bg-success/20 text-success font-semibold';
+    if (clicks >= 14) return 'bg-success/20 text-success font-semibold';
+    if (clicks >= 10) return 'bg-warning/20 text-warning font-semibold';
+    return 'bg-destructive/20 text-destructive font-semibold';
   };
 
   const getDiagnosticBadge = (diagnostico: string) => {
@@ -60,6 +67,7 @@ export const ResultsTable = ({ data, globalData }: ResultsTableProps) => {
           <LayoutGrid className="h-5 w-5 text-primary" />
           Tabla de Resultados
         </CardTitle>
+        <p className="text-sm text-muted-foreground">Resumen comparativo de métricas clave.</p>
       </CardHeader>
       <CardContent>
         {data.length > 0 ? (
@@ -70,7 +78,7 @@ export const ResultsTable = ({ data, globalData }: ResultsTableProps) => {
                   <TableHead className="font-heading font-semibold">Tipo</TableHead>
                   <TableHead className="font-heading font-semibold text-right">PVP</TableHead>
                   <TableHead className="font-heading font-semibold text-right">Regalías</TableHead>
-                  <TableHead className="font-heading font-semibold text-right">Margen</TableHead>
+                  <TableHead className="font-heading font-semibold text-right">Margen real (BACOS)</TableHead>
                   <TableHead className="font-heading font-semibold text-right">Clics máx./Venta</TableHead>
                   <TableHead className="font-heading font-semibold text-center">Estado</TableHead>
                   <TableHead className="font-heading font-semibold">Recomendación</TableHead>
@@ -114,9 +122,18 @@ export const ResultsTable = ({ data, globalData }: ResultsTableProps) => {
                       {getDiagnosticBadge(row.diagnostico)}
                     </TableCell>
                     <TableCell className="max-w-xs">
-                      <p className="text-sm text-muted-foreground truncate" title={row.recomendacion}>
-                        {row.recomendacion}
-                      </p>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="text-sm text-muted-foreground truncate cursor-help" title={row.recomendacion}>
+                              {row.recomendacion}
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-sm p-3">
+                            <p className="text-sm">{row.recomendacion}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </TableCell>
                   </TRow>
                 ))}
@@ -135,11 +152,11 @@ export const ResultsTable = ({ data, globalData }: ResultsTableProps) => {
         <div className="mt-4 flex flex-wrap gap-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-success"></span>
-            <span>Margen &gt; 40% / ≥10 clics máx.</span>
+            <span>Margen &gt; 40% / ≥14 clics máx.</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-warning"></span>
-            <span>Margen 30-40% / =10 clics</span>
+            <span>Margen 30-40% / 10-13 clics</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-destructive"></span>

@@ -22,8 +22,9 @@ export const PositioningSection = ({ results, globalData }: PositioningSectionPr
       <CardHeader className="pb-4">
         <CardTitle className="section-header">
           <Target className="h-5 w-5 text-secondary" />
-          Análisis de Posicionamiento
+          Consejo estratégico
         </CardTitle>
+        <p className="text-sm text-muted-foreground">Reglas operativas con tus números.</p>
       </CardHeader>
       <CardContent>
         {results ? (
@@ -67,7 +68,7 @@ export const PositioningSection = ({ results, globalData }: PositioningSectionPr
               </div>
             </div>
 
-            {/* Bloque de recomendación estratégica */}
+            {/* Bloque de recomendación estratégica - Texto mejorado con colores de acento */}
             <div className="bg-gradient-to-br from-secondary/10 to-primary/10 rounded-xl p-6 border border-secondary/20">
               <h4 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
                 <Target className="h-4 w-4 text-secondary" />
@@ -76,30 +77,34 @@ export const PositioningSection = ({ results, globalData }: PositioningSectionPr
               
               <div className="space-y-4 text-sm text-muted-foreground leading-relaxed">
                 <p>
-                  Si quieres competir con los mejores autores de tu nicho y tener un hueco en las primeras posiciones de Amazon, tendrás que vender una media de <span className="font-semibold text-foreground">{ventasDiarias} copias al día</span>.
+                  Si quieres competir con los mejores autores de tu nicho y tener presencia en primeras posiciones, 
+                  necesitarás vender una media de <span className="font-semibold text-primary">{ventasDiarias} copias/día</span>.
                 </p>
                 
                 <p>
-                  Si estás empezando y no tienes lista propia, asumirás el 100% del posicionamiento mediante Ads.
+                  Si estás empezando y no tienes canales propios de venta (p. ej., lista de email, comunidad en RRSS, 
+                  acuerdos con influencers o tráfico orgánico), asumirás el 100% del posicionamiento vía Ads.
                 </p>
                 
                 <p>
-                  Con una conversión mínima del 10%, necesitarás generar <span className="font-semibold text-foreground">{clicsDiarios} clics diarios</span>, lo que implica una inversión aproximada de <span className="font-semibold text-primary">{inversionDiaria.toFixed(2)}{currencySymbol} diarios</span>.
+                  Con una conversión mínima del 10%, tendrás que generar <span className="font-semibold text-primary">{clicsDiarios} clics/día</span>, 
+                  lo que implica una inversión aproximada de <span className="font-bold text-primary">{inversionDiaria.toFixed(2)}{currencySymbol}</span>.
                 </p>
                 
-                <p className="font-medium text-foreground">
+                <p className="font-medium text-foreground pt-2 border-t border-border/50">
                   Este dato te permite decidir si el nicho es viable antes de producir el libro.
                 </p>
               </div>
             </div>
 
-            {/* Advertencias */}
-            {results.advertencias.length > 0 ? (
+            {/* Advertencias - Solo condicionales */}
+            {results.advertencias.length > 0 && (
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4 text-warning" />
                   Advertencias
                 </h4>
+                <p className="text-xs text-muted-foreground">Avisos solo si aplican (sin ruido).</p>
                 <div className="space-y-2">
                   {results.advertencias.map((adv, idx) => (
                     <div
@@ -112,7 +117,10 @@ export const PositioningSection = ({ results, globalData }: PositioningSectionPr
                   ))}
                 </div>
               </div>
-            ) : (
+            )}
+
+            {/* Show success message only if no warnings */}
+            {results.advertencias.length === 0 && (
               <div className="flex items-start gap-3 p-3 bg-success/10 border border-success/30 rounded-lg">
                 <CheckCircle className="h-4 w-4 text-success mt-0.5 shrink-0" />
                 <p className="text-sm text-foreground">

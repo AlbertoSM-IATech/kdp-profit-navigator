@@ -13,10 +13,10 @@ import {
 } from '@/types/kdp';
 import { calculatePrintingCost } from '@/data/printingCosts';
 
-// Helper functions
+// Helper functions - Updated click thresholds: ≥14 green, 10-13 yellow, <10 red
 const calculateRiskLevel = (margenPct: number, clicsMax: number): RiskLevel => {
   if (margenPct < 30 || clicsMax < 10) return 'high';
-  if (margenPct <= 40 || clicsMax === 10) return 'medium';
+  if (margenPct <= 40 || clicsMax < 14) return 'medium';
   return 'low';
 };
 
@@ -24,6 +24,11 @@ const calculateViability = (regalias: number, margenPct: number, clicsMax: numbe
   if (regalias <= 0 || margenPct < 20 || clicsMax < 5) return 'not-viable';
   if (margenPct < 30 || clicsMax < 10) return 'adjustable';
   return 'viable';
+};
+
+// Round up to nearest cent
+const roundUpToCent = (value: number): number => {
+  return Math.ceil(value * 100) / 100;
 };
 
 export const useKdpCalculator = () => {
@@ -65,12 +70,9 @@ export const useKdpCalculator = () => {
 
     if (!marketplace || !pvp || cpc === null) return null;
 
-    const config = MARKETPLACE_CONFIGS[marketplace];
-    
-    // IVA calculation - only for ES marketplace, others don't have book VAT
+    // IVA calculation - only for ES marketplace
     const applyIva = marketplace === 'ES';
     const ivaPct = applyIva ? ivaType : 0;
-    const iva = (pvp * ivaPct) / 100;
 
     // Price without IVA
     const precioSinIva = pvp / (1 + ivaPct / 100);
@@ -83,26 +85,26 @@ export const useKdpCalculator = () => {
     // Royalties: (price without IVA × royalty rate) - delivery cost
     const regalias = (precioSinIva * (royaltyRate / 100)) - deliveryCost;
 
-    // Margin calculations
+    // Margin calculations - BACOS = Regalía neta / Precio sin IVA
     const margenAbsoluto = regalias;
-    const margenPct = pvp > 0 ? (regalias / pvp) * 100 : 0;
+    const margenPct = precioSinIva > 0 ? (regalias / precioSinIva) * 100 : 0;
     
-    // Benefit per sale (same as royalties for ebook)
+    // Benefit per sale
     const beneficioNeto = regalias;
     
-    // Maximum profitable CPC
-    const cpcMaxRentable = regalias > 0 ? regalias / 10 : 0; // At 10% conversion
+    // Maximum profitable CPC (at 10% conversion = 10 clicks)
+    const cpcMaxRentable = regalias > 0 ? regalias / 10 : 0;
     
     // ROI per sale
     const roiPorVenta = cpc > 0 ? (regalias / cpc) : 0;
 
+    // Maximum clicks per sale (breakeven point) = FLOOR(Regalía neta / CPC)
+    const clicsMaxPorVenta = cpc > 0 && regalias > 0 ? Math.floor(regalias / cpc) : 0;
+
     // Breakeven conversion rate
     const tasaConvBreakeven = regalias > 0 ? cpc / regalias : 0;
 
-    // Maximum clicks per sale (breakeven point)
-    const clicsMaxPorVenta = tasaConvBreakeven > 0 ? Math.floor(1 / tasaConvBreakeven) : 0;
-
-    // Minimum target price calculation
+    // Minimum recommended price calculation for eBook
     let precioMinObjetivo: number | null = null;
     let precioMinObjetivoError: string | null = null;
     
@@ -112,22 +114,29 @@ export const useKdpCalculator = () => {
       const denominator = effectiveRoyaltyRate - margenObj;
       
       if (denominator <= 0) {
-        precioMinObjetivoError = `Con este margen objetivo (${margenObjetivoPct}%) no es posible ser rentable con el ${royaltyRate}% de regalía.`;
+        precioMinObjetivoError = `Con el margen objetivo indicado (${margenObjetivoPct}%) no es factible con el ${royaltyRate}% de regalía; aumenta PVP o baja el margen.`;
       } else {
-        // For eBook: minimum price to cover delivery cost and achieve margin
-        const minPrice = deliveryCost / denominator;
-        precioMinObjetivo = Math.ceil(minPrice * 100) / 100;
+        // For eBook 70%: PsinIVA ≥ tarifa / (0.70 - m)
+        // For eBook 35%: margin is fixed at 35%, so if m > 35% it's not feasible
+        if (royaltyRate === 35 && margenObj > 0.35) {
+          precioMinObjetivoError = `Con regalía del 35%, el margen máximo posible es 35%. Reduce el margen objetivo o cambia a 70%.`;
+        } else {
+          const minPriceSinIva = deliveryCost / denominator;
+          const minPriceWithIva = minPriceSinIva * (1 + ivaPct / 100);
+          precioMinObjetivo = roundUpToCent(minPriceWithIva);
+        }
       }
     }
 
-    // Diagnosis
+    // Diagnosis based on clicks - Updated thresholds
     let diagnostico: 'good' | 'warning' | 'bad' = 'good';
     if (clicsMaxPorVenta < 10) {
       diagnostico = 'bad';
-    } else if (clicsMaxPorVenta === 10) {
+    } else if (clicsMaxPorVenta < 14) {
       diagnostico = 'warning';
     }
 
+    const iva = (pvp * ivaPct) / 100;
     const riskLevel = calculateRiskLevel(margenPct, clicsMaxPorVenta);
     const viabilityStatus = calculateViability(regalias, margenPct, clicsMaxPorVenta);
 
@@ -154,7 +163,7 @@ export const useKdpCalculator = () => {
 
   // Paperback/Hardcover Calculations
   const paperbackResults = useMemo((): PaperbackResults | null => {
-    const { marketplace, cpc, margenObjetivoPct, selectedFormat } = globalData;
+    const { marketplace, cpc, margenObjetivoPct } = globalData;
     const { interior, size, pvp, pages, ivaType } = paperbackData;
 
     if (!interior || !size || !pvp || !pages || cpc === null || !marketplace) return null;
@@ -168,9 +177,6 @@ export const useKdpCalculator = () => {
 
     const gastosImpresion = printingResult.totalCost;
 
-    // Royalty rate based on PVP (automatic)
-    const royaltyRate = pvp < 9.99 ? 0.50 : 0.60;
-
     // IVA - only apply for ES marketplace
     const applyIva = marketplace === 'ES';
     const ivaPct = applyIva ? ivaType : 0;
@@ -178,12 +184,16 @@ export const useKdpCalculator = () => {
     // Price without IVA
     const precioSinIva = pvp / (1 + ivaPct / 100);
 
+    // Royalty rate threshold (9.99€ for ES marketplace)
+    const royaltyThreshold = 9.99;
+    const royaltyRate = pvp < royaltyThreshold ? 0.50 : 0.60;
+
     // Royalties: (price without IVA × royalty rate) - printing cost
     const regalias = (precioSinIva * royaltyRate) - gastosImpresion;
 
-    // Margin calculations
+    // Margin calculations - BACOS = Regalía neta / Precio sin IVA
     const margenAbsoluto = regalias;
-    const margenPct = pvp > 0 ? (regalias / pvp) * 100 : 0;
+    const margenPct = precioSinIva > 0 ? (regalias / precioSinIva) * 100 : 0;
     
     // Benefit per sale
     const beneficioNeto = regalias;
@@ -194,37 +204,77 @@ export const useKdpCalculator = () => {
     // ROI per sale
     const roiPorVenta = cpc > 0 ? (regalias / cpc) : 0;
 
+    // Maximum clicks per sale = FLOOR(Regalía neta / CPC)
+    const clicsMaxPorVenta = cpc > 0 && regalias > 0 ? Math.floor(regalias / cpc) : 0;
+
     // Breakeven conversion rate
     const tasaConvBreakeven = regalias > 0 ? cpc / regalias : 0;
 
-    // Maximum clicks per sale (breakeven point)
-    const clicsMaxPorVenta = tasaConvBreakeven > 0 ? Math.floor(1 / tasaConvBreakeven) : 0;
-
-    // Minimum target price calculation
+    // Minimum recommended price calculation with royalty threshold logic
     let precioMinObjetivo: number | null = null;
     let precioMinObjetivoError: string | null = null;
     
     if (margenObjetivoPct !== null) {
       const margenObj = margenObjetivoPct / 100;
-      const denominator = royaltyRate - margenObj;
       
-      if (denominator <= 0) {
-        precioMinObjetivoError = `Con este margen objetivo (${margenObjetivoPct}%) no es posible ser rentable con el ${(royaltyRate * 100).toFixed(0)}% de regalía.`;
+      // Try with 60% royalty first
+      const denominator60 = 0.60 - margenObj;
+      
+      if (denominator60 <= 0) {
+        precioMinObjetivoError = `Con el margen objetivo indicado (${margenObjetivoPct}%) no es factible con esta regalía y costes; aumenta PVP o baja el margen.`;
       } else {
-        // Formula: CEIL(gastosImpresion / (royaltyRate - margenObj)) - 0.01
-        // But we need to account for IVA in the final price
-        const baseMinPrice = gastosImpresion / denominator;
-        // Add IVA back to get the final PVP
-        const minPriceWithIva = baseMinPrice * (1 + ivaPct / 100);
-        precioMinObjetivo = Math.ceil(minPriceWithIva) - 0.01;
+        // Calculate minimum price with 60% royalty
+        const psinIva60 = gastosImpresion / denominator60;
+        const pvp60 = roundUpToCent(psinIva60 * (1 + ivaPct / 100));
+        
+        if (pvp60 >= royaltyThreshold) {
+          // Valid with 60% royalty
+          precioMinObjetivo = pvp60;
+        } else {
+          // Need to check with 50% royalty
+          const denominator50 = 0.50 - margenObj;
+          
+          if (denominator50 <= 0) {
+            // Can't achieve margin with 50%, must use threshold price with 60%
+            precioMinObjetivo = royaltyThreshold;
+          } else {
+            const psinIva50 = gastosImpresion / denominator50;
+            const pvp50 = roundUpToCent(psinIva50 * (1 + ivaPct / 100));
+            
+            if (pvp50 >= royaltyThreshold) {
+              // Use threshold price with 60% (better royalty)
+              precioMinObjetivo = royaltyThreshold;
+            } else {
+              // Iterate from threshold upward until margin is achieved
+              let testPvp = royaltyThreshold;
+              let found = false;
+              while (testPvp <= 100 && !found) {
+                const testPsinIva = testPvp / (1 + ivaPct / 100);
+                const testRegalias = (testPsinIva * 0.60) - gastosImpresion;
+                const testMargen = testPsinIva > 0 ? testRegalias / testPsinIva : 0;
+                
+                if (testMargen >= margenObj) {
+                  precioMinObjetivo = testPvp;
+                  found = true;
+                } else {
+                  testPvp = roundUpToCent(testPvp + 0.10);
+                }
+              }
+              
+              if (!found) {
+                precioMinObjetivoError = `No se puede alcanzar el margen objetivo con costes actuales.`;
+              }
+            }
+          }
+        }
       }
     }
 
-    // Diagnosis based on margin and clicks
+    // Diagnosis based on margin and clicks - Updated thresholds
     let diagnostico: 'good' | 'warning' | 'bad' = 'good';
     if (margenPct < 30 || clicsMaxPorVenta < 10) {
       diagnostico = 'bad';
-    } else if (margenPct <= 40 || clicsMaxPorVenta === 10) {
+    } else if (margenPct <= 40 || clicsMaxPorVenta < 14) {
       diagnostico = 'warning';
     }
 
@@ -271,15 +321,20 @@ export const useKdpCalculator = () => {
     const activeResults = selectedFormat === 'EBOOK' ? ebookResults : paperbackResults;
     
     if (activeResults) {
-      const conversionNeeded = activeResults.tasaConvBreakeven;
-      if (conversionNeeded > 0.10) {
-        advertencias.push(`La conversión necesaria (${(conversionNeeded * 100).toFixed(1)}%) supera la referencia del 10%.`);
+      // Only add conditional warnings - removed the fixed "disproportionate" message
+      if (activeResults.margenPct < 25) {
+        advertencias.push(`El margen real (BACOS) es < 25%.`);
         riskLevel = 'high';
       }
-
-      // Check if daily investment is disproportionate
-      if (activeResults.regalias > 0 && inversionDiaria > activeResults.regalias * ventasDiariasCompetencia * 0.5) {
-        advertencias.push(`La inversión diaria estimada puede ser desproporcionada respecto a las regalías esperadas.`);
+      
+      if (activeResults.clicsMaxPorVenta < 10) {
+        advertencias.push(`Clics máx./Venta < 10 (por debajo del mínimo recomendado).`);
+        if (riskLevel !== 'high') riskLevel = 'medium';
+      }
+      
+      // Check if PVP is below royalty threshold
+      if (selectedFormat !== 'EBOOK' && paperbackData.pvp && paperbackData.pvp < 9.99) {
+        advertencias.push(`El PVP queda por debajo del umbral de regalías superior (9,99€); revisa el precio.`);
         if (riskLevel !== 'high') riskLevel = 'medium';
       }
     }
@@ -289,7 +344,7 @@ export const useKdpCalculator = () => {
     if (activeResults && activeResults.regalias > 0 && inversionDiaria > 0) {
       const dailyProfit = (activeResults.regalias * ventasDiariasCompetencia) - inversionDiaria;
       if (dailyProfit > 0) {
-        diasParaBreakeven = Math.ceil(inversionDiaria * 30 / dailyProfit); // Rough monthly estimate
+        diasParaBreakeven = Math.ceil(inversionDiaria * 30 / dailyProfit);
       }
     }
 
@@ -302,7 +357,7 @@ export const useKdpCalculator = () => {
       advertencias,
       riskLevel,
     };
-  }, [globalData, ebookResults, paperbackResults]);
+  }, [globalData, ebookResults, paperbackResults, paperbackData.pvp]);
 
   // Table Data
   const tableData = useMemo((): TableRow[] => {
@@ -313,11 +368,11 @@ export const useKdpCalculator = () => {
       let recomendacion = '';
       
       if (ebookResults.diagnostico === 'bad') {
-        recomendacion = `Necesitas mín. 1 venta cada 10 clics, pero solo puedes permitir ${ebookResults.clicsMaxPorVenta}. Aumenta PVP o reduce CPC.`;
+        recomendacion = `Solo puedes permitir ${ebookResults.clicsMaxPorVenta} clics máx. Reduce CPC o sube PVP.`;
       } else if (ebookResults.diagnostico === 'warning') {
-        recomendacion = 'En el límite de breakeven (10 clics). Margen ajustado.';
+        recomendacion = `Clics máx. ${ebookResults.clicsMaxPorVenta} (entre 10-13). Margen ajustable.`;
       } else {
-        recomendacion = `Puedes permitir hasta ${ebookResults.clicsMaxPorVenta} clics por venta. Buen margen.`;
+        recomendacion = `Puedes permitir hasta ${ebookResults.clicsMaxPorVenta} clics por venta. Configuración saludable.`;
       }
 
       rows.push({
@@ -344,7 +399,7 @@ export const useKdpCalculator = () => {
           recomendacion = `Solo puedes permitir ${paperbackResults.clicsMaxPorVenta} clics máx. Reduce CPC o sube PVP.`;
         }
       } else if (paperbackResults.diagnostico === 'warning') {
-        recomendacion = 'En el límite de breakeven (10 clics). Considera aumentar PVP.';
+        recomendacion = `Clics máx. ${paperbackResults.clicsMaxPorVenta} (entre 10-13). Considera optimizar.`;
       } else {
         recomendacion = `Puedes permitir hasta ${paperbackResults.clicsMaxPorVenta} clics por venta. Configuración rentable.`;
       }
