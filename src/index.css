@@ -21,23 +21,24 @@
     --secondary: 217 91% 60%;
     --secondary-foreground: 0 0% 100%;
     
-    --muted: 220 14% 94%;
-    --muted-foreground: 215 25% 40%;
+    /* Improved light mode - better contrast */
+    --muted: 220 14% 92%;
+    --muted-foreground: 215 25% 35%;
     
     --accent: 217 91% 60%;
     --accent-foreground: 0 0% 100%;
     
-    --destructive: 0 84% 60%;
+    --destructive: 0 84% 55%;
     --destructive-foreground: 0 0% 100%;
     
-    --success: 142 71% 45%;
+    --success: 142 71% 40%;
     --success-foreground: 0 0% 100%;
     
-    --warning: 38 92% 50%;
+    --warning: 38 92% 45%;
     --warning-foreground: 0 0% 12%;
     
-    --border: 0 0% 85%;
-    --input: 0 0% 85%;
+    --border: 0 0% 80%;
+    --input: 0 0% 80%;
     --ring: 24 94% 59%;
     
     --radius: 0.5rem;
@@ -45,18 +46,18 @@
     /* Functional colors */
     --high-content: 217 91% 60%;
     --medium-content: 24 94% 59%;
-    --low-content: 142 71% 45%;
+    --low-content: 142 71% 40%;
     
-    /* Status colors */
-    --status-published: 160 84% 39%;
-    --status-review: 38 92% 50%;
-    --status-draft: 239 84% 67%;
-    --status-archived: 0 84% 60%;
+    /* Status colors - adjusted for light mode visibility */
+    --status-published: 160 84% 35%;
+    --status-review: 38 92% 45%;
+    --status-draft: 239 84% 60%;
+    --status-archived: 0 84% 55%;
     
-    /* Diagnosis colors */
-    --diagnosis-good: 142 71% 45%;
-    --diagnosis-warning: 38 92% 50%;
-    --diagnosis-bad: 0 84% 60%;
+    /* Diagnosis colors - darker for light mode */
+    --diagnosis-good: 142 71% 35%;
+    --diagnosis-warning: 38 92% 42%;
+    --diagnosis-bad: 0 84% 50%;
     
     /* Shadows */
     --shadow-coral: 0 4px 14px -2px hsl(24 94% 59% / 0.35);
@@ -131,16 +132,17 @@
     @apply bg-card/80 backdrop-blur-sm border border-border/20;
   }
   
+  /* Diagnosis states with improved contrast */
   .diagnosis-good {
-    @apply bg-success/10 text-success border-success/30;
+    @apply bg-success/15 text-success border-success/40;
   }
   
   .diagnosis-warning {
-    @apply bg-warning/10 text-warning border-warning/30;
+    @apply bg-warning/15 text-warning border-warning/40;
   }
   
   .diagnosis-bad {
-    @apply bg-destructive/10 text-destructive border-destructive/30;
+    @apply bg-destructive/15 text-destructive border-destructive/40;
   }
   
   .section-header {
@@ -157,6 +159,33 @@
   
   .data-value {
     @apply text-sm font-medium text-foreground;
+  }
+  
+  /* Light mode specific improvements */
+  :root .kpi-card {
+    @apply bg-card border border-border shadow-sm;
+  }
+  
+  :root .result-value {
+    @apply text-foreground;
+  }
+  
+  /* Table improvements for light mode */
+  :root table {
+    @apply text-foreground;
+  }
+  
+  :root th {
+    @apply text-foreground bg-muted/70;
+  }
+  
+  :root td {
+    @apply text-foreground;
+  }
+  
+  /* Tooltip improvements */
+  :root [role="tooltip"] {
+    @apply text-popover-foreground bg-popover border border-border;
   }
 }
 
@@ -175,6 +204,15 @@
   
   .animate-glow {
     animation: glow 2s ease-in-out infinite;
+  }
+  
+  /* Force dark text in light mode for specific elements */
+  .text-dark-force {
+    color: hsl(0 0% 12%);
+  }
+  
+  .dark .text-dark-force {
+    color: hsl(0 0% 95%);
   }
 }
 
