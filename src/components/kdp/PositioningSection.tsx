@@ -35,7 +35,7 @@ export const PositioningSection = ({
                   <div className="p-2 bg-secondary/20 rounded-lg">
                     <TrendingUp className="h-5 w-5 text-secondary" />
                   </div>
-                  <span className="text-2xl font-extrabold text-primary-foreground">Conversión Ref.</span>
+                  <span className="text-2xl font-extrabold text-primary">Conversión Ref.</span>
                 </div>
                 <p className="text-secondary text-4xl font-extrabold">10%</p>
                 <p className="text-xs text-muted-foreground mt-1">1 venta cada 10 clics</p>
@@ -47,7 +47,7 @@ export const PositioningSection = ({
                   <div className="p-2 bg-primary/20 rounded-lg">
                     <MousePointer className="h-5 w-5 text-primary" />
                   </div>
-                  <span className="text-primary-foreground font-extrabold text-2xl">Clics Diarios</span>
+                  <span className="font-extrabold text-2xl text-primary">Clics Diarios</span>
                 </div>
                 <p className="text-primary text-4xl font-extrabold">{Math.ceil(results.clicsDiarios)}</p>
                 <p className="text-xs text-muted-foreground mt-1">Para {ventasDiarias} ventas/día</p>
@@ -59,7 +59,7 @@ export const PositioningSection = ({
                   <div className="p-2 bg-foreground/10 rounded-lg">
                     <Euro className="h-5 w-5 text-foreground" />
                   </div>
-                  <span className="text-2xl font-extrabold text-primary-foreground">Inversión Diaria</span>
+                  <span className="text-2xl font-extrabold text-primary">Inversión Diaria</span>
                 </div>
                 <p className="text-foreground text-4xl font-extrabold">{results.inversionDiaria.toFixed(2)}{currencySymbol}</p>
                 <p className="text-xs text-muted-foreground mt-1">A {cpc.toFixed(2)}{currencySymbol}/clic</p>
@@ -74,17 +74,17 @@ export const PositioningSection = ({
               </h4>
               
               <div className="space-y-4 text-sm leading-relaxed text-primary-foreground">
-                <p>
+                <p className="text-black">
                   Si quieres competir con los mejores autores de tu nicho y tener presencia en primeras posiciones, 
                   necesitarás vender una media de <span className="text-primary font-extrabold">{ventasDiarias} copias/día</span>.
                 </p>
                 
-                <p>
+                <p className="text-black">
                   Si estás empezando y no tienes canales propios de venta (p. ej., lista de email, comunidad en RRSS, 
                   acuerdos con influencers o tráfico orgánico), asumirás el 100% del posicionamiento vía Ads.
                 </p>
                 
-                <p>
+                <p className="text-black">
                   Con una conversión mínima del 10%, tendrás que generar <span className="text-primary font-extrabold">{clicsDiarios} clics/día</span>, 
                   lo que implica una inversión aproximada de <span className="text-primary font-extrabold">{inversionDiaria.toFixed(2)}{currencySymbol}</span>.
                 </p>
