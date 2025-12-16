@@ -8,7 +8,6 @@ import { ReportSection } from '@/components/kdp/ReportSection';
 import { PaperbackSimulator } from '@/components/kdp/PaperbackSimulator';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Calculator } from 'lucide-react';
-
 const Index = () => {
   const {
     globalData,
@@ -20,13 +19,10 @@ const Index = () => {
     setPaperbackData,
     paperbackResults,
     positioningResults,
-    tableData,
+    tableData
   } = useKdpCalculator();
-
   const showPhysicalFormat = globalData.selectedFormat === 'PAPERBACK' || globalData.selectedFormat === 'HARDCOVER';
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="container py-4">
@@ -37,7 +33,7 @@ const Index = () => {
               </div>
               <div>
                 <h1 className="text-xl font-heading font-bold text-foreground">
-                  KDP Profit & Viability Engine
+                  Calculadora de Viabilidad                  
                 </h1>
                 <p className="text-sm text-muted-foreground">
                   Análisis profesional de rentabilidad para publishers
@@ -55,54 +51,21 @@ const Index = () => {
         <GlobalDataSection data={globalData} onChange={setGlobalData} />
 
         {/* Step 2: Format-specific Section */}
-        {globalData.selectedFormat === 'EBOOK' && globalData.marketplace && (
-          <EbookSection
-            data={ebookData}
-            results={ebookResults}
-            globalData={globalData}
-            onChange={setEbookData}
-          />
-        )}
+        {globalData.selectedFormat === 'EBOOK' && globalData.marketplace && <EbookSection data={ebookData} results={ebookResults} globalData={globalData} onChange={setEbookData} />}
 
-        {showPhysicalFormat && globalData.marketplace && (
-          <>
-            <PaperbackSection
-              data={paperbackData}
-              results={paperbackResults}
-              globalData={globalData}
-              onChange={setPaperbackData}
-            />
-            {paperbackResults && (
-              <PaperbackSimulator
-                data={paperbackData}
-                globalData={globalData}
-                onChange={setPaperbackData}
-                onGlobalChange={setGlobalData}
-              />
-            )}
-          </>
-        )}
+        {showPhysicalFormat && globalData.marketplace && <>
+            <PaperbackSection data={paperbackData} results={paperbackResults} globalData={globalData} onChange={setPaperbackData} />
+            {paperbackResults && <PaperbackSimulator data={paperbackData} globalData={globalData} onChange={setPaperbackData} onGlobalChange={setGlobalData} />}
+          </>}
 
         {/* Step 3: Positioning Analysis */}
-        {globalData.selectedFormat && globalData.marketplace && (
-          <PositioningSection results={positioningResults} globalData={globalData} />
-        )}
+        {globalData.selectedFormat && globalData.marketplace && <PositioningSection results={positioningResults} globalData={globalData} />}
 
         {/* Step 4: Results Summary */}
-        {globalData.selectedFormat && tableData.length > 0 && (
-          <ResultsTable data={tableData} globalData={globalData} />
-        )}
+        {globalData.selectedFormat && tableData.length > 0 && <ResultsTable data={tableData} globalData={globalData} />}
 
         {/* Step 5: Final Report */}
-        <ReportSection
-          globalData={globalData}
-          ebookData={ebookData}
-          ebookResults={ebookResults}
-          paperbackData={paperbackData}
-          paperbackResults={paperbackResults}
-          positioningResults={positioningResults}
-          tableData={tableData}
-        />
+        <ReportSection globalData={globalData} ebookData={ebookData} ebookResults={ebookResults} paperbackData={paperbackData} paperbackResults={paperbackResults} positioningResults={positioningResults} tableData={tableData} />
       </main>
 
       {/* Footer */}
@@ -113,8 +76,6 @@ const Index = () => {
           </p>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
