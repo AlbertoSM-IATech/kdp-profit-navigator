@@ -74,17 +74,17 @@ export const PositioningSection = ({
               </h4>
               
               <div className="space-y-4 text-sm leading-relaxed text-primary-foreground">
-                <p className="text-black">
+                <p className="text-inherit">
                   Si quieres competir con los mejores autores de tu nicho y tener presencia en primeras posiciones, 
                   necesitarás vender una media de <span className="text-primary font-extrabold">{ventasDiarias} copias/día</span>.
                 </p>
                 
-                <p className="text-black">
+                <p className="text-inherit">
                   Si estás empezando y no tienes canales propios de venta (p. ej., lista de email, comunidad en RRSS, 
                   acuerdos con influencers o tráfico orgánico), asumirás el 100% del posicionamiento vía Ads.
                 </p>
                 
-                <p className="text-black">
+                <p className="text-inherit">
                   Con una conversión mínima del 10%, tendrás que generar <span className="text-primary font-extrabold">{clicsDiarios} clics/día</span>, 
                   lo que implica una inversión aproximada de <span className="text-primary font-extrabold">{inversionDiaria.toFixed(2)}{currencySymbol}</span>.
                 </p>
