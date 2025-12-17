@@ -36,15 +36,15 @@ const sizeLabels: Record<BookSize, string> = {
   LARGE: 'Grande (>6x9")',
 };
 
-// Helper to get clicks color with new thresholds: ≥14 green, 10-13 yellow, <10 red
+// Helper to get clicks color with thresholds: ≥13 green, 10-12 yellow, <10 red
 const getClicksColor = (clicks: number) => {
-  if (clicks >= 14) return 'text-success';
+  if (clicks >= 13) return 'text-success';
   if (clicks >= 10) return 'text-warning';
   return 'text-destructive';
 };
 
 const getClicksBg = (clicks: number) => {
-  if (clicks >= 14) return 'bg-success/20';
+  if (clicks >= 13) return 'bg-success/20';
   if (clicks >= 10) return 'bg-warning/20';
   return 'bg-destructive/20';
 };
@@ -366,14 +366,9 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
                               <br /><br />
                               <strong>Cuantos más clics puedas permitirte, más sano es tu margen.</strong>
                               <br /><br />
-                              Ejemplo: si el límite calculado es 14 clics, estás por encima del mínimo recomendado (10). 
-                              Cualquier venta dentro de esos 14 clics mejora tus resultados.
-                              <br /><br />
-                              Si el número es inferior a 10, ajusta precio, costes o CPC.
-                              <br /><br />
-                              <span className="text-success">🟢 ≥14: Buena campaña</span><br />
-                              <span className="text-warning">🟠 10-13: Límite aceptable</span><br />
-                              <span className="text-destructive">🔴 &lt;10: Campaña con riesgo</span>
+                              <span className="text-success">🟢 ≥13: Excelente — Campaña sana</span><br />
+                              <span className="text-warning">🟠 10-12: Aceptable — Funciona, pero ajustable</span><br />
+                              <span className="text-destructive">🔴 &lt;10: En riesgo — Ajusta antes de invertir</span>
                             </p>
                           </TooltipContent>
                         </Tooltip>
@@ -406,10 +401,6 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
                   <div className="data-row">
                     <span className="data-label">Gastos de Impresión</span>
                     <span className="data-value">-{results.gastosImpresion.toFixed(2)}{currencySymbol}</span>
-                  </div>
-                  <div className="data-row">
-                    <span className="data-label">ROI por venta</span>
-                    <span className="data-value">{results.roiPorVenta.toFixed(1)}x</span>
                   </div>
                   <div className="data-row">
                     <span className="data-label">Tasa conv. breakeven</span>

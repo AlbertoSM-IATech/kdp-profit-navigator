@@ -13,10 +13,10 @@ import {
 } from '@/types/kdp';
 import { calculatePrintingCost } from '@/data/printingCosts';
 
-// Helper functions - Updated click thresholds: ≥14 green, 10-13 yellow, <10 red
+// Helper functions - Updated click thresholds: ≥13 green, 10-12 yellow, <10 red
 const calculateRiskLevel = (margenPct: number, clicsMax: number): RiskLevel => {
   if (margenPct < 30 || clicsMax < 10) return 'high';
-  if (margenPct <= 40 || clicsMax < 14) return 'medium';
+  if (margenPct <= 40 || clicsMax < 13) return 'medium';
   return 'low';
 };
 
@@ -94,9 +94,6 @@ export const useKdpCalculator = () => {
     
     // Maximum profitable CPC (at 10% conversion = 10 clicks)
     const cpcMaxRentable = regalias > 0 ? regalias / 10 : 0;
-    
-    // ROI per sale
-    const roiPorVenta = cpc > 0 ? (regalias / cpc) : 0;
 
     // Maximum clicks per sale (breakeven point) = FLOOR(Regalía neta / CPC)
     const clicsMaxPorVenta = cpc > 0 && regalias > 0 ? Math.floor(regalias / cpc) : 0;
@@ -128,11 +125,11 @@ export const useKdpCalculator = () => {
       }
     }
 
-    // Diagnosis based on clicks - Updated thresholds
+    // Diagnosis based on clicks - Updated thresholds: ≥13 green, 10-12 yellow, <10 red
     let diagnostico: 'good' | 'warning' | 'bad' = 'good';
     if (clicsMaxPorVenta < 10) {
       diagnostico = 'bad';
-    } else if (clicsMaxPorVenta < 14) {
+    } else if (clicsMaxPorVenta < 13) {
       diagnostico = 'warning';
     }
 
@@ -150,7 +147,6 @@ export const useKdpCalculator = () => {
       margenAbsoluto,
       beneficioNeto,
       cpcMaxRentable,
-      roiPorVenta,
       tasaConvBreakeven,
       clicsMaxPorVenta,
       precioMinObjetivo,
@@ -200,9 +196,6 @@ export const useKdpCalculator = () => {
     
     // Maximum profitable CPC (at 10% conversion)
     const cpcMaxRentable = regalias > 0 ? regalias / 10 : 0;
-    
-    // ROI per sale
-    const roiPorVenta = cpc > 0 ? (regalias / cpc) : 0;
 
     // Maximum clicks per sale = FLOOR(Regalía neta / CPC)
     const clicsMaxPorVenta = cpc > 0 && regalias > 0 ? Math.floor(regalias / cpc) : 0;
@@ -270,11 +263,11 @@ export const useKdpCalculator = () => {
       }
     }
 
-    // Diagnosis based on margin and clicks - Updated thresholds
+    // Diagnosis based on margin and clicks - Updated thresholds: ≥13 green, 10-12 yellow, <10 red
     let diagnostico: 'good' | 'warning' | 'bad' = 'good';
     if (margenPct < 30 || clicsMaxPorVenta < 10) {
       diagnostico = 'bad';
-    } else if (margenPct <= 40 || clicsMaxPorVenta < 14) {
+    } else if (margenPct <= 40 || clicsMaxPorVenta < 13) {
       diagnostico = 'warning';
     }
 
@@ -292,7 +285,6 @@ export const useKdpCalculator = () => {
       margenAbsoluto,
       beneficioNeto,
       cpcMaxRentable,
-      roiPorVenta,
       tasaConvBreakeven,
       clicsMaxPorVenta,
       precioMinObjetivo,
@@ -321,7 +313,7 @@ export const useKdpCalculator = () => {
     const activeResults = selectedFormat === 'EBOOK' ? ebookResults : paperbackResults;
     
     if (activeResults) {
-      // Only add conditional warnings - removed the fixed "disproportionate" message
+      // Only add conditional warnings
       if (activeResults.margenPct < 25) {
         advertencias.push(`El margen real (BACOS) es < 25%.`);
         riskLevel = 'high';
@@ -368,11 +360,11 @@ export const useKdpCalculator = () => {
       let recomendacion = '';
       
       if (ebookResults.diagnostico === 'bad') {
-        recomendacion = `Solo puedes permitir ${ebookResults.clicsMaxPorVenta} clics máx. Reduce CPC o sube PVP.`;
+        recomendacion = `🔴 Solo ${ebookResults.clicsMaxPorVenta} clics máx. — Campaña en riesgo. Sube PVP, reduce CPC o busca keywords menos competidas.`;
       } else if (ebookResults.diagnostico === 'warning') {
-        recomendacion = `Clics máx. ${ebookResults.clicsMaxPorVenta} (entre 10-13). Margen ajustable.`;
+        recomendacion = `🟡 ${ebookResults.clicsMaxPorVenta} clics máx. (aceptable) — Estás en el límite. Puedes mejorar ajustando precio o buscando CPC más bajo.`;
       } else {
-        recomendacion = `Puedes permitir hasta ${ebookResults.clicsMaxPorVenta} clics por venta. Configuración saludable.`;
+        recomendacion = `🟢 ${ebookResults.clicsMaxPorVenta} clics máx. (excelente) — Campaña sana con buen margen de maniobra para escalar.`;
       }
 
       rows.push({
@@ -393,15 +385,15 @@ export const useKdpCalculator = () => {
       if (paperbackResults.diagnostico === 'bad') {
         if (paperbackResults.margenPct < 30) {
           recomendacion = paperbackResults.precioMinObjetivo 
-            ? `Subir PVP mínimo a ${paperbackResults.precioMinObjetivo.toFixed(2)}€ para alcanzar margen objetivo.`
-            : 'Aumenta el PVP para mejorar el margen.';
+            ? `🔴 Margen < 30% — Sube PVP a mín. ${paperbackResults.precioMinObjetivo.toFixed(2)}€ o reduce páginas/costes.`
+            : '🔴 Margen insuficiente — Aumenta PVP o reduce costes de impresión.';
         } else {
-          recomendacion = `Solo puedes permitir ${paperbackResults.clicsMaxPorVenta} clics máx. Reduce CPC o sube PVP.`;
+          recomendacion = `🔴 Solo ${paperbackResults.clicsMaxPorVenta} clics máx. — Campaña en riesgo. Ajusta precio, CPC o busca keywords menos competidas.`;
         }
       } else if (paperbackResults.diagnostico === 'warning') {
-        recomendacion = `Clics máx. ${paperbackResults.clicsMaxPorVenta} (entre 10-13). Considera optimizar.`;
+        recomendacion = `🟡 ${paperbackResults.clicsMaxPorVenta} clics máx. (aceptable) — Funciona, pero hay riesgo si el CPC sube. Optimiza si es posible.`;
       } else {
-        recomendacion = `Puedes permitir hasta ${paperbackResults.clicsMaxPorVenta} clics por venta. Configuración rentable.`;
+        recomendacion = `🟢 ${paperbackResults.clicsMaxPorVenta} clics máx. (excelente) — Configuración rentable para escalar campañas.`;
       }
 
       rows.push({

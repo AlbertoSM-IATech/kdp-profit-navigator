@@ -473,10 +473,6 @@ export const ReportSection = ({
                 <div class="data-label">CPC Máximo Rentable</div>
                 <div class="data-value accent">${paperbackResults.cpcMaxRentable.toFixed(2)}${currencySymbol}</div>
               </div>
-              <div class="data-item">
-                <div class="data-label">ROI por Venta</div>
-                <div class="data-value">${paperbackResults.roiPorVenta.toFixed(1)}x</div>
-              </div>
             </div>
           ` : ''}
 
@@ -516,10 +512,6 @@ export const ReportSection = ({
               <div class="data-item">
                 <div class="data-label">CPC Máximo Rentable</div>
                 <div class="data-value accent">${ebookResults.cpcMaxRentable.toFixed(2)}${currencySymbol}</div>
-              </div>
-              <div class="data-item">
-                <div class="data-label">ROI por Venta</div>
-                <div class="data-value">${ebookResults.roiPorVenta.toFixed(1)}x</div>
               </div>
             </div>
           ` : ''}

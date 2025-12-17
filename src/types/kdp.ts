@@ -39,7 +39,6 @@ export interface EbookResults {
   margenAbsoluto: number;
   beneficioNeto: number;
   cpcMaxRentable: number;
-  roiPorVenta: number;
   tasaConvBreakeven: number;
   clicsMaxPorVenta: number;
   precioMinObjetivo: number | null;
@@ -68,7 +67,6 @@ export interface PaperbackResults {
   margenAbsoluto: number;
   beneficioNeto: number;
   cpcMaxRentable: number;
-  roiPorVenta: number;
   tasaConvBreakeven: number;
   clicsMaxPorVenta: number;
   precioMinObjetivo: number | null;
