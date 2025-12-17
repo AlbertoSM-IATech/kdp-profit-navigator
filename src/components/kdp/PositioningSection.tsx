@@ -1,13 +1,17 @@
-import { PositioningResults, GlobalData } from '@/types/kdp';
+import { PositioningResults, GlobalData, EbookResults, PaperbackResults } from '@/types/kdp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Target, MousePointer, TrendingUp, AlertTriangle, CheckCircle, Euro } from 'lucide-react';
+import { Target, MousePointer, TrendingUp, AlertTriangle, CheckCircle, Euro, BarChart3 } from 'lucide-react';
+
 interface PositioningSectionProps {
   results: PositioningResults | null;
   globalData: GlobalData;
+  activeResults: EbookResults | PaperbackResults | null;
 }
+
 export const PositioningSection = ({
   results,
-  globalData
+  globalData,
+  activeResults
 }: PositioningSectionProps) => {
   const currencySymbol = globalData.marketplace === 'COM' ? '$' : '€';
   const ventasDiarias = globalData.ventasDiariasCompetencia || 0;
@@ -17,7 +21,12 @@ export const PositioningSection = ({
   const conversionRef = 0.10; // 10% conversión de referencia
   const clicsDiarios = ventasDiarias > 0 ? Math.ceil(ventasDiarias / conversionRef) : 0;
   const inversionDiaria = clicsDiarios * cpc;
-  return <Card className="animate-fade-in">
+
+  // Clics máx from base config
+  const clicsMaxBase = activeResults?.clicsMaxPorVenta || 0;
+
+  return (
+    <Card className="animate-fade-in">
       <CardHeader className="pb-4">
         <CardTitle className="section-header">
           <Target className="h-5 w-5 text-secondary" />
@@ -26,7 +35,8 @@ export const PositioningSection = ({
         <p className="text-sm text-muted-foreground">Reglas operativas con tus números.</p>
       </CardHeader>
       <CardContent>
-        {results ? <div className="space-y-6">
+        {results ? (
+          <div className="space-y-6">
             {/* Métricas clave */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Tasa de Conversión Referencia */}
@@ -74,16 +84,16 @@ export const PositioningSection = ({
               </h4>
               
               <div className="space-y-4 text-sm leading-relaxed text-primary-foreground">
-                <p className="text-zinc-500">
+                <p className="text-zinc-500 dark:text-zinc-400">
                   Si quieres competir con los mejores autores de tu nicho y tener presencia en primeras posiciones, 
                   necesitarás vender una media de <span className="text-primary font-extrabold">{ventasDiarias} copias/día</span>.
                 </p>
                 
-                <p className="text-zinc-500">
-                  Si estás empezando y no tienes canales propios de venta (p. ej., lista de email, comunidad en RRSS, acuerdos con influencers o tráfico orgánico), deberas asumir el 100% del posicionamiento vía Ads hasta rankear orgánicamente.
+                <p className="text-zinc-500 dark:text-zinc-400">
+                  Si estás empezando y no tienes canales propios de venta (p. ej., lista de email, comunidad en RRSS, acuerdos con influencers o tráfico orgánico), deberás asumir el 100% del posicionamiento vía Ads hasta rankear orgánicamente.
                 </p>
                 
-                <p className="text-zinc-500">
+                <p className="text-zinc-500 dark:text-zinc-400">
                   Con una conversión mínima del 10%, tendrás que generar <span className="text-primary font-extrabold">{clicsDiarios} clics/día</span>, 
                   lo que implica una inversión aproximada de <span className="text-primary font-extrabold">{inversionDiaria.toFixed(2)}{currencySymbol}</span>.
                 </p>
@@ -94,33 +104,63 @@ export const PositioningSection = ({
               </div>
             </div>
 
+            {/* Nuevo bloque: Referencia de breakeven publicitario */}
+            {activeResults && clicsMaxBase > 0 && (
+              <div className="bg-muted/50 rounded-xl p-6 border border-border">
+                <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4 text-primary" />
+                  📊 Referencia de breakeven publicitario
+                </h4>
+                
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Para mantenerte en breakeven con este libro, necesitarás conseguir 
+                  <span className="font-bold text-primary"> 1 pedido por cada {clicsMaxBase} clics</span>.
+                </p>
+                
+                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+                  Esto significa que, si superas ese número de clics por venta, empezarás a perder 
+                  dinero en Ads; si vendes en menos clics, el margen mejora.
+                </p>
+              </div>
+            )}
+
             {/* Advertencias - Solo condicionales */}
-            {results.advertencias.length > 0 && <div className="space-y-3">
+            {results.advertencias.length > 0 && (
+              <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4 text-warning" />
                   Advertencias
                 </h4>
                 <p className="text-xs text-muted-foreground">Avisos solo si aplican (sin ruido).</p>
                 <div className="space-y-2">
-                  {results.advertencias.map((adv, idx) => <div key={idx} className="flex items-start gap-3 p-3 bg-warning/10 border border-warning/30 rounded-lg">
+                  {results.advertencias.map((adv, idx) => (
+                    <div key={idx} className="flex items-start gap-3 p-3 bg-warning/10 border border-warning/30 rounded-lg">
                       <AlertTriangle className="h-4 w-4 text-warning mt-0.5 shrink-0" />
                       <p className="text-sm text-foreground">{adv}</p>
-                    </div>)}
+                    </div>
+                  ))}
                 </div>
-              </div>}
+              </div>
+            )}
 
             {/* Show success message only if no warnings */}
-            {results.advertencias.length === 0 && <div className="flex items-start gap-3 p-3 bg-success/10 border border-success/30 rounded-lg">
+            {results.advertencias.length === 0 && (
+              <div className="flex items-start gap-3 p-3 bg-success/10 border border-success/30 rounded-lg">
                 <CheckCircle className="h-4 w-4 text-success mt-0.5 shrink-0" />
                 <p className="text-sm text-foreground">
                   Los ratios de conversión y la inversión estimada están dentro de parámetros aceptables.
                 </p>
-              </div>}
-          </div> : <div className="flex items-center justify-center h-32 bg-muted/30 rounded-lg">
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center justify-center h-32 bg-muted/30 rounded-lg">
             <p className="text-sm text-muted-foreground">
               Completa los datos globales para ver análisis de posicionamiento
             </p>
-          </div>}
+          </div>
+        )}
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };

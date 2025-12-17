@@ -30,9 +30,9 @@ export const ResultsTable = ({ data, globalData }: ResultsTableProps) => {
     return 'bg-success/20 text-success font-semibold';
   };
 
-  // Updated clicks thresholds: ≥14 green, 10-13 yellow, <10 red
+  // Updated clicks thresholds: ≥13 green, 10-12 yellow, <10 red
   const getClicksClass = (clicks: number) => {
-    if (clicks >= 14) return 'bg-success/20 text-success font-semibold';
+    if (clicks >= 13) return 'bg-success/20 text-success font-semibold';
     if (clicks >= 10) return 'bg-warning/20 text-warning font-semibold';
     return 'bg-destructive/20 text-destructive font-semibold';
   };
@@ -42,19 +42,19 @@ export const ResultsTable = ({ data, globalData }: ResultsTableProps) => {
       case 'good':
         return (
           <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-success/15 text-success border border-success/30">
-            🟢 Óptimo
+            🟢 Excelente
           </span>
         );
       case 'warning':
         return (
           <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-warning/15 text-warning border border-warning/30">
-            🟠 Ajustar
+            🟠 Aceptable
           </span>
         );
       case 'bad':
         return (
           <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-destructive/15 text-destructive border border-destructive/30">
-            🔴 Riesgo
+            🔴 En riesgo
           </span>
         );
     }
@@ -152,15 +152,15 @@ export const ResultsTable = ({ data, globalData }: ResultsTableProps) => {
         <div className="mt-4 flex flex-wrap gap-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-success"></span>
-            <span>Margen &gt; 40% / ≥14 clics máx.</span>
+            <span>Margen &gt; 40% / ≥13 clics — Excelente</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-warning"></span>
-            <span>Margen 30-40% / 10-13 clics</span>
+            <span>Margen 30-40% / 10-12 clics — Aceptable</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-destructive"></span>
-            <span>Margen &lt; 30% / &lt;10 clics</span>
+            <span>Margen &lt; 30% / &lt;10 clics — En riesgo</span>
           </div>
         </div>
       </CardContent>
