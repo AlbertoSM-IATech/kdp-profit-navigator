@@ -8,7 +8,6 @@ import { ReportSection } from '@/components/kdp/ReportSection';
 import { PaperbackSimulator } from '@/components/kdp/PaperbackSimulator';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Calculator } from 'lucide-react';
-
 const Index = () => {
   const {
     globalData,
@@ -22,14 +21,11 @@ const Index = () => {
     positioningResults,
     tableData
   } = useKdpCalculator();
-
   const showPhysicalFormat = globalData.selectedFormat === 'PAPERBACK' || globalData.selectedFormat === 'HARDCOVER';
-  
+
   // Get active results for positioning section
   const activeResults = globalData.selectedFormat === 'EBOOK' ? ebookResults : paperbackResults;
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="container py-4">
@@ -39,9 +35,7 @@ const Index = () => {
                 <Calculator className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-xl font-heading font-bold text-foreground">
-                  Calculadora de Viabilidad                  
-                </h1>
+                <h1 className="text-xl font-heading font-bold text-foreground">Calculadora de Viabilidad / Optimización</h1>
                 <p className="text-sm text-muted-foreground">
                   Análisis profesional de rentabilidad para publishers
                 </p>
@@ -58,43 +52,21 @@ const Index = () => {
         <GlobalDataSection data={globalData} onChange={setGlobalData} />
 
         {/* Step 2: Format-specific Section */}
-        {globalData.selectedFormat === 'EBOOK' && globalData.marketplace && (
-          <EbookSection data={ebookData} results={ebookResults} globalData={globalData} onChange={setEbookData} />
-        )}
+        {globalData.selectedFormat === 'EBOOK' && globalData.marketplace && <EbookSection data={ebookData} results={ebookResults} globalData={globalData} onChange={setEbookData} />}
 
-        {showPhysicalFormat && globalData.marketplace && (
-          <>
+        {showPhysicalFormat && globalData.marketplace && <>
             <PaperbackSection data={paperbackData} results={paperbackResults} globalData={globalData} onChange={setPaperbackData} />
-            {paperbackResults && (
-              <PaperbackSimulator data={paperbackData} globalData={globalData} />
-            )}
-          </>
-        )}
+            {paperbackResults && <PaperbackSimulator data={paperbackData} globalData={globalData} />}
+          </>}
 
         {/* Step 3: Positioning Analysis */}
-        {globalData.selectedFormat && globalData.marketplace && (
-          <PositioningSection 
-            results={positioningResults} 
-            globalData={globalData} 
-            activeResults={activeResults}
-          />
-        )}
+        {globalData.selectedFormat && globalData.marketplace && <PositioningSection results={positioningResults} globalData={globalData} activeResults={activeResults} />}
 
         {/* Step 4: Results Summary */}
-        {globalData.selectedFormat && tableData.length > 0 && (
-          <ResultsTable data={tableData} globalData={globalData} />
-        )}
+        {globalData.selectedFormat && tableData.length > 0 && <ResultsTable data={tableData} globalData={globalData} />}
 
         {/* Step 5: Final Report */}
-        <ReportSection 
-          globalData={globalData} 
-          ebookData={ebookData} 
-          ebookResults={ebookResults} 
-          paperbackData={paperbackData} 
-          paperbackResults={paperbackResults} 
-          positioningResults={positioningResults} 
-          tableData={tableData} 
-        />
+        <ReportSection globalData={globalData} ebookData={ebookData} ebookResults={ebookResults} paperbackData={paperbackData} paperbackResults={paperbackResults} positioningResults={positioningResults} tableData={tableData} />
       </main>
 
       {/* Footer */}
@@ -105,8 +77,6 @@ const Index = () => {
           </p>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
