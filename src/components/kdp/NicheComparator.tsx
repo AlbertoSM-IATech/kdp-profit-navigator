@@ -137,7 +137,7 @@ export const NicheComparator = ({
       return [
         n.name,
         config?.name || 'N/A',
-        n.globalData.selectedFormat || 'N/A',
+        n.globalData.selectedFormat === 'EBOOK' ? 'eBook' : 'Formato impreso',
         n.pvp.toFixed(2),
         n.globalData.cpc?.toFixed(2) || '0',
         n.globalData.ventasDiariasCompetencia || '0',
@@ -360,7 +360,7 @@ export const NicheComparator = ({
                             {config?.name || 'N/A'}
                           </TableCell>
                           <TableCell className="text-muted-foreground">
-                            {niche.globalData.selectedFormat || 'N/A'}
+                            {niche.globalData.selectedFormat === 'EBOOK' ? 'eBook' : 'Formato impreso'}
                           </TableCell>
                           <TableCell className="text-right">
                             {niche.pvp.toFixed(2)}{config?.currencySymbol || '€'}

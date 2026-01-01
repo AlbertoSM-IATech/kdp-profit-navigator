@@ -52,7 +52,6 @@ const getClicksBg = (clicks: number) => {
 export const PaperbackSection = ({ data, results, globalData, onChange }: PaperbackSectionProps) => {
   const config = globalData.marketplace ? MARKETPLACE_CONFIGS[globalData.marketplace] : null;
   const currencySymbol = config?.currencySymbol || '€';
-  const isHardcover = globalData.selectedFormat === 'HARDCOVER';
   const showIvaSelector = globalData.marketplace === 'ES';
   
   // Calculate printing cost for display
@@ -117,7 +116,7 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
       <CardHeader className="pb-4">
         <CardTitle className="section-header">
           <Book className="h-5 w-5 text-primary" />
-          {isHardcover ? '📗 Hardcover' : '📕 Paperback'} — Configuración
+          📚 Formato impreso — Configuración
         </CardTitle>
         <p className="text-sm text-muted-foreground">Datos del libro físico.</p>
       </CardHeader>
