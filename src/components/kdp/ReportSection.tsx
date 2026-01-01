@@ -7,6 +7,7 @@ import {
   PaperbackResults,
   PositioningResults,
   TableRow,
+  ScoreBreakdown,
   MARKETPLACE_CONFIGS,
 } from '@/types/kdp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +23,7 @@ interface ReportSectionProps {
   paperbackResults: PaperbackResults | null;
   positioningResults: PositioningResults | null;
   tableData: TableRow[];
+  scoreBreakdown: ScoreBreakdown | null;
 }
 
 const interiorLabels: Record<string, string> = {
@@ -42,6 +44,14 @@ const getClicksStatus = (clicks: number) => {
   return { emoji: '🔴', text: 'En riesgo', color: '#EF4444' };
 };
 
+// Score status for PDF
+const getScoreStatus = (score: number) => {
+  if (score >= 80) return { emoji: '🟢', text: 'Muy sano para Ads', color: '#22C55E' };
+  if (score >= 60) return { emoji: '🟡', text: 'Viable con control', color: '#EAB308' };
+  if (score >= 40) return { emoji: '🟠', text: 'Riesgo medio-alto', color: '#F97316' };
+  return { emoji: '🔴', text: 'No recomendable para Ads', color: '#EF4444' };
+};
+
 export const ReportSection = ({
   globalData,
   ebookData,
@@ -50,6 +60,7 @@ export const ReportSection = ({
   paperbackResults,
   positioningResults,
   tableData,
+  scoreBreakdown,
 }: ReportSectionProps) => {
   const reportRef = useRef<HTMLDivElement>(null);
   const config = globalData.marketplace ? MARKETPLACE_CONFIGS[globalData.marketplace] : null;

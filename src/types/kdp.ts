@@ -97,6 +97,48 @@ export interface TableRow {
   recomendacion: string;
 }
 
+// ============================================
+// SCORING SYSTEM (0-100)
+// ============================================
+
+export interface ScoreBreakdown {
+  clicsScore: number;         // Max 30 pts
+  margenScore: number;        // Max 25 pts
+  bacosScore: number;         // Max 20 pts
+  inversionScore: number;     // Max 15 pts
+  pvpVsMinScore: number;      // Max 10 pts
+  totalScore: number;         // Sum 0-100
+  status: 'excellent' | 'viable' | 'risky' | 'not-recommended';
+  statusLabel: string;
+  statusEmoji: string;
+  statusColor: string;
+}
+
+// ============================================
+// NICHE COMPARATOR
+// ============================================
+
+export interface SavedNiche {
+  id: string;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+  // Data snapshot
+  globalData: GlobalData;
+  ebookData: EbookData | null;
+  paperbackData: PaperbackData | null;
+  // Results snapshot
+  clicsMaxPorVenta: number;
+  margenPct: number;
+  bacos: number;
+  inversionDiaria: number;
+  pvp: number;
+  precioMinRecomendado: number | null;
+  regalias: number;
+  // Score
+  scoreBreakdown: ScoreBreakdown;
+}
+
 // Helper types for currency and market-specific settings
 export interface MarketplaceConfig {
   code: Marketplace;
