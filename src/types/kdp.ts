@@ -6,7 +6,7 @@ export type InteriorType = 'BN' | 'COLOR_PREMIUM' | 'COLOR_STANDARD';
 
 export type BookSize = 'SMALL' | 'LARGE';
 
-export type FormatType = 'EBOOK' | 'PAPERBACK' | 'HARDCOVER';
+export type FormatType = 'EBOOK' | 'PAPERBACK';
 
 export type IvaType = 4 | 21;
 
@@ -87,7 +87,7 @@ export interface PositioningResults {
 }
 
 export interface TableRow {
-  tipo: 'eBook' | 'Paperback' | 'Hardcover';
+  tipo: 'eBook' | 'Formato impreso';
   pvp: number;
   regalias: number;
   margen: number;

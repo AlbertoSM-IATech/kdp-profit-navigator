@@ -379,7 +379,7 @@ export const useKdpCalculator = () => {
       });
     }
 
-    if ((selectedFormat === 'PAPERBACK' || selectedFormat === 'HARDCOVER') && paperbackResults && paperbackData.pvp) {
+    if (selectedFormat === 'PAPERBACK' && paperbackResults && paperbackData.pvp) {
       let recomendacion = '';
       
       if (paperbackResults.diagnostico === 'bad') {
@@ -397,7 +397,7 @@ export const useKdpCalculator = () => {
       }
 
       rows.push({
-        tipo: selectedFormat === 'HARDCOVER' ? 'Hardcover' : 'Paperback',
+        tipo: 'Formato impreso',
         pvp: paperbackData.pvp,
         regalias: paperbackResults.regalias,
         margen: paperbackResults.margenPct,

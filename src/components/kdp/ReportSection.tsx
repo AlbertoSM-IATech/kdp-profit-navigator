@@ -67,7 +67,7 @@ export const ReportSection = ({
   const currencySymbol = config?.currencySymbol || '€';
 
   const showEbook = globalData.selectedFormat === 'EBOOK' && ebookResults;
-  const showPaperback = (globalData.selectedFormat === 'PAPERBACK' || globalData.selectedFormat === 'HARDCOVER') && paperbackResults;
+  const showPaperback = globalData.selectedFormat === 'PAPERBACK' && paperbackResults;
   const hasData = showEbook || showPaperback;
 
   const getViabilityStatus = () => {
@@ -102,17 +102,17 @@ export const ReportSection = ({
       }
     }
 
-    if (showPaperback && paperbackResults) {
-      if (paperbackResults.clicsMaxPorVenta < 10) {
-        risks.push(`Paperback: Solo puedes permitir ${paperbackResults.clicsMaxPorVenta} clics por venta (campaña en riesgo).`);
+      if (showPaperback && paperbackResults) {
+        if (paperbackResults.clicsMaxPorVenta < 10) {
+          risks.push(`Formato impreso: Solo puedes permitir ${paperbackResults.clicsMaxPorVenta} clics por venta (campaña en riesgo).`);
+        }
+        if (paperbackResults.margenPct < 30) {
+          risks.push(`Formato impreso: Margen del ${paperbackResults.margenPct.toFixed(1)}% está por debajo del 30% recomendado.`);
+        }
+        if (paperbackResults.regalias < 0) {
+          risks.push('Formato impreso: Las regalías son negativas.');
+        }
       }
-      if (paperbackResults.margenPct < 30) {
-        risks.push(`Paperback: Margen del ${paperbackResults.margenPct.toFixed(1)}% está por debajo del 30% recomendado.`);
-      }
-      if (paperbackResults.regalias < 0) {
-        risks.push('Paperback: Las regalías son negativas.');
-      }
-    }
 
     if (positioningResults?.advertencias) {
       risks.push(...positioningResults.advertencias);
@@ -319,7 +319,7 @@ export const ReportSection = ({
         <!-- PÁGINA 1: RESUMEN EJECUTIVO -->
         <h1>📊 Análisis de Viabilidad KDP</h1>
         <p class="subtitle">
-          Formato: ${globalData.selectedFormat} — Marketplace: ${config?.name || 'N/A'} — 
+          Formato: ${globalData.selectedFormat === 'EBOOK' ? 'eBook' : 'Formato impreso'} — Marketplace: ${config?.name || 'N/A'} — 
           Fecha: ${new Date().toLocaleDateString('es-ES')}
         </p>
         
@@ -398,7 +398,7 @@ export const ReportSection = ({
           </div>
 
           ${showPaperback ? `
-            <h3>Datos del Libro (${globalData.selectedFormat})</h3>
+            <h3>Datos del Libro (Formato impreso)</h3>
             <div class="data-grid">
               <div class="data-item">
                 <div class="data-label">Tipo de Impresión</div>

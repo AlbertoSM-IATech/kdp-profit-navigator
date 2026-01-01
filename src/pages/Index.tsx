@@ -27,7 +27,7 @@ const Index = () => {
     tableData
   } = useKdpCalculator();
 
-  const showPhysicalFormat = globalData.selectedFormat === 'PAPERBACK' || globalData.selectedFormat === 'HARDCOVER';
+  const showPhysicalFormat = globalData.selectedFormat === 'PAPERBACK';
   const activeResults = globalData.selectedFormat === 'EBOOK' ? ebookResults : paperbackResults;
   
   // Calculate investment

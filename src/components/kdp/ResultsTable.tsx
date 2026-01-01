@@ -143,7 +143,7 @@ export const ResultsTable = ({ data, globalData }: ResultsTableProps) => {
         ) : (
           <div className="flex items-center justify-center h-32 bg-muted/30 rounded-lg">
             <p className="text-sm text-muted-foreground">
-              Completa los datos de eBook y/o Paperback para ver la tabla comparativa
+              Completa los datos del formato seleccionado para ver la tabla comparativa
             </p>
           </div>
         )}

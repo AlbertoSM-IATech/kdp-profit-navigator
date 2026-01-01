@@ -15,7 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Globe, Target, MousePointer, TrendingUp, AlertTriangle, BookOpen, Book, BookMarked, HelpCircle } from 'lucide-react';
+import { Globe, Target, MousePointer, TrendingUp, AlertTriangle, BookOpen, Book, HelpCircle } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface GlobalDataSectionProps {
@@ -78,17 +78,7 @@ export const GlobalDataSection = ({ data, onChange }: GlobalDataSectionProps) =>
                 className="flex items-center gap-2 cursor-pointer font-medium"
               >
                 <Book className="h-4 w-4 text-primary" />
-                📕 Paperback
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="HARDCOVER" id="format-hardcover" className="border-success data-[state=checked]:bg-success data-[state=checked]:border-success" />
-              <Label 
-                htmlFor="format-hardcover" 
-                className="flex items-center gap-2 cursor-pointer font-medium"
-              >
-                <BookMarked className="h-4 w-4 text-success" />
-                📗 Hardcover
+                📚 Formato impreso
               </Label>
             </div>
           </RadioGroup>
