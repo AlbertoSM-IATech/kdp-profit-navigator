@@ -172,11 +172,10 @@ export const PaperbackSimulator = ({ data, globalData }: PaperbackSimulatorProps
       <CardHeader className="pb-4">
         <CardTitle className="section-header">
           <SlidersHorizontal className="h-5 w-5 text-secondary" />
-          Simulador
+          Simulador de optimización
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Usa el simulador para probar ajustes y ver el impacto en tiempo real. 
-          <strong className="text-foreground"> No modifica tus datos base</strong>: es un sandbox para decidir.
+          Usa este simulador para probar ajustes de precio, CPC o margen sin modificar tus datos reales.
         </p>
       </CardHeader>
       <CardContent>
