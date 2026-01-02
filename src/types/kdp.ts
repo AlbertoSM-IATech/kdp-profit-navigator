@@ -98,16 +98,16 @@ export interface TableRow {
 }
 
 // ============================================
-// SCORING SYSTEM (0-100)
+// SCORING SYSTEM (0-100) - v4
+// Clics máx./Venta es el criterio dominante
 // ============================================
 
 export interface ScoreBreakdown {
-  clicsScore: number;         // Max 30 pts
-  margenScore: number;        // Max 25 pts
-  bacosScore: number;         // Max 20 pts
-  inversionScore: number;     // Max 15 pts
-  pvpVsMinScore: number;      // Max 10 pts
+  clicsScore: number;         // Max 50 pts (CRITICAL)
+  bacosScore: number;         // Max 30 pts
+  pvpVsMinScore: number;      // Max 20 pts
   totalScore: number;         // Sum 0-100
+  clicsCapped: boolean;       // True if <10 clics cap applied
   status: 'excellent' | 'viable' | 'risky' | 'not-recommended';
   statusLabel: string;
   statusEmoji: string;
@@ -118,18 +118,17 @@ export interface ScoreBreakdown {
 // NICHE COMPARATOR
 // ============================================
 
-export interface SavedNiche {
+// Niche Version for history tracking
+export interface NicheVersion {
   id: string;
-  name: string;
   createdAt: Date;
-  updatedAt: Date;
+  note?: string;
   // Data snapshot
   globalData: GlobalData;
   ebookData: EbookData | null;
   paperbackData: PaperbackData | null;
   // Results snapshot
   clicsMaxPorVenta: number;
-  margenPct: number;
   bacos: number;
   inversionDiaria: number;
   pvp: number;
@@ -137,6 +136,28 @@ export interface SavedNiche {
   regalias: number;
   // Score
   scoreBreakdown: ScoreBreakdown;
+}
+
+export interface SavedNiche {
+  id: string;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+  // Current version data
+  globalData: GlobalData;
+  ebookData: EbookData | null;
+  paperbackData: PaperbackData | null;
+  // Results snapshot
+  clicsMaxPorVenta: number;
+  bacos: number;
+  inversionDiaria: number;
+  pvp: number;
+  precioMinRecomendado: number | null;
+  regalias: number;
+  // Score
+  scoreBreakdown: ScoreBreakdown;
+  // Version history
+  versions: NicheVersion[];
 }
 
 // Helper types for currency and market-specific settings

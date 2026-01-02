@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { SavedNiche, MARKETPLACE_CONFIGS } from '@/types/kdp';
+import { useState, useEffect } from 'react';
+import { SavedNiche, NicheVersion, GlobalData, EbookData, PaperbackData, MARKETPLACE_CONFIGS } from '@/types/kdp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   Table, 
   TableBody, 
@@ -19,7 +20,14 @@ import {
   ArrowUpDown, 
   Star,
   Filter,
-  X
+  X,
+  Upload,
+  History,
+  RotateCcw,
+  ChevronDown,
+  ChevronRight,
+  Save,
+  Eye
 } from 'lucide-react';
 import { 
   Select, 
@@ -37,18 +45,31 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { toast } from 'sonner';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface NicheComparatorProps {
   niches: SavedNiche[];
   onSaveNiche: (name: string) => void;
   onDeleteNiche: (id: string) => void;
   onClearAll: () => void;
+  onLoadNiche: (niche: SavedNiche) => void;
+  onUpdateNicheVersion: (
+    nicheId: string,
+    note?: string
+  ) => void;
+  onRestoreVersion: (nicheId: string, versionId: string) => void;
   bestNiche: SavedNiche | null;
   hasCurrentData: boolean;
+  loadedNicheId: string | null;
 }
 
-type SortField = 'name' | 'score' | 'clics' | 'margen' | 'inversion';
+type SortField = 'name' | 'score' | 'clics' | 'bacos' | 'inversion';
 type SortDirection = 'asc' | 'desc';
 type FilterType = 'all' | 'viable' | 'score70';
 
@@ -57,14 +78,23 @@ export const NicheComparator = ({
   onSaveNiche,
   onDeleteNiche,
   onClearAll,
+  onLoadNiche,
+  onUpdateNicheVersion,
+  onRestoreVersion,
   bestNiche,
   hasCurrentData,
+  loadedNicheId,
 }: NicheComparatorProps) => {
   const [newNicheName, setNewNicheName] = useState('');
+  const [versionNote, setVersionNote] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false);
+  const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
+  const [selectedNicheForHistory, setSelectedNicheForHistory] = useState<SavedNiche | null>(null);
   const [sortField, setSortField] = useState<SortField>('score');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [filter, setFilter] = useState<FilterType>('all');
+  const [expandedNiches, setExpandedNiches] = useState<Set<string>>(new Set());
 
   const handleSave = () => {
     if (!newNicheName.trim()) {
@@ -77,6 +107,15 @@ export const NicheComparator = ({
     toast.success('Nicho guardado correctamente');
   };
 
+  const handleSaveVersion = () => {
+    if (loadedNicheId) {
+      onUpdateNicheVersion(loadedNicheId, versionNote.trim() || undefined);
+      setVersionNote('');
+      setIsVersionDialogOpen(false);
+      toast.success('Nueva versión guardada');
+    }
+  };
+
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
@@ -84,6 +123,23 @@ export const NicheComparator = ({
       setSortField(field);
       setSortDirection('desc');
     }
+  };
+
+  const toggleExpand = (id: string) => {
+    setExpandedNiches(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const openHistoryDialog = (niche: SavedNiche) => {
+    setSelectedNicheForHistory(niche);
+    setIsHistoryDialogOpen(true);
   };
 
   const filteredNiches = niches.filter(n => {
@@ -109,9 +165,9 @@ export const NicheComparator = ({
         aVal = a.clicsMaxPorVenta;
         bVal = b.clicsMaxPorVenta;
         break;
-      case 'margen':
-        aVal = a.margenPct;
-        bVal = b.margenPct;
+      case 'bacos':
+        aVal = a.bacos;
+        bVal = b.bacos;
         break;
       case 'inversion':
         aVal = a.inversionDiaria;
@@ -131,7 +187,7 @@ export const NicheComparator = ({
       return;
     }
 
-    const headers = ['Nombre', 'Marketplace', 'Formato', 'PVP', 'CPC', 'Ventas/día', 'Clics máx.', 'Margen', 'BACOS', 'Inversión', 'Score', 'Estado'];
+    const headers = ['Nombre', 'Marketplace', 'Formato', 'PVP', 'CPC', 'Ventas/día', 'Clics máx.', 'BACOS', 'Inversión', 'Score', 'Estado'];
     const rows = niches.map(n => {
       const config = n.globalData.marketplace ? MARKETPLACE_CONFIGS[n.globalData.marketplace] : null;
       return [
@@ -142,7 +198,6 @@ export const NicheComparator = ({
         n.globalData.cpc?.toFixed(2) || '0',
         n.globalData.ventasDiariasCompetencia || '0',
         n.clicsMaxPorVenta,
-        n.margenPct.toFixed(1) + '%',
         n.bacos.toFixed(1) + '%',
         n.inversionDiaria.toFixed(2),
         n.scoreBreakdown.totalScore,
@@ -163,8 +218,7 @@ export const NicheComparator = ({
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-success';
-    if (score >= 60) return 'text-warning';
-    if (score >= 40) return 'text-orange-500';
+    if (score >= 50) return 'text-warning';
     return 'text-destructive';
   };
 
@@ -183,6 +237,7 @@ export const NicheComparator = ({
             Comparador de Nichos
           </CardTitle>
           <div className="flex gap-2 flex-wrap">
+            {/* Save as New Niche */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button size="sm" disabled={!hasCurrentData}>
@@ -211,6 +266,38 @@ export const NicheComparator = ({
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+
+            {/* Save Version (if a niche is loaded) */}
+            {loadedNicheId && (
+              <Dialog open={isVersionDialogOpen} onOpenChange={setIsVersionDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" variant="secondary" disabled={!hasCurrentData}>
+                    <Save className="h-4 w-4 mr-2" />
+                    Guardar versión
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Guardar nueva versión</DialogTitle>
+                    <DialogDescription>
+                      Guarda los cambios actuales como nueva versión del nicho cargado.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Textarea
+                    placeholder="Nota opcional (ej: 'Probado con PVP más alto')"
+                    value={versionNote}
+                    onChange={(e) => setVersionNote(e.target.value)}
+                    rows={3}
+                  />
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsVersionDialogOpen(false)}>
+                      Cancelar
+                    </Button>
+                    <Button onClick={handleSaveVersion}>Guardar versión</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
             
             {niches.length > 0 && (
               <>
@@ -229,6 +316,13 @@ export const NicheComparator = ({
         <p className="text-sm text-muted-foreground">
           Guarda y compara diferentes escenarios para decidir en qué nicho empezar.
         </p>
+        {loadedNicheId && (
+          <div className="mt-2 p-2 bg-primary/10 border border-primary/30 rounded-lg text-sm">
+            <span className="text-primary font-medium">
+              📝 Editando: {niches.find(n => n.id === loadedNicheId)?.name}
+            </span>
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         {niches.length === 0 ? (
@@ -287,6 +381,7 @@ export const NicheComparator = ({
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">
+                      <TableHead className="w-8"></TableHead>
                       <TableHead 
                         className="cursor-pointer hover:bg-muted/70"
                         onClick={() => handleSort('name')}
@@ -299,7 +394,6 @@ export const NicheComparator = ({
                       <TableHead>Marketplace</TableHead>
                       <TableHead>Formato</TableHead>
                       <TableHead className="text-right">PVP</TableHead>
-                      <TableHead className="text-right">CPC</TableHead>
                       <TableHead 
                         className="text-right cursor-pointer hover:bg-muted/70"
                         onClick={() => handleSort('clics')}
@@ -311,19 +405,10 @@ export const NicheComparator = ({
                       </TableHead>
                       <TableHead 
                         className="text-right cursor-pointer hover:bg-muted/70"
-                        onClick={() => handleSort('margen')}
+                        onClick={() => handleSort('bacos')}
                       >
                         <span className="flex items-center justify-end gap-1">
-                          Margen
-                          <ArrowUpDown className="h-3 w-3" />
-                        </span>
-                      </TableHead>
-                      <TableHead 
-                        className="text-right cursor-pointer hover:bg-muted/70"
-                        onClick={() => handleSort('inversion')}
-                      >
-                        <span className="flex items-center justify-end gap-1">
-                          Inversión/día
+                          BACOS
                           <ArrowUpDown className="h-3 w-3" />
                         </span>
                       </TableHead>
@@ -337,23 +422,46 @@ export const NicheComparator = ({
                         </span>
                       </TableHead>
                       <TableHead className="text-center">Estado</TableHead>
-                      <TableHead></TableHead>
+                      <TableHead className="text-right">Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {sortedNiches.map((niche) => {
                       const config = niche.globalData.marketplace ? MARKETPLACE_CONFIGS[niche.globalData.marketplace] : null;
                       const isBest = bestNiche?.id === niche.id && niches.length > 1;
+                      const isLoaded = loadedNicheId === niche.id;
+                      const hasVersions = (niche.versions?.length || 0) > 1;
                       
                       return (
                         <TableRow 
                           key={niche.id} 
-                          className={isBest ? 'bg-success/5' : ''}
+                          className={`${isBest ? 'bg-success/5' : ''} ${isLoaded ? 'bg-primary/5 border-l-2 border-l-primary' : ''}`}
                         >
+                          <TableCell className="w-8">
+                            {hasVersions && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => toggleExpand(niche.id)}
+                                className="h-6 w-6 p-0"
+                              >
+                                {expandedNiches.has(niche.id) ? 
+                                  <ChevronDown className="h-4 w-4" /> : 
+                                  <ChevronRight className="h-4 w-4" />
+                                }
+                              </Button>
+                            )}
+                          </TableCell>
                           <TableCell className="font-medium">
                             <div className="flex items-center gap-2">
                               {isBest && <Star className="h-4 w-4 text-success" />}
+                              {isLoaded && <span className="text-primary">✏️</span>}
                               {niche.name}
+                              {hasVersions && (
+                                <span className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                                  v{niche.versions?.length || 1}
+                                </span>
+                              )}
                             </div>
                           </TableCell>
                           <TableCell className="text-muted-foreground">
@@ -365,17 +473,11 @@ export const NicheComparator = ({
                           <TableCell className="text-right">
                             {niche.pvp.toFixed(2)}{config?.currencySymbol || '€'}
                           </TableCell>
-                          <TableCell className="text-right text-muted-foreground">
-                            {niche.globalData.cpc?.toFixed(2) || '0'}{config?.currencySymbol || '€'}
-                          </TableCell>
                           <TableCell className={`text-right font-semibold ${getClicksColor(niche.clicsMaxPorVenta)}`}>
                             {niche.clicsMaxPorVenta}
                           </TableCell>
                           <TableCell className="text-right">
-                            {niche.margenPct.toFixed(1)}%
-                          </TableCell>
-                          <TableCell className="text-right text-muted-foreground">
-                            {niche.inversionDiaria.toFixed(2)}{config?.currencySymbol || '€'}
+                            {niche.bacos.toFixed(1)}%
                           </TableCell>
                           <TableCell className="text-center">
                             <span className={`font-bold ${getScoreColor(niche.scoreBreakdown.totalScore)}`}>
@@ -388,14 +490,37 @@ export const NicheComparator = ({
                             </span>
                           </TableCell>
                           <TableCell>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => onDeleteNiche(niche.id)}
-                              className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <div className="flex items-center justify-end gap-1">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => onLoadNiche(niche)}
+                                className="h-8 w-8 p-0 text-muted-foreground hover:text-primary"
+                                title="Cargar para editar"
+                              >
+                                <Upload className="h-4 w-4" />
+                              </Button>
+                              {hasVersions && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => openHistoryDialog(niche)}
+                                  className="h-8 w-8 p-0 text-muted-foreground hover:text-secondary"
+                                  title="Ver historial"
+                                >
+                                  <History className="h-4 w-4" />
+                                </Button>
+                              )}
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => onDeleteNiche(niche.id)}
+                                className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                                title="Eliminar"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       );
@@ -410,9 +535,116 @@ export const NicheComparator = ({
                 No hay nichos que coincidan con el filtro seleccionado.
               </div>
             )}
+
+            {/* History explanation */}
+            <div className="bg-muted/30 rounded-lg p-4 text-sm text-muted-foreground">
+              <p className="flex items-center gap-2">
+                <History className="h-4 w-4" />
+                Este historial te permite ver cómo evoluciona la viabilidad de un nicho a medida que ajustas precio, costes o mercado.
+              </p>
+            </div>
           </div>
         )}
       </CardContent>
+
+      {/* Version History Dialog */}
+      <Dialog open={isHistoryDialogOpen} onOpenChange={setIsHistoryDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="h-5 w-5" />
+              Historial de versiones: {selectedNicheForHistory?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Compara y restaura versiones anteriores de este nicho.
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="max-h-96">
+            <div className="space-y-3">
+              {selectedNicheForHistory?.versions?.map((version, index) => (
+                <div 
+                  key={version.id} 
+                  className={`p-4 rounded-lg border ${
+                    index === (selectedNicheForHistory.versions?.length || 0) - 1 
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-border bg-muted/30'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm font-medium">
+                          Versión {index + 1}
+                        </span>
+                        {index === (selectedNicheForHistory.versions?.length || 0) - 1 && (
+                          <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded">
+                            Actual
+                          </span>
+                        )}
+                        <span className="text-xs text-muted-foreground">
+                          {version.createdAt.toLocaleDateString('es-ES', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      </div>
+                      {version.note && (
+                        <p className="text-sm text-muted-foreground mb-2 italic">
+                          "{version.note}"
+                        </p>
+                      )}
+                      <div className="grid grid-cols-4 gap-3 text-sm">
+                        <div>
+                          <span className="text-muted-foreground block text-xs">Score</span>
+                          <span className={`font-bold ${getScoreColor(version.scoreBreakdown.totalScore)}`}>
+                            {version.scoreBreakdown.totalScore}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground block text-xs">Clics</span>
+                          <span className={`font-semibold ${getClicksColor(version.clicsMaxPorVenta)}`}>
+                            {version.clicsMaxPorVenta}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground block text-xs">BACOS</span>
+                          <span className="font-semibold">{version.bacos.toFixed(1)}%</span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground block text-xs">PVP</span>
+                          <span className="font-semibold">{version.pvp.toFixed(2)}€</span>
+                        </div>
+                      </div>
+                    </div>
+                    {index !== (selectedNicheForHistory.versions?.length || 0) - 1 && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          onRestoreVersion(selectedNicheForHistory.id, version.id);
+                          setIsHistoryDialogOpen(false);
+                          toast.success('Versión restaurada');
+                        }}
+                      >
+                        <RotateCcw className="h-4 w-4 mr-1" />
+                        Restaurar
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsHistoryDialogOpen(false)}>
+              Cerrar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
