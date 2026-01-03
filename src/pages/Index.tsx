@@ -107,36 +107,23 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
+      {/* Header - Compact */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
-        <div className="container py-4">
+        <div className="container py-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Calculator className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-xl font-heading font-bold text-foreground">Calculadora de Viabilidad | Optimización</h1>
-                <p className="text-sm text-muted-foreground">
-                  Análisis profesional de rentabilidad para publishers
-                </p>
-              </div>
-            </div>
             <div className="flex items-center gap-2">
+              <Calculator className="h-5 w-5 text-primary" />
+              <h1 className="text-base font-heading font-bold text-foreground">KDP Viabilidad</h1>
+            </div>
+            <div className="flex items-center gap-1">
               <Button 
-                variant="outline" 
+                variant={quickViewMode ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setQuickViewMode(!quickViewMode)}
-                className="hidden md:flex"
+                className="h-7 text-xs px-2"
               >
-                {quickViewMode ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
-                {quickViewMode ? 'Vista completa' : 'Vista rápida'}
-              </Button>
-              <Button variant="ghost" size="sm" onClick={collapseAll} className="hidden md:flex">
-                <ChevronUp className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" onClick={expandAll} className="hidden md:flex">
-                <ChevronDown className="h-4 w-4" />
+                {quickViewMode ? <EyeOff className="h-3 w-3 mr-1" /> : <Eye className="h-3 w-3 mr-1" />}
+                {quickViewMode ? 'Completa' : 'Rápida'}
               </Button>
               <ThemeToggle />
             </div>
@@ -145,32 +132,32 @@ const Index = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container py-8 space-y-6">
+      <main className="container py-4 space-y-3">
         {/* Quick View Mode */}
         {quickViewMode && hasCurrentData && scoreBreakdown && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <ScoreDisplay score={scoreBreakdown} compact={true} />
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-card rounded-lg border">
+            <div className="grid grid-cols-4 gap-2 p-3 bg-card rounded-lg border">
               <div className="text-center">
-                <span className="text-xs text-muted-foreground block">Clics máx./Venta</span>
-                <span className={`text-2xl font-bold ${activeResults?.clicsMaxPorVenta >= 13 ? 'text-success' : activeResults?.clicsMaxPorVenta >= 10 ? 'text-warning' : 'text-destructive'}`}>
+                <span className="text-[10px] text-muted-foreground block">Clics máx.</span>
+                <span className={`text-lg font-bold ${activeResults?.clicsMaxPorVenta >= 13 ? 'text-success' : activeResults?.clicsMaxPorVenta >= 10 ? 'text-warning' : 'text-destructive'}`}>
                   {activeResults?.clicsMaxPorVenta || 0}
                 </span>
               </div>
               <div className="text-center">
-                <span className="text-xs text-muted-foreground block">BACOS</span>
-                <span className="text-2xl font-bold text-primary">{activeResults?.margenPct.toFixed(1)}%</span>
+                <span className="text-[10px] text-muted-foreground block">BACOS</span>
+                <span className="text-lg font-bold text-primary">{activeResults?.margenPct.toFixed(0)}%</span>
               </div>
               <div className="text-center">
-                <span className="text-xs text-muted-foreground block">Regalía</span>
-                <span className="text-2xl font-bold">{activeResults?.regalias.toFixed(2)}€</span>
+                <span className="text-[10px] text-muted-foreground block">Regalía</span>
+                <span className="text-lg font-bold">{activeResults?.regalias.toFixed(2)}€</span>
               </div>
               <div className="text-center">
-                <span className="text-xs text-muted-foreground block">Recomendación</span>
-                <span className="text-lg font-semibold">{scoreBreakdown.statusEmoji} {scoreBreakdown.status === 'excellent' ? 'Publicar' : scoreBreakdown.status === 'viable' ? 'Ajustar' : 'Descartar'}</span>
+                <span className="text-[10px] text-muted-foreground block">Decisión</span>
+                <span className="text-sm font-semibold">{scoreBreakdown.statusEmoji}</span>
               </div>
             </div>
-            <Button variant="outline" className="w-full" onClick={() => setQuickViewMode(false)}>
+            <Button variant="outline" size="sm" className="w-full h-8" onClick={() => setQuickViewMode(false)}>
               Ver análisis completo
             </Button>
           </div>
@@ -178,7 +165,7 @@ const Index = () => {
 
         {/* Full View */}
         {!quickViewMode && (
-          <>
+          <div className="space-y-3">
             <GlobalDataSection data={globalData} onChange={setGlobalData} />
 
             {globalData.selectedFormat === 'EBOOK' && globalData.marketplace && (
@@ -186,10 +173,11 @@ const Index = () => {
             )}
 
             {showPhysicalFormat && globalData.marketplace && (
-              <>
-                <PaperbackSection data={paperbackData} results={paperbackResults} globalData={globalData} onChange={setPaperbackData} />
-                {paperbackResults && <PaperbackSimulator data={paperbackData} globalData={globalData} />}
-              </>
+              <PaperbackSection data={paperbackData} results={paperbackResults} globalData={globalData} onChange={setPaperbackData} />
+            )}
+
+            {showPhysicalFormat && globalData.marketplace && paperbackResults && (
+              <PaperbackSimulator data={paperbackData} globalData={globalData} />
             )}
 
             {globalData.selectedFormat && globalData.marketplace && activeResults && (
@@ -235,15 +223,15 @@ const Index = () => {
                 precioMinRecomendado: n.precioMinRecomendado,
               }))}
             />
-          </>
+          </div>
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-card mt-12">
-        <div className="container py-6">
-          <p className="text-center text-sm text-muted-foreground">
-            Publify — Análisis orientado a toma de decisiones editoriales © {new Date().getFullYear()}
+      {/* Footer - Minimal */}
+      <footer className="border-t border-border bg-card mt-6">
+        <div className="container py-3">
+          <p className="text-center text-xs text-muted-foreground">
+            Publify © {new Date().getFullYear()}
           </p>
         </div>
       </footer>
