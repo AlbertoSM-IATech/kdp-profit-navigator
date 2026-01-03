@@ -225,7 +225,15 @@ const Index = () => {
               paperbackResults={paperbackResults} 
               positioningResults={positioningResults} 
               tableData={tableData} 
-              scoreBreakdown={scoreBreakdown} 
+              scoreBreakdown={scoreBreakdown}
+              savedNiches={niches.map(n => ({
+                name: n.name,
+                scoreBreakdown: n.scoreBreakdown,
+                clicsMaxPorVenta: n.clicsMaxPorVenta,
+                bacos: n.bacos,
+                pvp: n.pvp,
+                precioMinRecomendado: n.precioMinRecomendado,
+              }))}
             />
           </>
         )}

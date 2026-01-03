@@ -15,6 +15,15 @@ import { Button } from '@/components/ui/button';
 import { FileText, Download, Printer, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
 import { calculatePrintingCost } from '@/data/printingCosts';
 
+interface SavedNicheForPdf {
+  name: string;
+  scoreBreakdown: ScoreBreakdown;
+  clicsMaxPorVenta: number;
+  bacos: number;
+  pvp: number;
+  precioMinRecomendado: number | null;
+}
+
 interface ReportSectionProps {
   globalData: GlobalData;
   ebookData: EbookData;
@@ -24,6 +33,7 @@ interface ReportSectionProps {
   positioningResults: PositioningResults | null;
   tableData: TableRow[];
   scoreBreakdown: ScoreBreakdown | null;
+  savedNiches?: SavedNicheForPdf[];
 }
 
 const interiorLabels: Record<string, string> = {
@@ -44,12 +54,99 @@ const getClicksStatus = (clicks: number) => {
   return { emoji: '🔴', text: 'En riesgo', color: '#EF4444' };
 };
 
-// Score status for PDF
+// Score status for PDF - Updated thresholds
 const getScoreStatus = (score: number) => {
-  if (score >= 80) return { emoji: '🟢', text: 'Muy sano para Ads', color: '#22C55E' };
-  if (score >= 60) return { emoji: '🟡', text: 'Viable con control', color: '#EAB308' };
-  if (score >= 40) return { emoji: '🟠', text: 'Riesgo medio-alto', color: '#F97316' };
-  return { emoji: '🔴', text: 'No recomendable para Ads', color: '#EF4444' };
+  if (score >= 80) return { emoji: '🟢', text: 'Nicho sano para Ads', color: '#22C55E' };
+  if (score >= 50) return { emoji: '🟡', text: 'Viable con ajustes', color: '#EAB308' };
+  return { emoji: '🔴', text: 'Riesgo alto', color: '#EF4444' };
+};
+
+// Generate SVG gauge for score (0-100)
+const generateScoreGaugeSvg = (score: number): string => {
+  const radius = 60;
+  const strokeWidth = 12;
+  const normalizedRadius = radius - strokeWidth / 2;
+  const circumference = normalizedRadius * 2 * Math.PI;
+  const progress = Math.min(score, 100) / 100;
+  const strokeDashoffset = circumference - progress * circumference;
+  
+  const getGaugeColor = (s: number) => {
+    if (s >= 80) return '#22C55E';
+    if (s >= 50) return '#EAB308';
+    return '#EF4444';
+  };
+  
+  const color = getGaugeColor(score);
+  
+  return `
+    <svg width="140" height="140" viewBox="0 0 140 140">
+      <circle
+        stroke="#E5E7EB"
+        fill="transparent"
+        stroke-width="${strokeWidth}"
+        r="${normalizedRadius}"
+        cx="70"
+        cy="70"
+        transform="rotate(-90 70 70)"
+      />
+      <circle
+        stroke="${color}"
+        fill="transparent"
+        stroke-width="${strokeWidth}"
+        stroke-dasharray="${circumference} ${circumference}"
+        stroke-dashoffset="${strokeDashoffset}"
+        stroke-linecap="round"
+        r="${normalizedRadius}"
+        cx="70"
+        cy="70"
+        transform="rotate(-90 70 70)"
+      />
+      <text x="70" y="70" text-anchor="middle" dominant-baseline="middle" font-size="28" font-weight="bold" fill="${color}">${score}</text>
+      <text x="70" y="95" text-anchor="middle" font-size="12" fill="#6B7280">/ 100</text>
+    </svg>
+  `;
+};
+
+// Generate comparison bar chart SVG
+const generateComparisonChartSvg = (
+  currentName: string,
+  currentScore: number,
+  otherNiches: { name: string; score: number }[]
+): string => {
+  const allData = [{ name: currentName + ' (actual)', score: currentScore }, ...otherNiches.slice(0, 4)];
+  const maxScore = 100;
+  const barHeight = 28;
+  const barGap = 12;
+  const chartWidth = 350;
+  const labelWidth = 120;
+  const barMaxWidth = chartWidth - labelWidth - 40;
+  const chartHeight = allData.length * (barHeight + barGap) + 20;
+  
+  const getBarColor = (s: number) => {
+    if (s >= 80) return '#22C55E';
+    if (s >= 50) return '#EAB308';
+    return '#EF4444';
+  };
+  
+  let bars = '';
+  allData.forEach((item, index) => {
+    const y = index * (barHeight + barGap) + 10;
+    const barWidth = (item.score / maxScore) * barMaxWidth;
+    const color = getBarColor(item.score);
+    const isFirst = index === 0;
+    
+    bars += `
+      <text x="0" y="${y + barHeight / 2 + 4}" font-size="11" fill="${isFirst ? '#1F1F1F' : '#6B7280'}" font-weight="${isFirst ? '600' : '400'}">${item.name.substring(0, 18)}${item.name.length > 18 ? '...' : ''}</text>
+      <rect x="${labelWidth}" y="${y}" width="${barWidth}" height="${barHeight}" rx="4" fill="${color}" opacity="${isFirst ? '1' : '0.7'}"/>
+      <text x="${labelWidth + barWidth + 8}" y="${y + barHeight / 2 + 4}" font-size="12" fill="${color}" font-weight="600">${item.score}</text>
+    `;
+  });
+  
+  return `
+    <svg width="${chartWidth}" height="${chartHeight}" viewBox="0 0 ${chartWidth} ${chartHeight}">
+      ${bars}
+    </svg>
+  `;
 };
 
 export const ReportSection = ({
@@ -61,6 +158,7 @@ export const ReportSection = ({
   positioningResults,
   tableData,
   scoreBreakdown,
+  savedNiches = [],
 }: ReportSectionProps) => {
   const reportRef = useRef<HTMLDivElement>(null);
   const config = globalData.marketplace ? MARKETPLACE_CONFIGS[globalData.marketplace] : null;
@@ -309,6 +407,30 @@ export const ReportSection = ({
           }
           .legend-item { display: flex; align-items: center; gap: 4px; }
           .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+          .score-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            margin: 20px 0;
+          }
+          .score-gauge { text-align: center; }
+          .score-info { flex: 1; }
+          .score-title { font-size: 16px; font-weight: 600; color: #374151; margin-bottom: 8px; }
+          .score-breakdown { font-size: 13px; color: #6B7280; }
+          .score-breakdown li { margin: 4px 0; }
+          .comparison-section {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+          }
+          .comparison-title { font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 12px; }
           @media print {
             body { padding: 20px; }
             .section { page-break-inside: avoid; }
@@ -323,10 +445,47 @@ export const ReportSection = ({
           Fecha: ${new Date().toLocaleDateString('es-ES')}
         </p>
         
-        <div class="viability-box">
-          <div class="viability-status">${viability.emoji} ${viability.text}</div>
-          <div class="viability-sub">${viability.subtext}</div>
-        </div>
+        <!-- SCORE GLOBAL CON GRÁFICO -->
+        ${scoreBreakdown ? `
+          <div class="score-section">
+            <div class="score-gauge">
+              ${generateScoreGaugeSvg(scoreBreakdown.totalScore)}
+              <div style="margin-top: 8px; font-size: 12px; color: ${scoreBreakdown.statusColor}; font-weight: 600;">
+                ${scoreBreakdown.statusEmoji} ${scoreBreakdown.statusLabel}
+              </div>
+            </div>
+            <div class="score-info">
+              <div class="score-title">Puntuación Global</div>
+              <ul class="score-breakdown">
+                <li><strong>Clics máx./Venta:</strong> ${scoreBreakdown.clicsScore}/50 pts ${scoreBreakdown.clicsCapped ? '⚠️ (Limitado por <10 clics)' : ''}</li>
+                <li><strong>BACOS (margen Ads):</strong> ${scoreBreakdown.bacosScore}/30 pts</li>
+                <li><strong>PVP vs Mínimo:</strong> ${scoreBreakdown.pvpVsMinScore}/20 pts</li>
+              </ul>
+              ${scoreBreakdown.clicsCapped ? `
+                <div style="margin-top: 10px; padding: 8px 12px; background: #FEF2F2; border-radius: 6px; border: 1px solid #FECACA; font-size: 12px; color: #B91C1C;">
+                  ⚠️ Score limitado a máx. 40 por tener menos de 10 clics máx./venta
+                </div>
+              ` : ''}
+            </div>
+          </div>
+          
+          <!-- GRÁFICO COMPARATIVO DE NICHOS -->
+          ${savedNiches.length > 0 ? `
+            <div class="comparison-section">
+              <div class="comparison-title">📊 Comparativa con otros nichos guardados</div>
+              ${generateComparisonChartSvg(
+                'Este nicho',
+                scoreBreakdown.totalScore,
+                savedNiches.map(n => ({ name: n.name, score: n.scoreBreakdown.totalScore }))
+              )}
+            </div>
+          ` : ''}
+        ` : `
+          <div class="viability-box">
+            <div class="viability-status">${viability.emoji} ${viability.text}</div>
+            <div class="viability-sub">${viability.subtext}</div>
+          </div>
+        `}
 
         <!-- Métricas clave -->
         <div class="data-grid">
