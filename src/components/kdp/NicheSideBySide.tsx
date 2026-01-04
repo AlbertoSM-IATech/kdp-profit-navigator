@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { SavedNiche, MARKETPLACE_CONFIGS } from '@/types/kdp';
+import { useState, useMemo } from 'react';
+import { SavedNiche, MARKETPLACE_CONFIGS, Marketplace, FormatType } from '@/types/kdp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -16,7 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Columns, ArrowRight, ArrowLeft, X } from 'lucide-react';
+import { Columns, ArrowRight, ArrowLeft, Filter } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface NicheSideBySideProps {
@@ -27,9 +27,22 @@ export const NicheSideBySide = ({ niches }: NicheSideBySideProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [leftNicheId, setLeftNicheId] = useState<string | null>(null);
   const [rightNicheId, setRightNicheId] = useState<string | null>(null);
+  
+  // Filters
+  const [marketplaceFilter, setMarketplaceFilter] = useState<Marketplace | 'ALL'>('ALL');
+  const [formatFilter, setFormatFilter] = useState<FormatType | 'ALL'>('ALL');
 
-  const leftNiche = niches.find(n => n.id === leftNicheId) || null;
-  const rightNiche = niches.find(n => n.id === rightNicheId) || null;
+  // Apply filters to niches list
+  const filteredNiches = useMemo(() => {
+    return niches.filter(n => {
+      const matchMarketplace = marketplaceFilter === 'ALL' || n.globalData.marketplace === marketplaceFilter;
+      const matchFormat = formatFilter === 'ALL' || n.globalData.selectedFormat === formatFilter;
+      return matchMarketplace && matchFormat;
+    });
+  }, [niches, marketplaceFilter, formatFilter]);
+
+  const leftNiche = filteredNiches.find(n => n.id === leftNicheId) || null;
+  const rightNiche = filteredNiches.find(n => n.id === rightNicheId) || null;
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-success';
@@ -249,6 +262,44 @@ export const NicheSideBySide = ({ niches }: NicheSideBySideProps) => {
           </DialogTitle>
         </DialogHeader>
 
+        {/* Filters */}
+        <div className="flex items-center gap-4 mb-4 p-3 bg-muted/30 rounded-lg">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          <div className="flex-1">
+            <label className="text-xs text-muted-foreground mb-1 block">Marketplace</label>
+            <Select value={marketplaceFilter} onValueChange={(v) => setMarketplaceFilter(v as Marketplace | 'ALL')}>
+              <SelectTrigger className="h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Todos</SelectItem>
+                <SelectItem value="ES">España (ES)</SelectItem>
+                <SelectItem value="COM">Estados Unidos (COM)</SelectItem>
+                <SelectItem value="DE">Alemania (DE)</SelectItem>
+                <SelectItem value="FR">Francia (FR)</SelectItem>
+                <SelectItem value="IT">Italia (IT)</SelectItem>
+                <SelectItem value="UK">Reino Unido (UK)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex-1">
+            <label className="text-xs text-muted-foreground mb-1 block">Formato</label>
+            <Select value={formatFilter} onValueChange={(v) => setFormatFilter(v as FormatType | 'ALL')}>
+              <SelectTrigger className="h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Todos</SelectItem>
+                <SelectItem value="EBOOK">eBook</SelectItem>
+                <SelectItem value="PAPERBACK">Formato impreso</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <span className="text-xs text-muted-foreground">
+            {filteredNiches.length} nichos
+          </span>
+        </div>
+
         {/* Niche Selectors */}
         <div className="flex items-center gap-4 mb-4">
           <div className="flex-1">
@@ -258,7 +309,7 @@ export const NicheSideBySide = ({ niches }: NicheSideBySideProps) => {
                 <SelectValue placeholder="Seleccionar nicho..." />
               </SelectTrigger>
               <SelectContent>
-                {niches.filter(n => n.id !== rightNicheId).map(n => (
+                {filteredNiches.filter(n => n.id !== rightNicheId).map(n => (
                   <SelectItem key={n.id} value={n.id}>
                     {n.name} ({n.scoreBreakdown.totalScore}/100)
                   </SelectItem>
@@ -285,7 +336,7 @@ export const NicheSideBySide = ({ niches }: NicheSideBySideProps) => {
                 <SelectValue placeholder="Seleccionar nicho..." />
               </SelectTrigger>
               <SelectContent>
-                {niches.filter(n => n.id !== leftNicheId).map(n => (
+                {filteredNiches.filter(n => n.id !== leftNicheId).map(n => (
                   <SelectItem key={n.id} value={n.id}>
                     {n.name} ({n.scoreBreakdown.totalScore}/100)
                   </SelectItem>

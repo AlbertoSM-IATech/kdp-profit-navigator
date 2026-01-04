@@ -1,4 +1,4 @@
-import { InteriorType, BookSize } from '@/types/kdp';
+import { InteriorType, BookSize, Marketplace } from '@/types/kdp';
 
 export interface PrintingCostTier {
   interior: InteriorType;
@@ -8,8 +8,8 @@ export interface PrintingCostTier {
   perPageCost: number;
 }
 
-// Printing cost tiers based on the exact Excel model
-export const printingCostTiers: PrintingCostTier[] = [
+// Printing cost tiers for European marketplaces (EUR)
+export const printingCostTiersEU: PrintingCostTier[] = [
   // B/N (Blanco y Negro) - Pequeño
   { interior: 'BN', size: 'SMALL', pageThreshold: 108, fixedCost: 2.05, perPageCost: 0 },
   { interior: 'BN', size: 'SMALL', pageThreshold: Infinity, fixedCost: 0.75, perPageCost: 0.012 },
@@ -35,6 +35,36 @@ export const printingCostTiers: PrintingCostTier[] = [
   { interior: 'COLOR_STANDARD', size: 'LARGE', pageThreshold: Infinity, fixedCost: 0.75, perPageCost: 0.035 },
 ];
 
+// Printing cost tiers for US marketplace (USD) - Different per-page costs
+export const printingCostTiersUS: PrintingCostTier[] = [
+  // B/N (Black & White) - Small
+  { interior: 'BN', size: 'SMALL', pageThreshold: 108, fixedCost: 2.15, perPageCost: 0 },
+  { interior: 'BN', size: 'SMALL', pageThreshold: Infinity, fixedCost: 0.85, perPageCost: 0.012 },
+  
+  // B/N (Black & White) - Large
+  { interior: 'BN', size: 'LARGE', pageThreshold: 108, fixedCost: 2.58, perPageCost: 0 },
+  { interior: 'BN', size: 'LARGE', pageThreshold: Infinity, fixedCost: 0.85, perPageCost: 0.018 },
+  
+  // Color Premium - Small
+  { interior: 'COLOR_PREMIUM', size: 'SMALL', pageThreshold: 40, fixedCost: 3.15, perPageCost: 0 },
+  { interior: 'COLOR_PREMIUM', size: 'SMALL', pageThreshold: Infinity, fixedCost: 0.85, perPageCost: 0.065 },
+  
+  // Color Premium - Large
+  { interior: 'COLOR_PREMIUM', size: 'LARGE', pageThreshold: 40, fixedCost: 3.90, perPageCost: 0 },
+  { interior: 'COLOR_PREMIUM', size: 'LARGE', pageThreshold: Infinity, fixedCost: 0.85, perPageCost: 0.085 },
+  
+  // Color Standard - Small (only >72 pages)
+  { interior: 'COLOR_STANDARD', size: 'SMALL', pageThreshold: 72, fixedCost: 0, perPageCost: 0 }, // Not valid
+  { interior: 'COLOR_STANDARD', size: 'SMALL', pageThreshold: Infinity, fixedCost: 0.85, perPageCost: 0.025 },
+  
+  // Color Standard - Large (only >72 pages)
+  { interior: 'COLOR_STANDARD', size: 'LARGE', pageThreshold: 72, fixedCost: 0, perPageCost: 0 }, // Not valid
+  { interior: 'COLOR_STANDARD', size: 'LARGE', pageThreshold: Infinity, fixedCost: 0.85, perPageCost: 0.040 },
+];
+
+// Keep legacy export for backward compatibility
+export const printingCostTiers = printingCostTiersEU;
+
 export interface PrintingCostResult {
   fixedCost: number;
   perPageCost: number;
@@ -44,13 +74,14 @@ export interface PrintingCostResult {
 }
 
 /**
- * Calculate printing costs based on interior type, size, and number of pages
- * Following the exact Excel model provided
+ * Calculate printing costs based on interior type, size, number of pages, and marketplace
+ * Uses US-specific costs for COM marketplace, EU costs for others
  */
 export const calculatePrintingCost = (
   interior: InteriorType | null,
   size: BookSize | null,
-  pages: number | null
+  pages: number | null,
+  marketplace?: Marketplace | null
 ): PrintingCostResult => {
   if (!interior || !size || pages === null || pages <= 0) {
     return { fixedCost: 0, perPageCost: 0, totalCost: 0, isValid: false };
@@ -67,8 +98,11 @@ export const calculatePrintingCost = (
     };
   }
 
+  // Select the appropriate tier list based on marketplace
+  const tierList = marketplace === 'COM' ? printingCostTiersUS : printingCostTiersEU;
+
   // Find the appropriate tier
-  const applicableTiers = printingCostTiers.filter(
+  const applicableTiers = tierList.filter(
     (tier) => tier.interior === interior && tier.size === size
   );
 
