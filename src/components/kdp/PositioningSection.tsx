@@ -35,7 +35,7 @@ export const PositioningSection = ({
             {/* Métricas clave */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Tasa de Conversión Referencia */}
-              <div className="rounded-xl p-4 border border-secondary/20 bg-primary">
+              <div className="rounded-xl p-4 border border-secondary/20 bg-inherit">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="p-1.5 bg-secondary/20 rounded-lg">
                     <TrendingUp className="h-4 w-4 text-secondary" />
