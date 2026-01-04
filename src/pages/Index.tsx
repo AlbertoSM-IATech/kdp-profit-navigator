@@ -193,11 +193,10 @@ const Index = () => {
             )}
 
             {globalData.selectedFormat && globalData.marketplace && activeResults && (
-              <ScoreDisplay score={scoreBreakdown} currencySymbol={globalData.marketplace === 'COM' ? '$' : '€'} />
-            )}
-
-            {globalData.selectedFormat && globalData.marketplace && (
-              <PositioningSection results={positioningResults} globalData={globalData} activeResults={activeResults} />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ScoreDisplay score={scoreBreakdown} currencySymbol={globalData.marketplace === 'COM' ? '$' : '€'} />
+                <PositioningSection results={positioningResults} globalData={globalData} activeResults={activeResults} />
+              </div>
             )}
 
             {globalData.selectedFormat && tableData.length > 0 && (
