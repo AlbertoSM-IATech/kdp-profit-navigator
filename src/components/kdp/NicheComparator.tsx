@@ -30,6 +30,7 @@ import {
   Eye
 } from 'lucide-react';
 import { NicheSideBySide } from './NicheSideBySide';
+import { NicheRadarChart } from './NicheRadarChart';
 import { 
   Select, 
   SelectContent, 
@@ -303,6 +304,7 @@ export const NicheComparator = ({
             {niches.length > 0 && (
               <>
                 <NicheSideBySide niches={niches} />
+                {niches.length >= 2 && <NicheRadarChart niches={niches} />}
                 <Button size="sm" variant="outline" onClick={handleExportCSV}>
                   <Download className="h-4 w-4 mr-2" />
                   Exportar

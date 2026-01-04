@@ -108,12 +108,12 @@ export const ScoreDisplay = ({ score, currencySymbol = '€', compact = false }:
         </p>
       </CardHeader>
       <CardContent>
-        {/* Two-column layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column: Main Score + Legend */}
-          <div className="space-y-4">
+        {/* Two-row layout: Score on top, Breakdown below */}
+        <div className="space-y-5">
+          {/* Row 1: Main Score + Legend */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             {/* Main Score Display */}
-            <div className={`flex items-center justify-between p-6 rounded-xl border-2 ${scoreBg}`}>
+            <div className={`flex items-center justify-between p-5 rounded-xl border-2 ${scoreBg}`}>
               <div className="text-center">
                 <span className="text-5xl font-extrabold" style={{ color: score.statusColor }}>
                   {score.totalScore}
@@ -126,55 +126,58 @@ export const ScoreDisplay = ({ score, currencySymbol = '€', compact = false }:
               </div>
             </div>
 
-            {/* Clics Cap Warning */}
-            {score.clicsCapped && (
-              <div className="flex items-start gap-3 p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
-                <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-sm font-semibold text-destructive">Score limitado a 40</p>
-                  <p className="text-xs text-muted-foreground">
-                    Con menos de 10 clics máx./venta, el nicho no es viable para Ads.
-                  </p>
+            {/* Legend + Interpretation */}
+            <div className="space-y-3">
+              {/* Score Legend */}
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div className="flex items-center gap-1 p-2 rounded-lg bg-success/10">
+                  <span className="w-2 h-2 rounded-full bg-success"></span>
+                  <span className="text-muted-foreground">80-100</span>
+                </div>
+                <div className="flex items-center gap-1 p-2 rounded-lg bg-warning/10">
+                  <span className="w-2 h-2 rounded-full bg-warning"></span>
+                  <span className="text-muted-foreground">50-79</span>
+                </div>
+                <div className="flex items-center gap-1 p-2 rounded-lg bg-destructive/10">
+                  <span className="w-2 h-2 rounded-full bg-destructive"></span>
+                  <span className="text-muted-foreground">&lt;50</span>
                 </div>
               </div>
-            )}
 
-            {/* Score Legend */}
-            <div className="grid grid-cols-3 gap-2 text-xs">
-              <div className="flex items-center gap-1 p-2 rounded-lg bg-success/10">
-                <span className="w-2 h-2 rounded-full bg-success"></span>
-                <span className="text-muted-foreground">80-100</span>
+              {/* Interpretation */}
+              <div className={`p-3 rounded-lg border ${scoreBg}`}>
+                <p className="text-sm text-foreground">
+                  {score.status === 'excellent' && 
+                    'Excelente configuración para escalar campañas de Ads. Margen de maniobra amplio.'}
+                  {score.status === 'viable' && 
+                    'Configuración viable pero requiere ajustes. Optimiza precio, CPC o busca keywords menos competidas.'}
+                  {score.status === 'not-recommended' && 
+                    'No recomendable para Ads en las condiciones actuales. Reformula antes de invertir.'}
+                </p>
               </div>
-              <div className="flex items-center gap-1 p-2 rounded-lg bg-warning/10">
-                <span className="w-2 h-2 rounded-full bg-warning"></span>
-                <span className="text-muted-foreground">50-79</span>
-              </div>
-              <div className="flex items-center gap-1 p-2 rounded-lg bg-destructive/10">
-                <span className="w-2 h-2 rounded-full bg-destructive"></span>
-                <span className="text-muted-foreground">&lt;50</span>
-              </div>
-            </div>
-
-            {/* Interpretation */}
-            <div className={`p-3 rounded-lg border ${scoreBg}`}>
-              <p className="text-sm text-foreground">
-                {score.status === 'excellent' && 
-                  'Excelente configuración para escalar campañas de Ads. Margen de maniobra amplio.'}
-                {score.status === 'viable' && 
-                  'Configuración viable pero requiere ajustes. Optimiza precio, CPC o busca keywords menos competidas.'}
-                {score.status === 'not-recommended' && 
-                  'No recomendable para Ads en las condiciones actuales. Reformula antes de invertir.'}
-              </p>
             </div>
           </div>
 
-          {/* Right Column: Score Breakdown */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+          {/* Clics Cap Warning */}
+          {score.clicsCapped && (
+            <div className="flex items-start gap-3 p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
+              <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-destructive">Score limitado a 40</p>
+                <p className="text-xs text-muted-foreground">
+                  Con menos de 10 clics máx./venta, el nicho no es viable para Ads.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Row 2: Score Breakdown */}
+          <div className="pt-4 border-t border-border">
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
               Desglose del Score
             </h4>
             
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <ScoreItem
                 label="Clics máx./Venta (CRÍTICO)"
                 value={score.clicsScore}
