@@ -1,13 +1,11 @@
 import { PositioningResults, GlobalData, EbookResults, PaperbackResults } from '@/types/kdp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Target, MousePointer, TrendingUp, AlertTriangle, CheckCircle, Euro, BarChart3 } from 'lucide-react';
-
 interface PositioningSectionProps {
   results: PositioningResults | null;
   globalData: GlobalData;
   activeResults: EbookResults | PaperbackResults | null;
 }
-
 export const PositioningSection = ({
   results,
   globalData,
@@ -24,9 +22,7 @@ export const PositioningSection = ({
 
   // Clics máx from base config
   const clicsMaxBase = activeResults?.clicsMaxPorVenta || 0;
-
-  return (
-    <Card className="animate-fade-in h-full">
+  return <Card className="animate-fade-in h-full">
       <CardHeader className="pb-4">
         <CardTitle className="section-header">
           <Target className="h-5 w-5 text-secondary" />
@@ -35,12 +31,11 @@ export const PositioningSection = ({
         <p className="text-sm text-muted-foreground">Reglas operativas con tus números.</p>
       </CardHeader>
       <CardContent>
-        {results ? (
-          <div className="space-y-6">
+        {results ? <div className="space-y-6">
             {/* Métricas clave */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Tasa de Conversión Referencia */}
-              <div className="bg-secondary/10 rounded-xl p-4 border border-secondary/20">
+              <div className="rounded-xl p-4 border border-secondary/20 bg-primary">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="p-1.5 bg-secondary/20 rounded-lg">
                     <TrendingUp className="h-4 w-4 text-secondary" />
@@ -85,8 +80,7 @@ export const PositioningSection = ({
               
               <div className="space-y-3 text-sm leading-relaxed">
                 <p className="text-muted-foreground break-words">
-                  Si quieres competir con los mejores autores de tu nicho y tener presencia en primeras posiciones, 
-                  necesitarás vender una media de <span className="text-primary font-extrabold">{ventasDiarias} copias/día</span>.
+                  Si quieres competir con los mejores autores de tu nicho y tener presencia en primeras posiciones, necesitarás vender una media mínima de <span className="text-primary font-extrabold">{ventasDiarias} copias/día</span>.
                 </p>
                 
                 <p className="text-muted-foreground break-words">
@@ -105,8 +99,7 @@ export const PositioningSection = ({
             </div>
 
             {/* Nuevo bloque: Referencia de breakeven publicitario */}
-            {activeResults && clicsMaxBase > 0 && (
-              <div className="bg-muted/50 rounded-xl p-6 border border-border">
+            {activeResults && clicsMaxBase > 0 && <div className="bg-muted/50 rounded-xl p-6 border border-border">
                 <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
                   <BarChart3 className="h-4 w-4 text-primary" />
                   📊 Referencia de breakeven publicitario
@@ -121,46 +114,35 @@ export const PositioningSection = ({
                   Esto significa que, si superas ese número de clics por venta, empezarás a perder 
                   dinero en Ads; si vendes en menos clics, el margen mejora.
                 </p>
-              </div>
-            )}
+              </div>}
 
             {/* Advertencias - Solo condicionales */}
-            {results.advertencias.length > 0 && (
-              <div className="space-y-3">
+            {results.advertencias.length > 0 && <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4 text-warning" />
                   Advertencias
                 </h4>
                 <p className="text-xs text-muted-foreground">Avisos solo si aplican (sin ruido).</p>
                 <div className="space-y-2">
-                  {results.advertencias.map((adv, idx) => (
-                    <div key={idx} className="flex items-start gap-3 p-3 bg-warning/10 border border-warning/30 rounded-lg">
+                  {results.advertencias.map((adv, idx) => <div key={idx} className="flex items-start gap-3 p-3 bg-warning/10 border border-warning/30 rounded-lg">
                       <AlertTriangle className="h-4 w-4 text-warning mt-0.5 shrink-0" />
                       <p className="text-sm text-foreground">{adv}</p>
-                    </div>
-                  ))}
+                    </div>)}
                 </div>
-              </div>
-            )}
+              </div>}
 
             {/* Show success message only if no warnings */}
-            {results.advertencias.length === 0 && (
-              <div className="flex items-start gap-3 p-3 bg-success/10 border border-success/30 rounded-lg">
+            {results.advertencias.length === 0 && <div className="flex items-start gap-3 p-3 bg-success/10 border border-success/30 rounded-lg">
                 <CheckCircle className="h-4 w-4 text-success mt-0.5 shrink-0" />
                 <p className="text-sm text-foreground">
                   Los ratios de conversión y la inversión estimada están dentro de parámetros aceptables.
                 </p>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-32 bg-muted/30 rounded-lg">
+              </div>}
+          </div> : <div className="flex items-center justify-center h-32 bg-muted/30 rounded-lg">
             <p className="text-sm text-muted-foreground">
               Completa los datos globales para ver análisis de posicionamiento
             </p>
-          </div>
-        )}
+          </div>}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };

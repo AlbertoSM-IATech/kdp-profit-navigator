@@ -3,13 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Gauge, MousePointer, TrendingUp, Tag, HelpCircle, AlertTriangle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-
 interface ScoreDisplayProps {
   score: ScoreBreakdown | null;
   currencySymbol?: string;
   compact?: boolean;
 }
-
 interface ScoreItemProps {
   label: string;
   value: number;
@@ -17,12 +15,15 @@ interface ScoreItemProps {
   icon: React.ReactNode;
   tooltip: string;
 }
-
-const ScoreItem = ({ label, value, max, icon, tooltip }: ScoreItemProps) => {
-  const percentage = (value / max) * 100;
-  
-  return (
-    <div className="flex items-center gap-3">
+const ScoreItem = ({
+  label,
+  value,
+  max,
+  icon,
+  tooltip
+}: ScoreItemProps) => {
+  const percentage = value / max * 100;
+  return <div className="flex items-center gap-3">
       <div className="p-2 bg-muted rounded-lg shrink-0">
         {icon}
       </div>
@@ -45,14 +46,15 @@ const ScoreItem = ({ label, value, max, icon, tooltip }: ScoreItemProps) => {
         </div>
         <Progress value={percentage} className="h-1.5" />
       </div>
-    </div>
-  );
+    </div>;
 };
-
-export const ScoreDisplay = ({ score, currencySymbol = '€', compact = false }: ScoreDisplayProps) => {
+export const ScoreDisplay = ({
+  score,
+  currencySymbol = '€',
+  compact = false
+}: ScoreDisplayProps) => {
   if (!score) {
-    return (
-      <Card className="animate-fade-in">
+    return <Card className="animate-fade-in">
         <CardHeader className="pb-4">
           <CardTitle className="section-header">
             <Gauge className="h-5 w-5 text-primary" />
@@ -66,24 +68,18 @@ export const ScoreDisplay = ({ score, currencySymbol = '€', compact = false }:
             </p>
           </div>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
-  const scoreColor = score.status === 'excellent' ? 'text-success' :
-                     score.status === 'viable' ? 'text-warning' :
-                     'text-destructive';
-
-  const scoreBg = score.status === 'excellent' ? 'bg-success/10 border-success/30' :
-                  score.status === 'viable' ? 'bg-warning/10 border-warning/30' :
-                  'bg-destructive/10 border-destructive/30';
+  const scoreColor = score.status === 'excellent' ? 'text-success' : score.status === 'viable' ? 'text-warning' : 'text-destructive';
+  const scoreBg = score.status === 'excellent' ? 'bg-success/10 border-success/30' : score.status === 'viable' ? 'bg-warning/10 border-warning/30' : 'bg-destructive/10 border-destructive/30';
 
   // Compact view for quick mode
   if (compact) {
-    return (
-      <div className={`flex items-center justify-between p-4 rounded-xl border-2 ${scoreBg}`}>
+    return <div className={`flex items-center justify-between p-4 rounded-xl border-2 ${scoreBg}`}>
         <div className="flex items-center gap-4">
-          <span className="text-4xl font-extrabold" style={{ color: score.statusColor }}>
+          <span className="text-4xl font-extrabold" style={{
+          color: score.statusColor
+        }}>
             {score.totalScore}
           </span>
           <span className="text-lg text-muted-foreground">/100</span>
@@ -92,12 +88,9 @@ export const ScoreDisplay = ({ score, currencySymbol = '€', compact = false }:
           <span className="text-2xl block mb-1">{score.statusEmoji}</span>
           <span className={`text-sm font-bold ${scoreColor}`}>{score.statusLabel}</span>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <Card className="animate-fade-in h-full">
+  return <Card className="animate-fade-in h-full">
       <CardHeader className="pb-4">
         <CardTitle className="section-header">
           <Gauge className="h-5 w-5 text-primary" />
@@ -111,11 +104,13 @@ export const ScoreDisplay = ({ score, currencySymbol = '€', compact = false }:
         {/* Two-row layout: Score on top, Breakdown below */}
         <div className="space-y-5">
           {/* Row 1: Main Score + Legend */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4 items-start">
             {/* Main Score Display */}
             <div className={`flex items-center justify-between p-5 rounded-xl border-2 ${scoreBg}`}>
               <div className="text-center">
-                <span className="text-5xl font-extrabold" style={{ color: score.statusColor }}>
+                <span className="text-5xl font-extrabold" style={{
+                color: score.statusColor
+              }}>
                   {score.totalScore}
                 </span>
                 <span className="text-xl text-muted-foreground">/100</span>
@@ -147,20 +142,16 @@ export const ScoreDisplay = ({ score, currencySymbol = '€', compact = false }:
               {/* Interpretation */}
               <div className={`p-3 rounded-lg border ${scoreBg}`}>
                 <p className="text-sm text-foreground">
-                  {score.status === 'excellent' && 
-                    'Excelente configuración para escalar campañas de Ads. Margen de maniobra amplio.'}
-                  {score.status === 'viable' && 
-                    'Configuración viable pero requiere ajustes. Optimiza precio, CPC o busca keywords menos competidas.'}
-                  {score.status === 'not-recommended' && 
-                    'No recomendable para Ads en las condiciones actuales. Reformula antes de invertir.'}
+                  {score.status === 'excellent' && 'Excelente configuración para escalar campañas de Ads. Margen de maniobra amplio.'}
+                  {score.status === 'viable' && 'Configuración viable pero requiere ajustes. Optimiza precio, CPC o busca keywords menos competidas.'}
+                  {score.status === 'not-recommended' && 'No recomendable para Ads en las condiciones actuales. Reformula antes de invertir.'}
                 </p>
               </div>
             </div>
           </div>
 
           {/* Clics Cap Warning */}
-          {score.clicsCapped && (
-            <div className="flex items-start gap-3 p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
+          {score.clicsCapped && <div className="flex items-start gap-3 p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
               <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
               <div>
                 <p className="text-sm font-semibold text-destructive">Score limitado a 40</p>
@@ -168,8 +159,7 @@ export const ScoreDisplay = ({ score, currencySymbol = '€', compact = false }:
                   Con menos de 10 clics máx./venta, el nicho no es viable para Ads.
                 </p>
               </div>
-            </div>
-          )}
+            </div>}
 
           {/* Row 2: Score Breakdown */}
           <div className="pt-4 border-t border-border">
@@ -177,34 +167,15 @@ export const ScoreDisplay = ({ score, currencySymbol = '€', compact = false }:
               Desglose del Score
             </h4>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <ScoreItem
-                label="Clics máx./Venta (CRÍTICO)"
-                value={score.clicsScore}
-                max={50}
-                icon={<MousePointer className="h-4 w-4 text-primary" />}
-                tooltip="≥13 clics = 50pts, 10-12 = 30pts, <10 = 0pts"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+              <ScoreItem label="Clics máx./Venta (CRÍTICO)" value={score.clicsScore} max={50} icon={<MousePointer className="h-4 w-4 text-primary" />} tooltip="≥13 clics = 50pts, 10-12 = 30pts, <10 = 0pts" />
               
-              <ScoreItem
-                label="BACOS"
-                value={score.bacosScore}
-                max={30}
-                icon={<TrendingUp className="h-4 w-4 text-success" />}
-                tooltip="≥40% = 30pts, ≥30% = 15pts, <30% = 0pts"
-              />
+              <ScoreItem label="BACOS" value={score.bacosScore} max={30} icon={<TrendingUp className="h-4 w-4 text-success" />} tooltip="≥40% = 30pts, ≥30% = 15pts, <30% = 0pts" />
               
-              <ScoreItem
-                label="PVP vs Mínimo"
-                value={score.pvpVsMinScore}
-                max={20}
-                icon={<Tag className="h-4 w-4 text-secondary" />}
-                tooltip="PVP > rec. = 20pts, PVP = rec. = 10pts, PVP < rec. = 0pts"
-              />
+              <ScoreItem label="PVP vs Mínimo" value={score.pvpVsMinScore} max={20} icon={<Tag className="h-4 w-4 text-secondary" />} tooltip="PVP > rec. = 20pts, PVP = rec. = 10pts, PVP < rec. = 0pts" />
             </div>
           </div>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
