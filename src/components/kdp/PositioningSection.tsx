@@ -38,67 +38,67 @@ export const PositioningSection = ({
         {results ? (
           <div className="space-y-6">
             {/* Métricas clave */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Tasa de Conversión Referencia */}
-              <div className="bg-secondary/10 rounded-xl p-5 border border-secondary/20">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-secondary/20 rounded-lg">
-                    <TrendingUp className="h-5 w-5 text-secondary" />
+              <div className="bg-secondary/10 rounded-xl p-4 border border-secondary/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="p-1.5 bg-secondary/20 rounded-lg">
+                    <TrendingUp className="h-4 w-4 text-secondary" />
                   </div>
-                  <span className="text-2xl font-extrabold text-primary">Conversión Ref.</span>
+                  <span className="text-sm font-bold text-foreground">Conversión Ref.</span>
                 </div>
-                <p className="text-secondary text-4xl font-extrabold">10%</p>
+                <p className="text-secondary text-3xl font-extrabold">10%</p>
                 <p className="text-xs text-muted-foreground mt-1">1 venta cada 10 clics</p>
               </div>
 
               {/* Clics Diarios Necesarios */}
-              <div className="bg-primary/10 rounded-xl p-5 border border-primary/20">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-primary/20 rounded-lg">
-                    <MousePointer className="h-5 w-5 text-primary" />
+              <div className="bg-primary/10 rounded-xl p-4 border border-primary/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="p-1.5 bg-primary/20 rounded-lg">
+                    <MousePointer className="h-4 w-4 text-primary" />
                   </div>
-                  <span className="font-extrabold text-2xl text-primary">Clics Diarios</span>
+                  <span className="font-bold text-sm text-foreground">Clics Diarios</span>
                 </div>
-                <p className="text-primary text-4xl font-extrabold">{Math.ceil(results.clicsDiarios)}</p>
+                <p className="text-primary text-3xl font-extrabold">{Math.ceil(results.clicsDiarios)}</p>
                 <p className="text-xs text-muted-foreground mt-1">Para {ventasDiarias} ventas/día</p>
               </div>
 
               {/* Inversión Diaria */}
-              <div className="bg-muted rounded-xl p-5 border border-border">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-foreground/10 rounded-lg">
-                    <Euro className="h-5 w-5 text-foreground" />
+              <div className="bg-muted rounded-xl p-4 border border-border">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="p-1.5 bg-foreground/10 rounded-lg">
+                    <Euro className="h-4 w-4 text-foreground" />
                   </div>
-                  <span className="text-2xl font-extrabold text-primary">Inversión Diaria</span>
+                  <span className="text-sm font-bold text-foreground">Inversión Diaria</span>
                 </div>
-                <p className="text-foreground text-4xl font-extrabold">{results.inversionDiaria.toFixed(2)}{currencySymbol}</p>
+                <p className="text-foreground text-3xl font-extrabold">{results.inversionDiaria.toFixed(2)}{currencySymbol}</p>
                 <p className="text-xs text-muted-foreground mt-1">A {cpc.toFixed(2)}{currencySymbol}/clic</p>
               </div>
             </div>
 
-            {/* Bloque de recomendación estratégica - Texto mejorado con colores de acento */}
-            <div className="bg-gradient-to-br from-secondary/10 to-primary/10 rounded-xl p-6 border border-secondary/20">
-              <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2 text-xl">
-                <Target className="h-4 w-4 text-secondary" />
+            {/* Bloque de recomendación estratégica */}
+            <div className="bg-gradient-to-br from-secondary/10 to-primary/10 rounded-xl p-4 border border-secondary/20 overflow-hidden">
+              <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2 text-base">
+                <Target className="h-4 w-4 text-secondary shrink-0" />
                 Consejo estratégico de posicionamiento
               </h4>
               
-              <div className="space-y-4 text-sm leading-relaxed text-primary-foreground">
-                <p className="text-zinc-500 dark:text-zinc-400">
+              <div className="space-y-3 text-sm leading-relaxed">
+                <p className="text-muted-foreground break-words">
                   Si quieres competir con los mejores autores de tu nicho y tener presencia en primeras posiciones, 
                   necesitarás vender una media de <span className="text-primary font-extrabold">{ventasDiarias} copias/día</span>.
                 </p>
                 
-                <p className="text-zinc-500 dark:text-zinc-400">
+                <p className="text-muted-foreground break-words">
                   Si estás empezando y no tienes canales propios de venta (p. ej., lista de email, comunidad en RRSS, acuerdos con influencers o tráfico orgánico), deberás asumir el 100% del posicionamiento vía Ads hasta rankear orgánicamente.
                 </p>
                 
-                <p className="text-zinc-500 dark:text-zinc-400">
+                <p className="text-muted-foreground break-words">
                   Con una conversión mínima del 10%, tendrás que generar <span className="text-primary font-extrabold">{clicsDiarios} clics/día</span>, 
                   lo que implica una inversión aproximada de <span className="text-primary font-extrabold">{inversionDiaria.toFixed(2)}{currencySymbol}</span>.
                 </p>
                 
-                <p className="font-medium text-foreground pt-2 border-t border-border/50">
+                <p className="font-medium text-foreground pt-2 border-t border-border/50 break-words">
                   Este dato te permite decidir si el nicho es viable antes de producir el libro.
                 </p>
               </div>
