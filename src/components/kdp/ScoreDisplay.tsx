@@ -70,8 +70,8 @@ export const ScoreDisplay = ({
         </CardContent>
       </Card>;
   }
-  const scoreColor = score.status === 'excellent' ? 'text-success' : score.status === 'viable' ? 'text-warning' : 'text-destructive';
-  const scoreBg = score.status === 'excellent' ? 'bg-success/10 border-success/30' : score.status === 'viable' ? 'bg-warning/10 border-warning/30' : 'bg-destructive/10 border-destructive/30';
+  const scoreColor = score.status === 'excellent' ? 'text-foreground' : score.status === 'viable' ? 'text-muted-foreground' : 'text-destructive';
+  const scoreBg = score.status === 'excellent' ? 'bg-muted/40 border-border' : score.status === 'viable' ? 'bg-muted/30 border-border' : 'bg-destructive/5 border-destructive/20';
 
   // Compact view for quick mode
   if (compact) {

@@ -101,7 +101,7 @@ export const NicheRadarChart = ({ niches }: NicheRadarChartProps) => {
           Gráfico Radar
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh]">
+      <DialogContent className="max-w-[95vw] w-full max-h-[95vh] h-full">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
@@ -109,13 +109,13 @@ export const NicheRadarChart = ({ niches }: NicheRadarChartProps) => {
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 h-[calc(100%-60px)]">
           {/* Selector de nichos */}
           <div className="lg:col-span-1">
             <h4 className="text-sm font-semibold text-muted-foreground mb-3">
               Seleccionar nichos (máx. 8)
             </h4>
-            <ScrollArea className="h-[350px] pr-4">
+            <ScrollArea className="h-[500px] pr-4">
               <div className="space-y-2">
                 {niches.map((niche, index) => {
                   const config = niche.globalData.marketplace ? MARKETPLACE_CONFIGS[niche.globalData.marketplace] : null;
@@ -159,10 +159,10 @@ export const NicheRadarChart = ({ niches }: NicheRadarChartProps) => {
             </ScrollArea>
           </div>
 
-          {/* Gráfico Radar */}
-          <div className="lg:col-span-3">
+          {/* Gráfico Radar - Más grande */}
+          <div className="lg:col-span-4 flex flex-col">
             {selectedNiches.length >= 2 ? (
-              <ResponsiveContainer width="100%" height={400}>
+              <ResponsiveContainer width="100%" height={600}>
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="hsl(var(--border))" />
                   <PolarAngleAxis 
@@ -202,7 +202,7 @@ export const NicheRadarChart = ({ niches }: NicheRadarChartProps) => {
                 </RadarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex items-center justify-center h-[400px] bg-muted/30 rounded-lg">
+              <div className="flex items-center justify-center h-[600px] bg-muted/20 rounded-lg border border-dashed border-border">
                 <p className="text-sm text-muted-foreground">
                   Selecciona al menos 2 nichos para ver el gráfico
                 </p>

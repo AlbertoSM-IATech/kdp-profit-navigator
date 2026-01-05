@@ -45,17 +45,17 @@ const sizeLabels: Record<BookSize, string> = {
   LARGE: '> 6" x 9"',
 };
 
-// Helper to get clicks color with thresholds: ≥13 green, 10-12 yellow, <10 red
+// Simplified color scheme - more subtle
 const getClicksColor = (clicks: number) => {
-  if (clicks >= 13) return 'text-success';
-  if (clicks >= 10) return 'text-warning';
+  if (clicks >= 13) return 'text-foreground';
+  if (clicks >= 10) return 'text-muted-foreground';
   return 'text-destructive';
 };
 
 const getClicksBg = (clicks: number) => {
-  if (clicks >= 13) return 'bg-success/20';
-  if (clicks >= 10) return 'bg-warning/20';
-  return 'bg-destructive/20';
+  if (clicks >= 13) return 'bg-muted/40';
+  if (clicks >= 10) return 'bg-muted/30';
+  return 'bg-destructive/10';
 };
 
 export const PaperbackSimulator = ({ data, globalData }: PaperbackSimulatorProps) => {
@@ -163,8 +163,7 @@ export const PaperbackSimulator = ({ data, globalData }: PaperbackSimulatorProps
 
   const getMarginColor = () => {
     if (margenBacos < 30) return 'text-destructive';
-    if (margenBacos <= 40) return 'text-warning';
-    return 'text-success';
+    return 'text-foreground';
   };
 
   return (
@@ -331,7 +330,7 @@ export const PaperbackSimulator = ({ data, globalData }: PaperbackSimulatorProps
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center p-3 bg-background rounded-lg">
                   <span className="text-xs text-muted-foreground block mb-1">Regalías (sim.)</span>
-                  <span className={`text-xl font-bold ${regalias > 0 ? 'text-primary' : 'text-destructive'}`}>
+                  <span className={`text-xl font-bold ${regalias > 0 ? 'text-foreground' : 'text-destructive'}`}>
                     {regalias.toFixed(2)}{currencySymbol}
                   </span>
                 </div>
@@ -379,7 +378,7 @@ export const PaperbackSimulator = ({ data, globalData }: PaperbackSimulatorProps
                 </div>
                 <div className="text-center p-3 bg-background rounded-lg">
                   <span className="text-xs text-muted-foreground block mb-1">PVP Mín. (sim.)</span>
-                  <span className="text-xl font-bold text-secondary">
+                  <span className="text-xl font-bold text-foreground">
                     {precioMinSimulado ? `${precioMinSimulado.toFixed(2)}${currencySymbol}` : '-'}
                   </span>
                 </div>
@@ -388,43 +387,25 @@ export const PaperbackSimulator = ({ data, globalData }: PaperbackSimulatorProps
               {/* CPC Max Rentable */}
               <div className="text-center p-3 bg-background rounded-lg">
                 <span className="text-xs text-muted-foreground block mb-1">CPC Máximo Rentable</span>
-                <span className={`text-xl font-bold ${simState.cpc <= cpcMaxRentable ? 'text-success' : 'text-destructive'}`}>
+                <span className={`text-xl font-bold ${simState.cpc <= cpcMaxRentable ? 'text-foreground' : 'text-destructive'}`}>
                   {cpcMaxRentable.toFixed(2)}{currencySymbol}
                 </span>
               </div>
             </div>
 
-            {/* Risk Level */}
+            {/* Risk Level - Simplified */}
             <div className={`p-4 rounded-lg border ${
-              risk.color === 'success' ? 'bg-success/10 border-success/30' :
-              risk.color === 'warning' ? 'bg-warning/10 border-warning/30' :
-              'bg-destructive/10 border-destructive/30'
+              risk.color === 'success' ? 'bg-muted/40 border-border' :
+              risk.color === 'warning' ? 'bg-muted/30 border-border' :
+              'bg-destructive/5 border-destructive/20'
             }`}>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Riesgo simulado:</span>
-                <span className={`text-lg font-bold text-${risk.color}`}>{risk.text}</span>
+                <span className="text-sm font-medium text-muted-foreground">Riesgo:</span>
+                <span className={`text-base font-semibold ${risk.color === 'destructive' ? 'text-destructive' : 'text-foreground'}`}>{risk.text}</span>
               </div>
-              <p className={`text-sm font-medium ${diagnostic.color}`}>
-                {diagnostic.text}
+              <p className={`text-sm ${risk.color === 'destructive' ? 'text-destructive' : 'text-muted-foreground'}`}>
+                {diagnostic.text.replace(/🟢|🟡|🔴/g, '').trim()}
               </p>
-            </div>
-
-            {/* Viability Status */}
-            <div className={`p-4 rounded-xl text-center ${
-              risk.level === 'low' ? 'bg-success/20 border-2 border-success' :
-              risk.level === 'medium' ? 'bg-warning/20 border-2 border-warning' :
-              'bg-destructive/20 border-2 border-destructive'
-            }`}>
-              <span className="text-2xl mb-2 block">
-                {risk.level === 'low' ? '🟢' : risk.level === 'medium' ? '🟡' : '🔴'}
-              </span>
-              <span className={`font-bold text-lg ${
-                risk.level === 'low' ? 'text-success' :
-                risk.level === 'medium' ? 'text-warning' :
-                'text-destructive'
-              }`}>
-                {risk.level === 'low' ? 'Viable' : risk.level === 'medium' ? 'Ajustable' : 'No Viable'}
-              </span>
             </div>
 
             {/* Disclaimer */}
