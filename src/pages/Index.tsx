@@ -103,6 +103,31 @@ const Index = () => {
     }
   }, [restoreVersion, handleLoadNiche]);
 
+  const handleStartNew = useCallback(() => {
+    setGlobalData({
+      marketplace: null,
+      margenObjetivoPct: null,
+      cpc: null,
+      ventasDiariasCompetencia: null,
+      selectedFormat: null,
+    });
+    setEbookData({
+      pvp: null,
+      royaltyRate: 70,
+      tamanoMb: null,
+      ivaType: 4,
+    });
+    setPaperbackData({
+      interior: null,
+      size: null,
+      pages: null,
+      pvp: null,
+      ivaType: 4,
+    });
+    setLoadedNicheId(null);
+    toast.success('Formulario limpio para nuevo análisis');
+  }, [setGlobalData, setEbookData, setPaperbackData]);
+
   const hasCurrentData = !!(activeResults && globalData.marketplace);
 
   return (
@@ -211,6 +236,7 @@ const Index = () => {
               onLoadNiche={handleLoadNiche}
               onUpdateNicheVersion={handleUpdateNicheVersion}
               onRestoreVersion={handleRestoreVersion}
+              onStartNew={handleStartNew}
               bestNiche={getBestNiche()} 
               hasCurrentData={hasCurrentData}
               loadedNicheId={loadedNicheId}

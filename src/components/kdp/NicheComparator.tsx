@@ -66,6 +66,7 @@ interface NicheComparatorProps {
     note?: string
   ) => void;
   onRestoreVersion: (nicheId: string, versionId: string) => void;
+  onStartNew: () => void;
   bestNiche: SavedNiche | null;
   hasCurrentData: boolean;
   loadedNicheId: string | null;
@@ -83,6 +84,7 @@ export const NicheComparator = ({
   onLoadNiche,
   onUpdateNicheVersion,
   onRestoreVersion,
+  onStartNew,
   bestNiche,
   hasCurrentData,
   loadedNicheId,
@@ -321,10 +323,19 @@ export const NicheComparator = ({
           Guarda y compara diferentes escenarios para decidir en qué nicho empezar.
         </p>
         {loadedNicheId && (
-          <div className="mt-2 p-2 bg-primary/10 border border-primary/30 rounded-lg text-sm">
-            <span className="text-primary font-medium">
-              📝 Editando: {niches.find(n => n.id === loadedNicheId)?.name}
+          <div className="mt-2 p-2 bg-muted/50 border border-border rounded-lg text-sm flex items-center justify-between">
+            <span className="text-muted-foreground">
+              Editando: <span className="font-medium text-foreground">{niches.find(n => n.id === loadedNicheId)?.name}</span>
             </span>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={onStartNew}
+              className="h-7 text-xs"
+            >
+              <Plus className="h-3 w-3 mr-1" />
+              Nuevo análisis
+            </Button>
           </div>
         )}
       </CardHeader>

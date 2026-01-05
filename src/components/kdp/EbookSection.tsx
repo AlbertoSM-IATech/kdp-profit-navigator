@@ -24,17 +24,17 @@ interface EbookSectionProps {
   onChange: (data: EbookData) => void;
 }
 
-// Helper to get clicks color with thresholds: ≥13 green, 10-12 yellow, <10 red
+// Simplified color scheme - more subtle
 const getClicksColor = (clicks: number) => {
-  if (clicks >= 13) return 'text-success';
-  if (clicks >= 10) return 'text-warning';
+  if (clicks >= 13) return 'text-foreground';
+  if (clicks >= 10) return 'text-muted-foreground';
   return 'text-destructive';
 };
 
 const getClicksBg = (clicks: number) => {
-  if (clicks >= 13) return 'bg-success/20';
-  if (clicks >= 10) return 'bg-warning/20';
-  return 'bg-destructive/20';
+  if (clicks >= 13) return 'bg-muted/40';
+  if (clicks >= 10) return 'bg-muted/30';
+  return 'bg-destructive/10';
 };
 
 export const EbookSection = ({ data, results, globalData, onChange }: EbookSectionProps) => {
@@ -59,8 +59,8 @@ export const EbookSection = ({ data, results, globalData, onChange }: EbookSecti
   const getViabilityIcon = () => {
     if (!results) return null;
     switch (results.viabilityStatus) {
-      case 'viable': return <CheckCircle className="h-5 w-5 text-success" />;
-      case 'adjustable': return <AlertTriangle className="h-5 w-5 text-warning" />;
+      case 'viable': return <CheckCircle className="h-5 w-5 text-foreground" />;
+      case 'adjustable': return <AlertTriangle className="h-5 w-5 text-muted-foreground" />;
       case 'not-viable': return <XCircle className="h-5 w-5 text-destructive" />;
     }
   };
@@ -68,18 +68,18 @@ export const EbookSection = ({ data, results, globalData, onChange }: EbookSecti
   const getViabilityText = () => {
     if (!results) return '';
     switch (results.viabilityStatus) {
-      case 'viable': return 'Este precio permite invertir en Ads con margen';
-      case 'adjustable': return 'Ajustable, pero con riesgo medio';
-      case 'not-viable': return 'No viable para Ads, alto riesgo de pérdida';
+      case 'viable': return 'Viable para invertir en Ads';
+      case 'adjustable': return 'Requiere ajustes';
+      case 'not-viable': return 'No recomendado para Ads';
     }
   };
 
   const getViabilityBg = () => {
-    if (!results) return 'bg-muted';
+    if (!results) return 'bg-muted/30';
     switch (results.viabilityStatus) {
-      case 'viable': return 'bg-success/10 border-success/30';
-      case 'adjustable': return 'bg-warning/10 border-warning/30';
-      case 'not-viable': return 'bg-destructive/10 border-destructive/30';
+      case 'viable': return 'bg-muted/40 border-border';
+      case 'adjustable': return 'bg-muted/30 border-border';
+      case 'not-viable': return 'bg-destructive/5 border-destructive/20';
     }
   };
 
@@ -245,7 +245,7 @@ export const EbookSection = ({ data, results, globalData, onChange }: EbookSecti
                         </Tooltip>
                       </TooltipProvider>
                     </span>
-                    <span className={`text-xl font-bold ${results.regalias > 0 ? 'text-secondary' : 'text-destructive'}`}>
+                    <span className={`text-xl font-bold ${results.regalias > 0 ? 'text-foreground' : 'text-destructive'}`}>
                       {results.regalias.toFixed(2)}{currencySymbol}
                     </span>
                   </div>
@@ -269,7 +269,7 @@ export const EbookSection = ({ data, results, globalData, onChange }: EbookSecti
                         </Tooltip>
                       </TooltipProvider>
                     </span>
-                    <span className={`text-xl font-bold ${results.margenPct >= 30 ? 'text-success' : results.margenPct >= 20 ? 'text-warning' : 'text-destructive'}`}>
+                    <span className={`text-xl font-bold ${results.margenPct >= 30 ? 'text-foreground' : results.margenPct >= 20 ? 'text-muted-foreground' : 'text-destructive'}`}>
                       {results.margenPct.toFixed(1)}%
                     </span>
                   </div>
@@ -302,7 +302,7 @@ export const EbookSection = ({ data, results, globalData, onChange }: EbookSecti
                   </div>
                   <div className="bg-muted/30 rounded-lg p-3 text-center">
                     <span className="text-xs text-muted-foreground block mb-1">CPC máx. rentable</span>
-                    <span className="text-xl font-bold text-primary">
+                    <span className="text-xl font-bold text-foreground">
                       {results.cpcMaxRentable.toFixed(2)}{currencySymbol}
                     </span>
                   </div>
