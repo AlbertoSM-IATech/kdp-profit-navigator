@@ -186,10 +186,10 @@ const Index = () => {
             )}
 
             {showPhysicalFormat && globalData.marketplace && (
-              <>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <PaperbackSection data={paperbackData} results={paperbackResults} globalData={globalData} onChange={setPaperbackData} />
                 {paperbackResults && <PaperbackSimulator data={paperbackData} globalData={globalData} />}
-              </>
+              </div>
             )}
 
             {globalData.selectedFormat && globalData.marketplace && activeResults && (
