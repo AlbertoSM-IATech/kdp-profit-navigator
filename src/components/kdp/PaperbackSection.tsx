@@ -121,7 +121,7 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
         <p className="text-sm text-muted-foreground">Datos del libro físico.</p>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="space-y-6">
           {/* Inputs Column */}
           <div className="space-y-6">
             <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
@@ -280,8 +280,8 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
             )}
           </div>
 
-          {/* Results Column */}
-          <div className="space-y-4">
+          {/* Results Section - Below inputs */}
+          <div className="space-y-4 pt-4 border-t border-border/50">
             <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
               Resultados
             </h4>

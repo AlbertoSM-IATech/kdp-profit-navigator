@@ -179,7 +179,7 @@ export const PaperbackSimulator = ({ data, globalData }: PaperbackSimulatorProps
         </p>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="space-y-6">
           {/* Controls */}
           <div className="space-y-6">
             {/* Selectors for Color and Size */}
@@ -323,8 +323,8 @@ export const PaperbackSimulator = ({ data, globalData }: PaperbackSimulatorProps
             </div>
           </div>
 
-          {/* Live Results */}
-          <div className="space-y-4">
+          {/* Live Results - Below controls */}
+          <div className="space-y-4 pt-4 border-t border-border/50">
             <div className="bg-muted/30 rounded-xl p-5 space-y-4">
               <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Resultados simulados</h4>
               
