@@ -1,4 +1,4 @@
-export type Marketplace = 'ES' | 'COM' | 'DE' | 'FR' | 'IT' | 'UK';
+export type Marketplace = 'ES' | 'COM' | 'DE' | 'FR' | 'IT' | 'UK' | 'CA' | 'AU' | 'JP';
 
 export type RoyaltyRate = 70 | 35;
 
@@ -177,4 +177,7 @@ export const MARKETPLACE_CONFIGS: Record<Marketplace, MarketplaceConfig> = {
   FR: { code: 'FR', name: 'Amazon Francia', currency: 'EUR', currencySymbol: '€', ivaDefault: 5.5, royaltyThreshold: 9.99 },
   IT: { code: 'IT', name: 'Amazon Italia', currency: 'EUR', currencySymbol: '€', ivaDefault: 4, royaltyThreshold: 9.99 },
   UK: { code: 'UK', name: 'Amazon UK', currency: 'GBP', currencySymbol: '£', ivaDefault: 0, royaltyThreshold: 9.99 },
+  CA: { code: 'CA', name: 'Amazon Canadá', currency: 'CAD', currencySymbol: 'C$', ivaDefault: 0, royaltyThreshold: 12.99 },
+  AU: { code: 'AU', name: 'Amazon Australia', currency: 'AUD', currencySymbol: 'A$', ivaDefault: 0, royaltyThreshold: 14.99 },
+  JP: { code: 'JP', name: 'Amazon Japón', currency: 'JPY', currencySymbol: '¥', ivaDefault: 0, royaltyThreshold: 1250 },
 };
