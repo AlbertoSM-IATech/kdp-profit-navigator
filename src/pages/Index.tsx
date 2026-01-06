@@ -12,6 +12,7 @@ import { ReportSection } from '@/components/kdp/ReportSection';
 import { PaperbackSimulator } from '@/components/kdp/PaperbackSimulator';
 import { ScoreDisplay } from '@/components/kdp/ScoreDisplay';
 import { NicheComparator } from '@/components/kdp/NicheComparator';
+import { PrintingCostsTable } from '@/components/kdp/PrintingCostsTable';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Calculator, Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react';
@@ -258,8 +259,11 @@ const Index = () => {
                 bacos: n.bacos,
                 pvp: n.pvp,
                 precioMinRecomendado: n.precioMinRecomendado,
-              }))}
+                }))}
             />
+            
+            {/* Tabla de precios de impresión */}
+            <PrintingCostsTable />
           </>
         )}
       </main>
