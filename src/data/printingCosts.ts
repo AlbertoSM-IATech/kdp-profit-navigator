@@ -8,64 +8,75 @@ export interface PrintingCostTier {
   perPageCost: number;
 }
 
-// Printing cost tiers for European marketplaces (EUR)
+// Printing cost tiers for European marketplaces (EUR) - Amazon .es
+// Fuente: Calculadora de nichos actualizada
 export const printingCostTiersEU: PrintingCostTier[] = [
   // B/N (Blanco y Negro) - Pequeño
+  // <6x9 y 24-108 pág: Fijo 2.05€, por página 0€
   { interior: 'BN', size: 'SMALL', pageThreshold: 108, fixedCost: 2.05, perPageCost: 0 },
+  // <6x9 y >108 pág: Fijo 0.75€, por página 0.012€
   { interior: 'BN', size: 'SMALL', pageThreshold: Infinity, fixedCost: 0.75, perPageCost: 0.012 },
   
   // B/N (Blanco y Negro) - Grande
+  // >6x9 y 24-108 pág: Fijo 2.48€, por página 0€
   { interior: 'BN', size: 'LARGE', pageThreshold: 108, fixedCost: 2.48, perPageCost: 0 },
+  // >6x9 y >108 pág: Fijo 0.75€, por página 0.016€
   { interior: 'BN', size: 'LARGE', pageThreshold: Infinity, fixedCost: 0.75, perPageCost: 0.016 },
   
   // Color Premium - Pequeño
+  // <6x9 y 24-40 pág: Fijo 3.03€, por página 0€
   { interior: 'COLOR_PREMIUM', size: 'SMALL', pageThreshold: 40, fixedCost: 3.03, perPageCost: 0 },
+  // <6x9 y >40 pág: Fijo 0.75€, por página 0.053€
   { interior: 'COLOR_PREMIUM', size: 'SMALL', pageThreshold: Infinity, fixedCost: 0.75, perPageCost: 0.053 },
   
   // Color Premium - Grande
+  // >6x9 y 24-40 pág: Fijo 3.63€, por página 0€
   { interior: 'COLOR_PREMIUM', size: 'LARGE', pageThreshold: 40, fixedCost: 3.63, perPageCost: 0 },
+  // >6x9 y >40 pág: Fijo 0.75€, por página 0.072€
   { interior: 'COLOR_PREMIUM', size: 'LARGE', pageThreshold: Infinity, fixedCost: 0.75, perPageCost: 0.072 },
   
   // Color Estándar - Pequeño (only >72 pages)
+  // <6x9 y >72 pág: Fijo 0.75€, por página 0.024€
   { interior: 'COLOR_STANDARD', size: 'SMALL', pageThreshold: 72, fixedCost: 0, perPageCost: 0 }, // Not valid
   { interior: 'COLOR_STANDARD', size: 'SMALL', pageThreshold: Infinity, fixedCost: 0.75, perPageCost: 0.024 },
   
   // Color Estándar - Grande (only >72 pages)
+  // >6x9 y >72 pág: Fijo 0.75€, por página 0.035€
   { interior: 'COLOR_STANDARD', size: 'LARGE', pageThreshold: 72, fixedCost: 0, perPageCost: 0 }, // Not valid
   { interior: 'COLOR_STANDARD', size: 'LARGE', pageThreshold: Infinity, fixedCost: 0.75, perPageCost: 0.035 },
 ];
 
-// Printing cost tiers for US marketplace (USD) - Based on Amazon KDP official pricing
-// Fuente: Tabla de costes de impresión Amazon USA
+// Printing cost tiers for US marketplace (USD) - Amazon .com
+// Fuente: Calculadora de nichos actualizada
 export const printingCostTiersUS: PrintingCostTier[] = [
-  // B/N (Black & White) - Small (<6x9 y 24-108 pág)
-  // Fijo: $2.30, por página: $0.000 (coste total = $2.30)
+  // B/N (Black & White) - Small
+  // <6x9 y 24-108 pág: Fijo $2.30, por página $0.000
   { interior: 'BN', size: 'SMALL', pageThreshold: 108, fixedCost: 2.30, perPageCost: 0 },
-  // B/N - Small (>6x9 y >108 pág): Fijo $1.00, por página $0.012
+  // <6x9 y >108 pág: Fijo $1.00, por página $0.012
   { interior: 'BN', size: 'SMALL', pageThreshold: Infinity, fixedCost: 1.00, perPageCost: 0.012 },
   
-  // B/N (Black & White) - Large (>6x9 y 24-108 pág)
-  // Fijo: $2.84, por página: $0.000 (coste total = $2.84)
+  // B/N (Black & White) - Large
+  // >6x9 y 24-108 pág: Fijo $2.84, por página $0.000
   { interior: 'BN', size: 'LARGE', pageThreshold: 108, fixedCost: 2.84, perPageCost: 0 },
-  // B/N - Large (>6x9 y >108 pág): Fijo $1.00, por página $0.017
+  // >6x9 y >108 pág: Fijo $1.00, por página $0.017
   { interior: 'BN', size: 'LARGE', pageThreshold: Infinity, fixedCost: 1.00, perPageCost: 0.017 },
   
-  // Color Premium - Small (<6x9 y 24-40 pág)
-  // Fijo: $3.60, por página: $0.000 (coste total = $3.60)
+  // Color Premium - Small
+  // <6x9 y 24-40 pág: Fijo $3.60, por página $0.000
   { interior: 'COLOR_PREMIUM', size: 'SMALL', pageThreshold: 40, fixedCost: 3.60, perPageCost: 0 },
-  // Color Premium - Small (>40 pág): por página $0.065
-  { interior: 'COLOR_PREMIUM', size: 'SMALL', pageThreshold: Infinity, fixedCost: 0, perPageCost: 0.065 },
+  // <6x9 y >40 pág: Fijo $1.00, por página $0.065
+  { interior: 'COLOR_PREMIUM', size: 'SMALL', pageThreshold: Infinity, fixedCost: 1.00, perPageCost: 0.065 },
   
-  // Color Premium - Large (>6x9 y 24-40 pág)
-  // Fijo: $4.20, por página: $0.000 (coste total = $4.20)
+  // Color Premium - Large
+  // >6x9 y 24-40 pág: Fijo $4.20, por página $0.000
   { interior: 'COLOR_PREMIUM', size: 'LARGE', pageThreshold: 40, fixedCost: 4.20, perPageCost: 0 },
-  // Color Premium - Large (>40 pág): por página $0.085
-  { interior: 'COLOR_PREMIUM', size: 'LARGE', pageThreshold: Infinity, fixedCost: 0, perPageCost: 0.085 },
+  // >6x9 y >40 pág: Fijo $1.00, por página $0.080
+  { interior: 'COLOR_PREMIUM', size: 'LARGE', pageThreshold: Infinity, fixedCost: 1.00, perPageCost: 0.080 },
   
   // Color Standard - Small (only >72 pages)
-  // <6x9 y >72 pág: Fijo $1.00, por página $0.040
+  // <6x9 y >72 pág: Fijo $1.00, por página $0.026
   { interior: 'COLOR_STANDARD', size: 'SMALL', pageThreshold: 72, fixedCost: 0, perPageCost: 0 }, // Not valid
-  { interior: 'COLOR_STANDARD', size: 'SMALL', pageThreshold: Infinity, fixedCost: 1.00, perPageCost: 0.040 },
+  { interior: 'COLOR_STANDARD', size: 'SMALL', pageThreshold: Infinity, fixedCost: 1.00, perPageCost: 0.026 },
   
   // Color Standard - Large (only >72 pages)
   // >6x9 y >72 pág: Fijo $1.00, por página $0.040
