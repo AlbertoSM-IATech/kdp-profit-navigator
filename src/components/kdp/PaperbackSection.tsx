@@ -54,8 +54,8 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
   const currencySymbol = config?.currencySymbol || '€';
   const showIvaSelector = globalData.marketplace === 'ES';
   
-  // Calculate printing cost for display
-  const printingResult = calculatePrintingCost(data.interior, data.size, data.pages);
+  // Calculate printing cost for display - USE MARKETPLACE!
+  const printingResult = calculatePrintingCost(data.interior, data.size, data.pages, globalData.marketplace);
   const minPages = getMinPages(data.interior);
 
   const handleInteriorChange = (value: string) => {
