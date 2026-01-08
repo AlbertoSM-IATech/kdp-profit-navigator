@@ -10,6 +10,7 @@ import { PositioningSection } from '@/components/kdp/PositioningSection';
 import { ResultsTable } from '@/components/kdp/ResultsTable';
 import { ReportSection } from '@/components/kdp/ReportSection';
 import { PaperbackSimulator } from '@/components/kdp/PaperbackSimulator';
+import { RoyaltyChart } from '@/components/kdp/RoyaltyChart';
 import { ScoreDisplay } from '@/components/kdp/ScoreDisplay';
 import { NicheComparator } from '@/components/kdp/NicheComparator';
 import { PrintingCostsTable } from '@/components/kdp/PrintingCostsTable';
@@ -125,6 +126,7 @@ const Index = () => {
       pages: null,
       pvp: null,
       ivaType: 4,
+      bookFormat: 'PAPERBACK',
     });
     setLoadedNicheId(null);
     toast.success('Formulario limpio para nuevo análisis');
@@ -213,10 +215,13 @@ const Index = () => {
             )}
 
             {showPhysicalFormat && globalData.marketplace && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <PaperbackSection data={paperbackData} results={paperbackResults} globalData={globalData} onChange={setPaperbackData} />
-                {paperbackResults && <PaperbackSimulator data={paperbackData} globalData={globalData} />}
-              </div>
+              <>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <PaperbackSection data={paperbackData} results={paperbackResults} globalData={globalData} onChange={setPaperbackData} />
+                  {paperbackResults && <PaperbackSimulator data={paperbackData} globalData={globalData} />}
+                </div>
+                <RoyaltyChart globalData={globalData} paperbackData={paperbackData} />
+              </>
             )}
 
             {globalData.selectedFormat && globalData.marketplace && activeResults && (

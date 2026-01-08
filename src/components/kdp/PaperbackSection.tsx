@@ -1,4 +1,4 @@
-import { PaperbackData, PaperbackResults, GlobalData, InteriorType, BookSize, IvaType, MARKETPLACE_CONFIGS } from '@/types/kdp';
+import { PaperbackData, PaperbackResults, GlobalData, InteriorType, BookSize, IvaType, BookFormat, MARKETPLACE_CONFIGS } from '@/types/kdp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -15,7 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Book, Palette, Ruler, FileText, Euro, HelpCircle, AlertCircle, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
+import { Book, Palette, Ruler, FileText, Euro, HelpCircle, AlertCircle, CheckCircle, AlertTriangle, XCircle, BookOpen, Layers } from 'lucide-react';
 import { calculatePrintingCost, getMinPages } from '@/data/printingCosts';
 
 interface PaperbackSectionProps {
@@ -36,6 +36,11 @@ const sizeLabels: Record<BookSize, string> = {
   LARGE: 'Grande (>6x9")',
 };
 
+const formatLabels: Record<BookFormat, string> = {
+  PAPERBACK: 'Tapa blanda',
+  HARDCOVER: 'Tapa dura',
+};
+
 // Simplified color scheme - more subtle
 const getClicksColor = (clicks: number) => {
   if (clicks >= 13) return 'text-foreground';
@@ -54,17 +59,23 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
   const currencySymbol = config?.currencySymbol || '€';
   const showIvaSelector = globalData.marketplace === 'ES';
   
-  // Calculate printing cost for display - USE MARKETPLACE!
-  const printingResult = calculatePrintingCost(data.interior, data.size, data.pages, globalData.marketplace);
+  // Calculate printing cost for display - USE MARKETPLACE AND FORMAT!
+  const printingResult = calculatePrintingCost(data.interior, data.size, data.pages, globalData.marketplace, data.bookFormat);
   const minPages = getMinPages(data.interior);
+  const isHardcover = data.bookFormat === 'HARDCOVER';
 
   const handleInteriorChange = (value: string) => {
     const newInterior = value as InteriorType;
     const newMinPages = getMinPages(newInterior);
+    // If switching to COLOR_STANDARD and hardcover is selected, reset to paperback
+    const newBookFormat = newInterior === 'COLOR_STANDARD' && data.bookFormat === 'HARDCOVER' 
+      ? 'PAPERBACK' 
+      : data.bookFormat;
     onChange({
       ...data,
       interior: newInterior,
       pages: data.pages && data.pages < newMinPages ? newMinPages : data.pages,
+      bookFormat: newBookFormat,
     });
   };
 
@@ -72,6 +83,13 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
     onChange({
       ...data,
       size: value as BookSize,
+    });
+  };
+
+  const handleFormatChange = (value: string) => {
+    onChange({
+      ...data,
+      bookFormat: value as BookFormat,
     });
   };
 
@@ -128,7 +146,33 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
               Datos del libro
             </h4>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {/* Book Format (Paperback/Hardcover) */}
+              <div className="space-y-2">
+                <Label htmlFor="bookFormat" className="flex items-center gap-2 text-sm font-medium">
+                  <Layers className="h-4 w-4 text-muted-foreground" />
+                  Encuadernación
+                </Label>
+                <Select value={data.bookFormat} onValueChange={handleFormatChange}>
+                  <SelectTrigger id="bookFormat" className="input-focus">
+                    <SelectValue placeholder="Seleccionar..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border border-border">
+                    <SelectItem value="PAPERBACK">{formatLabels.PAPERBACK}</SelectItem>
+                    <SelectItem 
+                      value="HARDCOVER" 
+                      disabled={data.interior === 'COLOR_STANDARD'}
+                    >
+                      {formatLabels.HARDCOVER}
+                      {data.interior === 'COLOR_STANDARD' && ' (no disponible)'}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                {isHardcover && (
+                  <p className="text-xs text-primary">Tapa dura incluye coste adicional</p>
+                )}
+              </div>
+
               {/* Interior Type */}
               <div className="space-y-2">
                 <Label htmlFor="interior" className="flex items-center gap-2 text-sm font-medium">
@@ -250,7 +294,14 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
             {/* Printing Cost Info - Read only */}
             {data.interior && data.size && data.pages && printingResult.isValid && (
               <div className="p-4 bg-muted/50 rounded-lg space-y-2 animate-fade-in">
-                <h5 className="text-sm font-semibold text-foreground">Costes de Impresión (solo lectura)</h5>
+                <div className="flex items-center justify-between">
+                  <h5 className="text-sm font-semibold text-foreground">Costes de Impresión (solo lectura)</h5>
+                  {isHardcover && (
+                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                      Tapa dura
+                    </span>
+                  )}
+                </div>
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
                     <span className="text-muted-foreground block text-xs">Coste Fijo</span>
@@ -267,6 +318,7 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
                   Fórmula: ({data.pages} × {printingResult.perPageCost.toFixed(3)}) + {printingResult.fixedCost.toFixed(2)} = {printingResult.totalCost.toFixed(2)}{currencySymbol}
+                  {isHardcover && ' (incluye coste adicional tapa dura)'}
                 </p>
               </div>
             )}
