@@ -1,5 +1,7 @@
 import { InteriorType, BookSize, Marketplace } from '@/types/kdp';
 
+export type BookFormat = 'PAPERBACK' | 'HARDCOVER';
+
 export interface PrintingCostTier {
   interior: InteriorType;
   size: BookSize;
@@ -179,6 +181,39 @@ export const marketplaceTiers: Record<Marketplace, PrintingCostTier[]> = {
   JP: printingCostTiersJP,
 };
 
+// ============================================
+// HARDCOVER (TAPA DURA) - Costes adicionales
+// Fuente: https://kdp.amazon.com/es_ES/help/topic/G201834340
+// ============================================
+// Hardcover tiene un coste fijo adicional sobre paperback
+
+export interface HardcoverAdditionalCost {
+  // Coste fijo adicional por tapa dura (se suma al coste de paperback)
+  fixedCostAdditional: number;
+  // En algunos casos también hay coste adicional por página
+  perPageCostAdditional: number;
+}
+
+// Costes adicionales de hardcover por marketplace
+export const hardcoverCostsEU: HardcoverAdditionalCost = { fixedCostAdditional: 5.72, perPageCostAdditional: 0 };
+export const hardcoverCostsUS: HardcoverAdditionalCost = { fixedCostAdditional: 6.80, perPageCostAdditional: 0 };
+export const hardcoverCostsUK: HardcoverAdditionalCost = { fixedCostAdditional: 4.95, perPageCostAdditional: 0 };
+export const hardcoverCostsCA: HardcoverAdditionalCost = { fixedCostAdditional: 8.50, perPageCostAdditional: 0 };
+export const hardcoverCostsAU: HardcoverAdditionalCost = { fixedCostAdditional: 10.20, perPageCostAdditional: 0 };
+export const hardcoverCostsJP: HardcoverAdditionalCost = { fixedCostAdditional: 850, perPageCostAdditional: 0 };
+
+export const hardcoverCostsByMarketplace: Record<Marketplace, HardcoverAdditionalCost> = {
+  ES: hardcoverCostsEU,
+  DE: hardcoverCostsEU,
+  FR: hardcoverCostsEU,
+  IT: hardcoverCostsEU,
+  COM: hardcoverCostsUS,
+  UK: hardcoverCostsUK,
+  CA: hardcoverCostsCA,
+  AU: hardcoverCostsAU,
+  JP: hardcoverCostsJP,
+};
+
 export interface PrintingCostResult {
   fixedCost: number;
   perPageCost: number;
@@ -188,21 +223,25 @@ export interface PrintingCostResult {
 }
 
 /**
- * Calculate printing costs based on interior type, size, number of pages, and marketplace
+ * Calculate printing costs based on interior type, size, number of pages, marketplace, and format
  */
 export const calculatePrintingCost = (
   interior: InteriorType | null,
   size: BookSize | null,
   pages: number | null,
-  marketplace?: Marketplace | null
+  marketplace?: Marketplace | null,
+  format?: BookFormat
 ): PrintingCostResult => {
   if (!interior || !size || pages === null || pages <= 0) {
     return { fixedCost: 0, perPageCost: 0, totalCost: 0, isValid: false };
   }
 
+  const effectiveMarketplace = marketplace || 'ES';
+  const isHardcover = format === 'HARDCOVER';
+
   // For Color Estándar, minimum is 72 pages (except AU and JP which don't support it)
   if (interior === 'COLOR_STANDARD') {
-    if (marketplace === 'AU' || marketplace === 'JP') {
+    if (effectiveMarketplace === 'AU' || effectiveMarketplace === 'JP') {
       return {
         fixedCost: 0,
         perPageCost: 0,
@@ -222,8 +261,19 @@ export const calculatePrintingCost = (
     }
   }
 
+  // Hardcover not available for Color Standard
+  if (isHardcover && interior === 'COLOR_STANDARD') {
+    return {
+      fixedCost: 0,
+      perPageCost: 0,
+      totalCost: 0,
+      isValid: false,
+      errorMessage: 'Tapa dura no disponible para Color Estándar',
+    };
+  }
+
   // Select the appropriate tier list based on marketplace
-  const tierList = marketplaceTiers[marketplace || 'ES'];
+  const tierList = marketplaceTiers[effectiveMarketplace];
 
   // Find the appropriate tier
   const applicableTiers = tierList.filter(
@@ -239,12 +289,23 @@ export const calculatePrintingCost = (
     return { fixedCost: 0, perPageCost: 0, totalCost: 0, isValid: false };
   }
 
+  // Base costs from paperback
+  let fixedCost = tier.fixedCost;
+  let perPageCost = tier.perPageCost;
+
+  // Add hardcover additional costs
+  if (isHardcover) {
+    const hardcoverCosts = hardcoverCostsByMarketplace[effectiveMarketplace];
+    fixedCost += hardcoverCosts.fixedCostAdditional;
+    perPageCost += hardcoverCosts.perPageCostAdditional;
+  }
+
   // Calculate total cost: (pages × perPageCost) + fixedCost
-  const totalCost = (pages * tier.perPageCost) + tier.fixedCost;
+  const totalCost = (pages * perPageCost) + fixedCost;
 
   return {
-    fixedCost: tier.fixedCost,
-    perPageCost: tier.perPageCost,
+    fixedCost,
+    perPageCost,
     totalCost,
     isValid: true,
   };

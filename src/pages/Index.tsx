@@ -13,6 +13,7 @@ import { PaperbackSimulator } from '@/components/kdp/PaperbackSimulator';
 import { ScoreDisplay } from '@/components/kdp/ScoreDisplay';
 import { NicheComparator } from '@/components/kdp/NicheComparator';
 import { PrintingCostsTable } from '@/components/kdp/PrintingCostsTable';
+import { PrintingCalculator } from '@/components/kdp/PrintingCalculator';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Calculator, Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react';
@@ -261,6 +262,9 @@ const Index = () => {
                 precioMinRecomendado: n.precioMinRecomendado,
                 }))}
             />
+            
+            {/* Calculador interactivo de costes */}
+            <PrintingCalculator />
             
             {/* Tabla de precios de impresión */}
             <PrintingCostsTable />
