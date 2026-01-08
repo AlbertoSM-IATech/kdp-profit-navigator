@@ -56,6 +56,7 @@ export const useKdpCalculator = () => {
     pvp: null,
     pages: null,
     ivaType: 4,
+    bookFormat: 'PAPERBACK',
   });
 
   // Get marketplace config
@@ -160,12 +161,12 @@ export const useKdpCalculator = () => {
   // Paperback/Hardcover Calculations
   const paperbackResults = useMemo((): PaperbackResults | null => {
     const { marketplace, cpc, margenObjetivoPct } = globalData;
-    const { interior, size, pvp, pages, ivaType } = paperbackData;
+    const { interior, size, pvp, pages, ivaType, bookFormat } = paperbackData;
 
     if (!interior || !size || !pvp || !pages || cpc === null || !marketplace) return null;
 
-    // Calculate printing costs (pass marketplace for US-specific costs)
-    const printingResult = calculatePrintingCost(interior, size, pages, marketplace);
+    // Calculate printing costs (pass marketplace and format for US-specific costs and hardcover)
+    const printingResult = calculatePrintingCost(interior, size, pages, marketplace, bookFormat);
     
     if (!printingResult.isValid) {
       return null;

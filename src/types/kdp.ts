@@ -8,6 +8,8 @@ export type BookSize = 'SMALL' | 'LARGE';
 
 export type FormatType = 'EBOOK' | 'PAPERBACK';
 
+export type BookFormat = 'PAPERBACK' | 'HARDCOVER';
+
 export type IvaType = 4 | 21;
 
 export type RiskLevel = 'low' | 'medium' | 'high';
@@ -54,6 +56,7 @@ export interface PaperbackData {
   pvp: number | null;
   pages: number | null;
   ivaType: IvaType;
+  bookFormat: BookFormat;
 }
 
 export interface PaperbackResults {
