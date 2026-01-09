@@ -225,10 +225,25 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
                     placeholder={`Mín: ${minPages}`}
                     value={data.pages ?? ''}
                     onChange={(e) => handleNumberChange('pages', e.target.value)}
-                    className="input-focus border-primary/30"
+                    className={`input-focus border-primary/30 ${
+                      data.pages !== null && data.pages < minPages 
+                        ? 'border-destructive focus:ring-destructive' 
+                        : ''
+                    }`}
                   />
-                  {data.interior === 'COLOR_STANDARD' && (
-                    <p className="text-xs text-muted-foreground">Color Estándar requiere &gt;72 páginas</p>
+                  {/* Validation message for pages */}
+                  {data.pages !== null && data.pages < minPages && (
+                    <div className="flex items-center gap-1.5 text-destructive text-xs animate-fade-in">
+                      <AlertCircle className="h-3 w-3" />
+                      <span>Mínimo {minPages} páginas para este tipo de impresión</span>
+                    </div>
+                  )}
+                  {data.pages !== null && data.pages >= minPages && (
+                    <p className="text-xs text-muted-foreground">
+                      {data.interior === 'COLOR_STANDARD' 
+                        ? 'Color Estándar: 72-600 páginas' 
+                        : `${data.interior === 'BN' ? 'B/N' : 'Color Premium'}: ${minPages}-828 páginas`}
+                    </p>
                   )}
                 </div>
 
