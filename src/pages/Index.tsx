@@ -15,6 +15,9 @@ import { ScoreDisplay } from '@/components/kdp/ScoreDisplay';
 import { NicheComparator } from '@/components/kdp/NicheComparator';
 import { PrintingCostsTable } from '@/components/kdp/PrintingCostsTable';
 import { PrintingCalculator } from '@/components/kdp/PrintingCalculator';
+import { FormatComparison } from '@/components/kdp/FormatComparison';
+import { BreakevenAlert } from '@/components/kdp/BreakevenAlert';
+import { ExportPdf } from '@/components/kdp/ExportPdf';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Calculator, Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react';
@@ -216,11 +219,17 @@ const Index = () => {
 
             {showPhysicalFormat && globalData.marketplace && (
               <>
+                {/* Breakeven Alert */}
+                <BreakevenAlert globalData={globalData} paperbackData={paperbackData} />
+                
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <PaperbackSection data={paperbackData} results={paperbackResults} globalData={globalData} onChange={setPaperbackData} />
                   {paperbackResults && <PaperbackSimulator data={paperbackData} globalData={globalData} />}
                 </div>
                 <RoyaltyChart globalData={globalData} paperbackData={paperbackData} />
+                
+                {/* Format Comparison */}
+                <FormatComparison globalData={globalData} paperbackData={paperbackData} />
               </>
             )}
 
@@ -266,6 +275,18 @@ const Index = () => {
                 pvp: n.pvp,
                 precioMinRecomendado: n.precioMinRecomendado,
                 }))}
+            />
+            
+            {/* Export PDF */}
+            <ExportPdf 
+              globalData={globalData}
+              ebookData={ebookData}
+              ebookResults={ebookResults}
+              paperbackData={paperbackData}
+              paperbackResults={paperbackResults}
+              positioningResults={positioningResults}
+              tableData={tableData}
+              scoreBreakdown={scoreBreakdown}
             />
             
             {/* Calculador interactivo de costes */}
