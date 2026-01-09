@@ -36,9 +36,10 @@ export const RoyaltyChart = ({ globalData, paperbackData }: RoyaltyChartProps) =
   const currencySymbol = config?.currencySymbol || '€';
   const royaltyThreshold = config?.royaltyThreshold || 9.99;
   
-  const [pvpRange, setPvpRange] = useState<[number, number]>([5, 30]);
+  const [pvpMin, setPvpMin] = useState(5);
+  const [pvpMax, setPvpMax] = useState(30);
 
-  const canSimulate = paperbackData.interior && paperbackData.size && paperbackData.pages && globalData.marketplace;
+  const canSimulate = paperbackData.interior && paperbackData.size && paperbackData.pages && paperbackData.pages >= 24 && globalData.marketplace;
 
   const simulationData = useMemo((): SimulationPoint[] => {
     if (!canSimulate) return [];
@@ -56,7 +57,7 @@ export const RoyaltyChart = ({ globalData, paperbackData }: RoyaltyChartProps) =
     const points: SimulationPoint[] = [];
     const step = 0.50;
     
-    for (let pvp = pvpRange[0]; pvp <= pvpRange[1]; pvp += step) {
+    for (let pvp = pvpMin; pvp <= pvpMax; pvp += step) {
       const precioSinIva = pvp / (1 + ivaPct / 100);
       const royaltyRate = pvp < royaltyThreshold ? 0.50 : 0.60;
       const regalias = (precioSinIva * royaltyRate) - gastosImpresion;
@@ -72,7 +73,7 @@ export const RoyaltyChart = ({ globalData, paperbackData }: RoyaltyChartProps) =
     }
 
     return points;
-  }, [canSimulate, paperbackData, globalData.marketplace, pvpRange]);
+  }, [canSimulate, paperbackData, globalData.marketplace, pvpMin, pvpMax]);
 
   // Find breakeven point
   const breakevenPvp = useMemo(() => {
@@ -94,7 +95,7 @@ export const RoyaltyChart = ({ globalData, paperbackData }: RoyaltyChartProps) =
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground text-center py-8">
-            Configura el tipo de impresión, tamaño y número de páginas para ver la simulación.
+            Configura el tipo de impresión, tamaño y número de páginas (mínimo 24) para ver la simulación.
           </p>
         </CardContent>
       </Card>
@@ -114,19 +115,29 @@ export const RoyaltyChart = ({ globalData, paperbackData }: RoyaltyChartProps) =
         {/* Range Selector */}
         <div className="space-y-4">
           <Label className="text-sm font-medium">
-            Rango de PVP: {pvpRange[0]}{currencySymbol} - {pvpRange[1]}{currencySymbol}
+            Rango de PVP: {pvpMin}{currencySymbol} - {pvpMax}{currencySymbol}
           </Label>
-          <div className="flex gap-4 items-center">
-            <span className="text-xs text-muted-foreground w-16">Min: {pvpRange[0]}{currencySymbol}</span>
-            <Slider
-              value={pvpRange}
-              onValueChange={(v) => setPvpRange(v as [number, number])}
-              min={1}
-              max={50}
-              step={1}
-              className="flex-1"
-            />
-            <span className="text-xs text-muted-foreground w-16">Max: {pvpRange[1]}{currencySymbol}</span>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <span className="text-xs text-muted-foreground">Mínimo: {pvpMin}{currencySymbol}</span>
+              <Slider
+                value={[pvpMin]}
+                onValueChange={(v) => setPvpMin(Math.min(v[0], pvpMax - 1))}
+                min={1}
+                max={49}
+                step={1}
+              />
+            </div>
+            <div className="space-y-2">
+              <span className="text-xs text-muted-foreground">Máximo: {pvpMax}{currencySymbol}</span>
+              <Slider
+                value={[pvpMax]}
+                onValueChange={(v) => setPvpMax(Math.max(v[0], pvpMin + 1))}
+                min={2}
+                max={50}
+                step={1}
+              />
+            </div>
           </div>
         </div>
 
@@ -225,7 +236,7 @@ export const RoyaltyChart = ({ globalData, paperbackData }: RoyaltyChartProps) =
               />
 
               {/* Current PVP marker */}
-              {currentPvp && currentPvp >= pvpRange[0] && currentPvp <= pvpRange[1] && (
+              {currentPvp && currentPvp >= pvpMin && currentPvp <= pvpMax && (
                 <ReferenceLine 
                   x={currentPvp} 
                   stroke="hsl(var(--foreground))" 
