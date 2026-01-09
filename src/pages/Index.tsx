@@ -11,6 +11,7 @@ import { ResultsTable } from '@/components/kdp/ResultsTable';
 import { ReportSection } from '@/components/kdp/ReportSection';
 import { PaperbackSimulator } from '@/components/kdp/PaperbackSimulator';
 import { RoyaltyChart } from '@/components/kdp/RoyaltyChart';
+import { PageSensitivityChart } from '@/components/kdp/PageSensitivityChart';
 import { ScoreDisplay } from '@/components/kdp/ScoreDisplay';
 import { NicheComparator } from '@/components/kdp/NicheComparator';
 import { PrintingCostsTable } from '@/components/kdp/PrintingCostsTable';
@@ -227,6 +228,9 @@ const Index = () => {
                   {paperbackResults && <PaperbackSimulator data={paperbackData} globalData={globalData} />}
                 </div>
                 <RoyaltyChart globalData={globalData} paperbackData={paperbackData} />
+                
+                {/* Page Sensitivity Chart */}
+                <PageSensitivityChart globalData={globalData} paperbackData={paperbackData} />
                 
                 {/* Format Comparison */}
                 <FormatComparison globalData={globalData} paperbackData={paperbackData} />
