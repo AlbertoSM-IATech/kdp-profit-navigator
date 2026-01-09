@@ -229,6 +229,7 @@ export const RoyaltyChart = ({ globalData, paperbackData }: RoyaltyChartProps) =
 
               {/* Royalty threshold line */}
               <ReferenceLine 
+                yAxisId="left"
                 x={royaltyThreshold} 
                 stroke="hsl(var(--primary))" 
                 strokeDasharray="5 5"
@@ -238,6 +239,7 @@ export const RoyaltyChart = ({ globalData, paperbackData }: RoyaltyChartProps) =
               {/* Current PVP marker */}
               {currentPvp && currentPvp >= pvpMin && currentPvp <= pvpMax && (
                 <ReferenceLine 
+                  yAxisId="left"
                   x={currentPvp} 
                   stroke="hsl(var(--foreground))" 
                   strokeWidth={2}
