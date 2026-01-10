@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useKdpCalculator } from '@/hooks/useKdpCalculator';
 import { useScoring } from '@/hooks/useScoring';
 import { useNicheComparator } from '@/hooks/useNicheComparator';
@@ -26,6 +26,9 @@ import { SavedNiche } from '@/types/kdp';
 import { toast } from 'sonner';
 
 const Index = () => {
+  // Chart refs for PDF export
+  const royaltyChartRef = useRef<HTMLDivElement>(null);
+  const sensitivityChartRef = useRef<HTMLDivElement>(null);
   const {
     globalData,
     setGlobalData,
@@ -230,7 +233,12 @@ const Index = () => {
                 <RoyaltyChart globalData={globalData} paperbackData={paperbackData} />
                 
                 {/* Page Sensitivity Chart */}
-                <PageSensitivityChart globalData={globalData} paperbackData={paperbackData} />
+                <PageSensitivityChart 
+                  globalData={globalData} 
+                  paperbackData={paperbackData} 
+                  ref={sensitivityChartRef}
+                  onPagesChange={(pages) => setPaperbackData({ ...paperbackData, pages })}
+                />
                 
                 {/* Format Comparison */}
                 <FormatComparison globalData={globalData} paperbackData={paperbackData} />
@@ -291,6 +299,8 @@ const Index = () => {
               positioningResults={positioningResults}
               tableData={tableData}
               scoreBreakdown={scoreBreakdown}
+              royaltyChartRef={royaltyChartRef}
+              sensitivityChartRef={sensitivityChartRef}
             />
             
             {/* Calculador interactivo de costes */}
