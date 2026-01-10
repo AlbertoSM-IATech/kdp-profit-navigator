@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, forwardRef } from 'react';
 import { GlobalData, PaperbackData, MARKETPLACE_CONFIGS, BookFormat } from '@/types/kdp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -31,7 +31,8 @@ interface SimulationPoint {
   isAboveThreshold: boolean;
 }
 
-export const RoyaltyChart = ({ globalData, paperbackData }: RoyaltyChartProps) => {
+export const RoyaltyChart = forwardRef<HTMLDivElement, RoyaltyChartProps>(
+  ({ globalData, paperbackData }, ref) => {
   const config = globalData.marketplace ? MARKETPLACE_CONFIGS[globalData.marketplace] : null;
   const currencySymbol = config?.currencySymbol || '€';
   const royaltyThreshold = config?.royaltyThreshold || 9.99;
@@ -103,7 +104,7 @@ export const RoyaltyChart = ({ globalData, paperbackData }: RoyaltyChartProps) =
   }
 
   return (
-    <Card className="animate-fade-in">
+    <Card className="animate-fade-in" ref={ref}>
       <CardHeader className="pb-4">
         <CardTitle className="section-header">
           <TrendingUp className="h-5 w-5 text-primary" />
@@ -299,4 +300,6 @@ export const RoyaltyChart = ({ globalData, paperbackData }: RoyaltyChartProps) =
       </CardContent>
     </Card>
   );
-};
+});
+
+RoyaltyChart.displayName = 'RoyaltyChart';
