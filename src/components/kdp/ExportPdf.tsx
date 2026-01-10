@@ -9,9 +9,9 @@ import {
   PaperbackResults, 
   PositioningResults,
   TableRow,
+  ScoreBreakdown,
   MARKETPLACE_CONFIGS
 } from '@/types/kdp';
-import { ScoreBreakdown } from '@/hooks/useScoring';
 import { Download, Loader2, FileText, CheckCircle } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -148,16 +148,16 @@ export const ExportPdf = ({
       // Score
       if (scoreBreakdown) {
         addText('🎯 Puntuación de Viabilidad', 14, 'bold');
-        const scoreColor: [number, number, number] = scoreBreakdown.total >= 70 ? [34, 197, 94] : 
-          scoreBreakdown.total >= 50 ? [234, 179, 8] : [239, 68, 68];
-        addText(`Puntuación total: ${scoreBreakdown.total}/100 ${scoreBreakdown.statusEmoji}`, 16, 'bold', scoreColor);
+        const scoreColor: [number, number, number] = scoreBreakdown.totalScore >= 70 ? [34, 197, 94] : 
+          scoreBreakdown.totalScore >= 50 ? [234, 179, 8] : [239, 68, 68];
+        addText(`Puntuación total: ${scoreBreakdown.totalScore}/100 ${scoreBreakdown.statusEmoji}`, 16, 'bold', scoreColor);
         addText(`Estado: ${scoreBreakdown.status === 'excellent' ? 'Excelente - Publicar' : 
           scoreBreakdown.status === 'viable' ? 'Viable - Ajustar' : 
-          scoreBreakdown.status === 'marginal' ? 'Marginal - Revisar' : 'No viable - Descartar'}`, 11);
+          scoreBreakdown.status === 'risky' ? 'Riesgoso - Revisar' : 'No recomendable - Descartar'}`, 11);
         yPos += 2;
-        addText(`• Clics máx./venta: ${scoreBreakdown.clicsScore.value}/${scoreBreakdown.clicsScore.max} pts`, 10);
-        addText(`• BACOS (margen): ${scoreBreakdown.bacosScore.value}/${scoreBreakdown.bacosScore.max} pts`, 10);
-        addText(`• PVP vs mínimo: ${scoreBreakdown.pvpScore.value}/${scoreBreakdown.pvpScore.max} pts`, 10);
+        addText(`• Clics máx./venta: ${scoreBreakdown.clicsScore}/50 pts`, 10);
+        addText(`• BACOS (margen): ${scoreBreakdown.bacosScore}/30 pts`, 10);
+        addText(`• PVP vs mínimo: ${scoreBreakdown.pvpVsMinScore}/20 pts`, 10);
         yPos += 3;
         addLine();
       }
