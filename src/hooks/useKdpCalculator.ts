@@ -86,9 +86,9 @@ export const useKdpCalculator = () => {
     // Royalties: (price without IVA × royalty rate) - delivery cost
     const regalias = (precioSinIva * (royaltyRate / 100)) - deliveryCost;
 
-    // Margin calculations - BACOS = Regalía neta / Precio sin IVA
+    // Margin calculations - BACOS = Regalía neta / PVP
     const margenAbsoluto = regalias;
-    const margenPct = precioSinIva > 0 ? (regalias / precioSinIva) * 100 : 0;
+    const margenPct = pvp > 0 ? (regalias / pvp) * 100 : 0;
     
     // Benefit per sale
     const beneficioNeto = regalias;
@@ -188,9 +188,9 @@ export const useKdpCalculator = () => {
     // Royalties: (price without IVA × royalty rate) - printing cost
     const regalias = (precioSinIva * royaltyRate) - gastosImpresion;
 
-    // Margin calculations - BACOS = Regalía neta / Precio sin IVA
+    // Margin calculations - BACOS = Regalía neta / PVP
     const margenAbsoluto = regalias;
-    const margenPct = precioSinIva > 0 ? (regalias / precioSinIva) * 100 : 0;
+    const margenPct = pvp > 0 ? (regalias / pvp) * 100 : 0;
     
     // Benefit per sale
     const beneficioNeto = regalias;
