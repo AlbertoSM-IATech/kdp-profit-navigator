@@ -122,8 +122,8 @@ export const PaperbackSimulator = ({ data, globalData }: PaperbackSimulatorProps
   const precioSinIva = simState.pvp / (1 + ivaPct / 100);
   const regalias = (precioSinIva * royaltyRate) - gastosImpresion;
   
-  // BACOS = Regalía neta / Precio sin IVA
-  const margenBacos = precioSinIva > 0 ? (regalias / precioSinIva) * 100 : 0;
+  // BACOS = Regalía neta / PVP
+  const margenBacos = simState.pvp > 0 ? (regalias / simState.pvp) * 100 : 0;
   const cpcMaxRentable = regalias > 0 ? regalias / 10 : 0;
   
   // Clics máx. = FLOOR(Regalía neta / CPC)
@@ -344,7 +344,7 @@ export const PaperbackSimulator = ({ data, globalData }: PaperbackSimulatorProps
                         </TooltipTrigger>
                         <TooltipContent className="max-w-xs p-3">
                           <p className="text-sm">
-                            BACOS = (Regalía neta) / (Precio sin IVA)
+                            BACOS = (Regalía neta) / (PVP)
                           </p>
                         </TooltipContent>
                       </Tooltip>

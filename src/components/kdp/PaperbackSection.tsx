@@ -405,7 +405,7 @@ export const PaperbackSection = ({ data, results, globalData, onChange }: Paperb
                             <p className="text-sm">
                               <strong>BACOS</strong> = Margen real después del coste de ventas.
                               <br /><br />
-                              Fórmula: (Regalía neta) / (Precio sin IVA)
+                              Fórmula: (Regalía neta) / (PVP)
                               <br /><br />
                               Es el porcentaje de cada venta que realmente te queda para margen operativo (antes de estructura).
                             </p>

@@ -273,7 +273,7 @@ export const ReportSection = ({
       const ivaPct = globalData.marketplace === 'ES' ? 4 : 0;
       const precioSinIva = simPvp / (1 + ivaPct / 100);
       const regalias = (precioSinIva * royaltyRate) - printingResult.totalCost;
-      const margenBacos = precioSinIva > 0 ? (regalias / precioSinIva) * 100 : 0;
+      const margenBacos = simPvp > 0 ? (regalias / simPvp) * 100 : 0;
       const clicsMax = simCpc > 0 && regalias > 0 ? Math.floor(regalias / simCpc) : 0;
       
       simResults = {
