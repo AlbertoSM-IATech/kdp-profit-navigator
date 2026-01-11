@@ -229,15 +229,16 @@ const Index = () => {
                   <PaperbackSection data={paperbackData} results={paperbackResults} globalData={globalData} onChange={setPaperbackData} />
                   {paperbackResults && <PaperbackSimulator data={paperbackData} globalData={globalData} />}
                 </div>
-                <RoyaltyChart globalData={globalData} paperbackData={paperbackData} ref={royaltyChartRef} />
-                
-                {/* Page Sensitivity Chart */}
-                <PageSensitivityChart 
-                  globalData={globalData} 
-                  paperbackData={paperbackData} 
-                  ref={sensitivityChartRef}
-                  onPagesChange={(pages) => setPaperbackData({ ...paperbackData, pages })}
-                />
+                {/* Charts Grid - Side by Side */}
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                  <RoyaltyChart globalData={globalData} paperbackData={paperbackData} ref={royaltyChartRef} />
+                  <PageSensitivityChart 
+                    globalData={globalData} 
+                    paperbackData={paperbackData} 
+                    ref={sensitivityChartRef}
+                    onPagesChange={(pages) => setPaperbackData({ ...paperbackData, pages })}
+                  />
+                </div>
               </>
             )}
 
