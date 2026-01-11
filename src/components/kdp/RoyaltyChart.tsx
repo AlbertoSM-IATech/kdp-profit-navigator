@@ -21,6 +21,7 @@ import {
 interface RoyaltyChartProps {
   globalData: GlobalData;
   paperbackData: PaperbackData;
+  embedded?: boolean;
 }
 
 interface SimulationPoint {
@@ -32,7 +33,7 @@ interface SimulationPoint {
 }
 
 export const RoyaltyChart = forwardRef<HTMLDivElement, RoyaltyChartProps>(
-  ({ globalData, paperbackData }, ref) => {
+  ({ globalData, paperbackData, embedded = false }, ref) => {
   const config = globalData.marketplace ? MARKETPLACE_CONFIGS[globalData.marketplace] : null;
   const currencySymbol = config?.currencySymbol || '€';
   const royaltyThreshold = config?.royaltyThreshold || 9.99;
@@ -86,6 +87,13 @@ export const RoyaltyChart = forwardRef<HTMLDivElement, RoyaltyChartProps>(
   const currentPvp = paperbackData.pvp;
 
   if (!canSimulate) {
+    if (embedded) {
+      return (
+        <p className="text-sm text-muted-foreground text-center py-8">
+          Configura el tipo de impresión, tamaño y número de páginas (mínimo 24) para ver la simulación.
+        </p>
+      );
+    }
     return (
       <Card className="animate-fade-in">
         <CardHeader className="pb-4">
@@ -103,16 +111,9 @@ export const RoyaltyChart = forwardRef<HTMLDivElement, RoyaltyChartProps>(
     );
   }
 
-  return (
-    <Card className="animate-fade-in" ref={ref}>
-      <CardHeader className="pb-4">
-        <CardTitle className="section-header">
-          <TrendingUp className="h-5 w-5 text-primary" />
-          📊 Simulador de Regalías por PVP
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">Visualiza cómo cambian las regalías según el precio de venta.</p>
-      </CardHeader>
-      <CardContent className="space-y-6">
+  // Chart content (reusable for both embedded and standalone modes)
+  const chartContent = (
+    <div className="space-y-6">
         {/* Range Selector */}
         <div className="space-y-4">
           <Label className="text-sm font-medium">
@@ -297,7 +298,25 @@ export const RoyaltyChart = forwardRef<HTMLDivElement, RoyaltyChartProps>(
             </ul>
           </div>
         )}
-      </CardContent>
+      </div>
+  );
+
+  // If embedded, just return the content
+  if (embedded) {
+    return <div ref={ref}>{chartContent}</div>;
+  }
+
+  // Otherwise, wrap in Card
+  return (
+    <Card className="animate-fade-in" ref={ref}>
+      <CardHeader className="pb-4">
+        <CardTitle className="section-header">
+          <TrendingUp className="h-5 w-5 text-primary" />
+          📊 Simulador de Regalías por PVP
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">Visualiza cómo cambian las regalías según el precio de venta.</p>
+      </CardHeader>
+      <CardContent>{chartContent}</CardContent>
     </Card>
   );
 });
