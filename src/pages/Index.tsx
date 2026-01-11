@@ -20,7 +20,9 @@ import { BreakevenAlert } from '@/components/kdp/BreakevenAlert';
 import { ExportPdf } from '@/components/kdp/ExportPdf';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
-import { Calculator, Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Calculator, Eye, EyeOff, ChevronDown, ChevronUp, TrendingUp, FileText } from 'lucide-react';
 import { SavedNiche } from '@/types/kdp';
 import { toast } from 'sonner';
 
@@ -43,6 +45,8 @@ const Index = () => {
 
   const [loadedNicheId, setLoadedNicheId] = useState<string | null>(null);
   const [quickViewMode, setQuickViewMode] = useState(false);
+  const [royaltyChartOpen, setRoyaltyChartOpen] = useState(true);
+  const [sensitivityChartOpen, setSensitivityChartOpen] = useState(true);
   
   const showPhysicalFormat = globalData.selectedFormat === 'PAPERBACK';
   const activeResults = globalData.selectedFormat === 'EBOOK' ? ebookResults : paperbackResults;
@@ -144,7 +148,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
-        <div className="container py-4">
+        <div className="w-[90%] max-w-[1800px] mx-auto py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-lg">
@@ -180,7 +184,7 @@ const Index = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container py-8 space-y-6">
+      <main className="w-[90%] max-w-[1800px] mx-auto py-8 space-y-6">
         {/* Quick View Mode */}
         {quickViewMode && hasCurrentData && scoreBreakdown && (
           <div className="space-y-4">
@@ -229,15 +233,74 @@ const Index = () => {
                   <PaperbackSection data={paperbackData} results={paperbackResults} globalData={globalData} onChange={setPaperbackData} />
                   {paperbackResults && <PaperbackSimulator data={paperbackData} globalData={globalData} />}
                 </div>
-                {/* Charts Grid - Side by Side */}
+                {/* Charts Grid - Side by Side, Collapsible */}
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  <RoyaltyChart globalData={globalData} paperbackData={paperbackData} ref={royaltyChartRef} />
-                  <PageSensitivityChart 
-                    globalData={globalData} 
-                    paperbackData={paperbackData} 
-                    ref={sensitivityChartRef}
-                    onPagesChange={(pages) => setPaperbackData({ ...paperbackData, pages })}
-                  />
+                  {/* Royalty Chart - Collapsible */}
+                  <Collapsible open={royaltyChartOpen} onOpenChange={setRoyaltyChartOpen}>
+                    <Card className="animate-fade-in">
+                      <CollapsibleTrigger asChild>
+                        <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="section-header">
+                              <TrendingUp className="h-5 w-5 text-primary" />
+                              📊 Simulador de Regalías por PVP
+                            </CardTitle>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              {royaltyChartOpen ? (
+                                <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                              ) : (
+                                <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                              )}
+                            </Button>
+                          </div>
+                          <p className="text-sm text-muted-foreground">Visualiza cómo cambian las regalías según el precio.</p>
+                        </CardHeader>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <CardContent className="min-h-[450px]">
+                          <div ref={royaltyChartRef}>
+                            <RoyaltyChart globalData={globalData} paperbackData={paperbackData} embedded />
+                          </div>
+                        </CardContent>
+                      </CollapsibleContent>
+                    </Card>
+                  </Collapsible>
+
+                  {/* Page Sensitivity Chart - Collapsible */}
+                  <Collapsible open={sensitivityChartOpen} onOpenChange={setSensitivityChartOpen}>
+                    <Card className="animate-fade-in">
+                      <CollapsibleTrigger asChild>
+                        <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="section-header">
+                              <FileText className="h-5 w-5 text-primary" />
+                              📄 Sensibilidad de Páginas
+                            </CardTitle>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              {sensitivityChartOpen ? (
+                                <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                              ) : (
+                                <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                              )}
+                            </Button>
+                          </div>
+                          <p className="text-sm text-muted-foreground">Analiza el impacto del número de páginas en rentabilidad.</p>
+                        </CardHeader>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <CardContent className="min-h-[450px]">
+                          <div ref={sensitivityChartRef}>
+                            <PageSensitivityChart 
+                              globalData={globalData} 
+                              paperbackData={paperbackData} 
+                              onPagesChange={(pages) => setPaperbackData({ ...paperbackData, pages })}
+                              embedded
+                            />
+                          </div>
+                        </CardContent>
+                      </CollapsibleContent>
+                    </Card>
+                  </Collapsible>
                 </div>
               </>
             )}

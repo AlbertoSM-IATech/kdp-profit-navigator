@@ -22,6 +22,7 @@ interface PageSensitivityChartProps {
   globalData: GlobalData;
   paperbackData: PaperbackData;
   onPagesChange?: (pages: number) => void;
+  embedded?: boolean;
 }
 
 interface SensitivityPoint {
@@ -34,7 +35,7 @@ interface SensitivityPoint {
 }
 
 export const PageSensitivityChart = forwardRef<HTMLDivElement, PageSensitivityChartProps>(
-  ({ globalData, paperbackData, onPagesChange }, ref) => {
+  ({ globalData, paperbackData, onPagesChange, embedded = false }, ref) => {
     const config = globalData.marketplace ? MARKETPLACE_CONFIGS[globalData.marketplace] : null;
     const currencySymbol = config?.currencySymbol || '€';
     const royaltyThreshold = config?.royaltyThreshold || 9.99;
@@ -169,6 +170,13 @@ export const PageSensitivityChart = forwardRef<HTMLDivElement, PageSensitivityCh
     const isSimulationDifferent = simulatedPages !== paperbackData.pages;
 
     if (!canSimulate || sensitivityData.length === 0) {
+      if (embedded) {
+        return (
+          <p className="text-sm text-muted-foreground text-center py-8">
+            Configura tipo de impresión, tamaño, páginas (mín. 24) y PVP para ver cómo varían las regalías.
+          </p>
+        );
+      }
       return (
         <Card className="animate-fade-in">
           <CardHeader className="pb-4">
@@ -186,18 +194,9 @@ export const PageSensitivityChart = forwardRef<HTMLDivElement, PageSensitivityCh
       );
     }
 
-    return (
-      <Card className="animate-fade-in" ref={ref}>
-        <CardHeader className="pb-4">
-          <CardTitle className="section-header">
-            <FileText className="h-5 w-5 text-primary" />
-            📊 Sensibilidad por Páginas
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Impacto del número de páginas en regalías y costes (PVP fijo: {paperbackData.pvp}{currencySymbol})
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
+    // Chart content (reusable for both embedded and standalone modes)
+    const chartContent = (
+      <div className="space-y-4">
           {/* Interactive Slider */}
           <div className="p-4 bg-muted/20 rounded-lg border border-border">
             <div className="flex items-center gap-2 mb-3">
@@ -437,7 +436,27 @@ export const PageSensitivityChart = forwardRef<HTMLDivElement, PageSensitivityCh
               )}
             </ul>
           </div>
-        </CardContent>
+        </div>
+    );
+
+    // If embedded, just return the content
+    if (embedded) {
+      return <div ref={ref}>{chartContent}</div>;
+    }
+
+    // Otherwise, wrap in Card
+    return (
+      <Card className="animate-fade-in" ref={ref}>
+        <CardHeader className="pb-4">
+          <CardTitle className="section-header">
+            <FileText className="h-5 w-5 text-primary" />
+            📊 Sensibilidad por Páginas
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Impacto del número de páginas en regalías y costes (PVP fijo: {paperbackData.pvp}{currencySymbol})
+          </p>
+        </CardHeader>
+        <CardContent>{chartContent}</CardContent>
       </Card>
     );
   }
