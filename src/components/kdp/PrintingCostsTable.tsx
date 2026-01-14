@@ -11,12 +11,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 
-export const PrintingCostsTable = () => {
+interface PrintingCostsTableProps {
+  embedded?: boolean;
+}
+
+export const PrintingCostsTable = ({ embedded = false }: PrintingCostsTableProps) => {
   const formatCurrency = (value: number, currency: string) => {
     if (value === 0) return '—';
     if (currency === 'JPY') return `¥${value}`;
     return `${value.toFixed(currency === 'EUR' || currency === 'GBP' ? 2 : 3)}`;
   };
+
+  if (embedded) {
+    return renderContent();
+  }
 
   return (
     <Card className="w-full">
@@ -37,12 +45,19 @@ export const PrintingCostsTable = () => {
         </p>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="bn" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="bn" className="text-xs">B/N (Tinta Negra)</TabsTrigger>
-            <TabsTrigger value="cp" className="text-xs">Color Premium</TabsTrigger>
-            <TabsTrigger value="cs" className="text-xs">Color Estándar</TabsTrigger>
-          </TabsList>
+        {renderContent()}
+      </CardContent>
+    </Card>
+  );
+
+  function renderContent() {
+    return (
+      <Tabs defaultValue="bn" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-4">
+          <TabsTrigger value="bn" className="text-xs">B/N (Tinta Negra)</TabsTrigger>
+          <TabsTrigger value="cp" className="text-xs">Color Premium</TabsTrigger>
+          <TabsTrigger value="cs" className="text-xs">Color Estándar</TabsTrigger>
+        </TabsList>
 
           {/* B/N Tab */}
           <TabsContent value="bn">
@@ -184,9 +199,8 @@ export const PrintingCostsTable = () => {
                 </TableBody>
               </Table>
             </div>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
-  );
+        </TabsContent>
+      </Tabs>
+    );
+  }
 };

@@ -45,8 +45,6 @@ const Index = () => {
 
   const [loadedNicheId, setLoadedNicheId] = useState<string | null>(null);
   const [quickViewMode, setQuickViewMode] = useState(false);
-  const [royaltyChartOpen, setRoyaltyChartOpen] = useState(true);
-  const [sensitivityChartOpen, setSensitivityChartOpen] = useState(true);
   
   const showPhysicalFormat = globalData.selectedFormat === 'PAPERBACK';
   const activeResults = globalData.selectedFormat === 'EBOOK' ? ebookResults : paperbackResults;
@@ -236,7 +234,7 @@ const Index = () => {
                 {/* Charts Grid - Side by Side, Collapsible */}
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                   {/* Royalty Chart - Collapsible */}
-                  <Collapsible open={royaltyChartOpen} onOpenChange={setRoyaltyChartOpen}>
+                  <Collapsible open={!isCollapsed('royaltyChart')} onOpenChange={() => toggleSection('royaltyChart')}>
                     <Card className="animate-fade-in">
                       <CollapsibleTrigger asChild>
                         <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
@@ -246,14 +244,16 @@ const Index = () => {
                               📊 Simulador de Regalías por PVP
                             </CardTitle>
                             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              {royaltyChartOpen ? (
+                              {!isCollapsed('royaltyChart') ? (
                                 <ChevronUp className="h-5 w-5 text-muted-foreground" />
                               ) : (
                                 <ChevronDown className="h-5 w-5 text-muted-foreground" />
                               )}
                             </Button>
                           </div>
-                          <p className="text-sm text-muted-foreground">Visualiza cómo cambian las regalías según el precio.</p>
+                          {!isCollapsed('royaltyChart') && (
+                            <p className="text-sm text-muted-foreground">Visualiza cómo cambian las regalías según el precio.</p>
+                          )}
                         </CardHeader>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
@@ -267,7 +267,7 @@ const Index = () => {
                   </Collapsible>
 
                   {/* Page Sensitivity Chart - Collapsible */}
-                  <Collapsible open={sensitivityChartOpen} onOpenChange={setSensitivityChartOpen}>
+                  <Collapsible open={!isCollapsed('sensitivityChart')} onOpenChange={() => toggleSection('sensitivityChart')}>
                     <Card className="animate-fade-in">
                       <CollapsibleTrigger asChild>
                         <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
@@ -277,14 +277,16 @@ const Index = () => {
                               📄 Sensibilidad de Páginas
                             </CardTitle>
                             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              {sensitivityChartOpen ? (
+                              {!isCollapsed('sensitivityChart') ? (
                                 <ChevronUp className="h-5 w-5 text-muted-foreground" />
                               ) : (
                                 <ChevronDown className="h-5 w-5 text-muted-foreground" />
                               )}
                             </Button>
                           </div>
-                          <p className="text-sm text-muted-foreground">Analiza el impacto del número de páginas en rentabilidad.</p>
+                          {!isCollapsed('sensitivityChart') && (
+                            <p className="text-sm text-muted-foreground">Analiza el impacto del número de páginas en rentabilidad.</p>
+                          )}
                         </CardHeader>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
@@ -313,7 +315,31 @@ const Index = () => {
             )}
 
             {globalData.selectedFormat && tableData.length > 0 && (
-              <ResultsTable data={tableData} globalData={globalData} />
+              <Collapsible open={!isCollapsed('results')} onOpenChange={() => toggleSection('results')}>
+                <Card className="animate-fade-in">
+                  <CollapsibleTrigger asChild>
+                    <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="section-header">
+                          📊 Tabla de Resultados
+                        </CardTitle>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          {!isCollapsed('results') ? (
+                            <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                          ) : (
+                            <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                          )}
+                        </Button>
+                      </div>
+                    </CardHeader>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <CardContent>
+                      <ResultsTable data={tableData} globalData={globalData} embedded />
+                    </CardContent>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
             )}
 
             <NicheComparator 
@@ -346,7 +372,7 @@ const Index = () => {
                 bacos: n.bacos,
                 pvp: n.pvp,
                 precioMinRecomendado: n.precioMinRecomendado,
-                }))}
+              }))}
             />
             
             {/* Export PDF */}
@@ -364,10 +390,58 @@ const Index = () => {
             />
             
             {/* Calculador interactivo de costes */}
-            <PrintingCalculator />
+            <Collapsible open={!isCollapsed('printingCalculator')} onOpenChange={() => toggleSection('printingCalculator')}>
+              <Card className="animate-fade-in">
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="section-header">
+                        🧮 Calculador de Costes de Impresión
+                      </CardTitle>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        {!isCollapsed('printingCalculator') ? (
+                          <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                        ) : (
+                          <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent>
+                    <PrintingCalculator embedded />
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
             
             {/* Tabla de precios de impresión */}
-            <PrintingCostsTable />
+            <Collapsible open={!isCollapsed('printingCosts')} onOpenChange={() => toggleSection('printingCosts')}>
+              <Card className="animate-fade-in">
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="section-header">
+                        💰 Tabla de Costes de Impresión KDP
+                      </CardTitle>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        {!isCollapsed('printingCosts') ? (
+                          <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                        ) : (
+                          <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent>
+                    <PrintingCostsTable embedded />
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
           </>
         )}
       </main>
