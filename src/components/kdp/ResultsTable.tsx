@@ -19,9 +19,10 @@ import { LayoutGrid, BookOpen, Book } from 'lucide-react';
 interface ResultsTableProps {
   data: TableRow[];
   globalData: GlobalData;
+  embedded?: boolean;
 }
 
-export const ResultsTable = ({ data, globalData }: ResultsTableProps) => {
+export const ResultsTable = ({ data, globalData, embedded = false }: ResultsTableProps) => {
   const currencySymbol = globalData.marketplace === 'COM' ? '$' : '€';
 
   const getMarginClass = (margin: number) => {
@@ -60,93 +61,78 @@ export const ResultsTable = ({ data, globalData }: ResultsTableProps) => {
     }
   };
 
-  return (
-    <Card className="animate-fade-in">
-      <CardHeader className="pb-4">
-        <CardTitle className="section-header">
-          <LayoutGrid className="h-5 w-5 text-primary" />
-          Tabla de Resultados
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">Resumen comparativo de métricas clave.</p>
-      </CardHeader>
-      <CardContent>
-        {data.length > 0 ? (
-          <div className="overflow-x-auto rounded-lg border border-border">
-            <Table>
-              <TableHeader>
-                <TRow className="bg-muted/50">
-                  <TableHead className="font-heading font-semibold">Tipo</TableHead>
-                  <TableHead className="font-heading font-semibold text-right">PVP</TableHead>
-                  <TableHead className="font-heading font-semibold text-right">Regalías</TableHead>
-                  <TableHead className="font-heading font-semibold text-right">Margen real (BACOS)</TableHead>
-                  <TableHead className="font-heading font-semibold text-right">Clics máx./Venta</TableHead>
-                  <TableHead className="font-heading font-semibold text-center">Estado</TableHead>
-                  <TableHead className="font-heading font-semibold">Recomendación</TableHead>
+  const renderContent = () => (
+    data.length > 0 ? (
+      <>
+        <div className="overflow-x-auto rounded-lg border border-border">
+          <Table>
+            <TableHeader>
+              <TRow className="bg-muted/50">
+                <TableHead className="font-heading font-semibold">Tipo</TableHead>
+                <TableHead className="font-heading font-semibold text-right">PVP</TableHead>
+                <TableHead className="font-heading font-semibold text-right">Regalías</TableHead>
+                <TableHead className="font-heading font-semibold text-right">Margen real (BACOS)</TableHead>
+                <TableHead className="font-heading font-semibold text-right">Clics máx./Venta</TableHead>
+                <TableHead className="font-heading font-semibold text-center">Estado</TableHead>
+                <TableHead className="font-heading font-semibold">Recomendación</TableHead>
+              </TRow>
+            </TableHeader>
+            <TableBody>
+              {data.map((row, idx) => (
+                <TRow 
+                  key={idx} 
+                  className="hover:bg-muted/30 transition-colors"
+                >
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {row.tipo === 'eBook' ? (
+                        <BookOpen className="h-4 w-4 text-secondary" />
+                      ) : (
+                        <Book className="h-4 w-4 text-primary" />
+                      )}
+                      <span className="font-medium">{row.tipo}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right font-mono">
+                    {row.pvp.toFixed(2)}{currencySymbol}
+                  </TableCell>
+                  <TableCell className="text-right font-mono">
+                    <span className={row.regalias > 0 ? 'text-success' : 'text-destructive'}>
+                      {row.regalias.toFixed(2)}{currencySymbol}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <span className={`px-2 py-1 rounded ${getMarginClass(row.margen)}`}>
+                      {row.margen.toFixed(1)}%
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <span className={`px-2 py-1 rounded ${getClicksClass(row.clicsMaxPorVenta)}`}>
+                      {row.clicsMaxPorVenta}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {getDiagnosticBadge(row.diagnostico)}
+                  </TableCell>
+                  <TableCell className="max-w-xs">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <p className="text-sm text-muted-foreground truncate cursor-help" title={row.recomendacion}>
+                            {row.recomendacion}
+                          </p>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-sm p-3">
+                          <p className="text-sm">{row.recomendacion}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </TableCell>
                 </TRow>
-              </TableHeader>
-              <TableBody>
-                {data.map((row, idx) => (
-                  <TRow 
-                    key={idx} 
-                    className="hover:bg-muted/30 transition-colors"
-                  >
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {row.tipo === 'eBook' ? (
-                          <BookOpen className="h-4 w-4 text-secondary" />
-                        ) : (
-                          <Book className="h-4 w-4 text-primary" />
-                        )}
-                        <span className="font-medium">{row.tipo}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right font-mono">
-                      {row.pvp.toFixed(2)}{currencySymbol}
-                    </TableCell>
-                    <TableCell className="text-right font-mono">
-                      <span className={row.regalias > 0 ? 'text-success' : 'text-destructive'}>
-                        {row.regalias.toFixed(2)}{currencySymbol}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <span className={`px-2 py-1 rounded ${getMarginClass(row.margen)}`}>
-                        {row.margen.toFixed(1)}%
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <span className={`px-2 py-1 rounded ${getClicksClass(row.clicsMaxPorVenta)}`}>
-                        {row.clicsMaxPorVenta}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {getDiagnosticBadge(row.diagnostico)}
-                    </TableCell>
-                    <TableCell className="max-w-xs">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <p className="text-sm text-muted-foreground truncate cursor-help" title={row.recomendacion}>
-                              {row.recomendacion}
-                            </p>
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-sm p-3">
-                            <p className="text-sm">{row.recomendacion}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </TableCell>
-                  </TRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-32 bg-muted/30 rounded-lg">
-            <p className="text-sm text-muted-foreground">
-              Completa los datos del formato seleccionado para ver la tabla comparativa
-            </p>
-          </div>
-        )}
+              ))}
+            </TableBody>
+          </Table>
+        </div>
 
         {/* Legend */}
         <div className="mt-4 flex flex-wrap gap-4 text-xs text-muted-foreground">
@@ -163,6 +149,31 @@ export const ResultsTable = ({ data, globalData }: ResultsTableProps) => {
             <span>Margen &lt; 30% / &lt;10 clics — En riesgo</span>
           </div>
         </div>
+      </>
+    ) : (
+      <div className="flex items-center justify-center h-32 bg-muted/30 rounded-lg">
+        <p className="text-sm text-muted-foreground">
+          Completa los datos del formato seleccionado para ver la tabla comparativa
+        </p>
+      </div>
+    )
+  );
+
+  if (embedded) {
+    return renderContent();
+  }
+
+  return (
+    <Card className="animate-fade-in">
+      <CardHeader className="pb-4">
+        <CardTitle className="section-header">
+          <LayoutGrid className="h-5 w-5 text-primary" />
+          Tabla de Resultados
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">Resumen comparativo de métricas clave.</p>
+      </CardHeader>
+      <CardContent>
+        {renderContent()}
       </CardContent>
     </Card>
   );

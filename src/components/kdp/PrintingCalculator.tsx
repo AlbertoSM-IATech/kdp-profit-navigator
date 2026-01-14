@@ -31,7 +31,11 @@ const formatLabels: Record<BookFormat, string> = {
   HARDCOVER: 'Tapa dura',
 };
 
-export const PrintingCalculator = () => {
+interface PrintingCalculatorProps {
+  embedded?: boolean;
+}
+
+export const PrintingCalculator = ({ embedded = false }: PrintingCalculatorProps) => {
   const [marketplace, setMarketplace] = useState<Marketplace>('ES');
   const [format, setFormat] = useState<BookFormat>('PAPERBACK');
   const [interior, setInterior] = useState<InteriorType>('BN');
@@ -48,6 +52,10 @@ export const PrintingCalculator = () => {
   // For hardcover, show additional info
   const isHardcover = format === 'HARDCOVER';
 
+  if (embedded) {
+    return renderContent();
+  }
+
   return (
     <Card className="animate-fade-in">
       <CardHeader className="pb-4">
@@ -60,9 +68,16 @@ export const PrintingCalculator = () => {
         </p>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
-          {/* Selection Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {renderContent()}
+      </CardContent>
+    </Card>
+  );
+
+  function renderContent() {
+    return (
+      <div className="space-y-6">
+        {/* Selection Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {/* Marketplace */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-sm font-medium">
@@ -198,7 +213,6 @@ export const PrintingCalculator = () => {
             </p>
           )}
         </div>
-      </CardContent>
-    </Card>
-  );
+      );
+  }
 };
