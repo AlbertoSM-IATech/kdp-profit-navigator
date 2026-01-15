@@ -70,6 +70,7 @@ interface NicheComparatorProps {
   bestNiche: SavedNiche | null;
   hasCurrentData: boolean;
   loadedNicheId: string | null;
+  embedded?: boolean;
 }
 
 type SortField = 'name' | 'score' | 'clics' | 'bacos' | 'inversion';
@@ -88,6 +89,7 @@ export const NicheComparator = ({
   bestNiche,
   hasCurrentData,
   loadedNicheId,
+  embedded = false,
 }: NicheComparatorProps) => {
   const [newNicheName, setNewNicheName] = useState('');
   const [versionNote, setVersionNote] = useState('');
@@ -238,7 +240,7 @@ export const NicheComparator = ({
         <div className="flex items-center justify-between flex-wrap gap-3">
           <CardTitle className="section-header">
             <LayoutGrid className="h-5 w-5 text-primary" />
-            Comparador de Nichos
+            Análisis guardados
           </CardTitle>
           <div className="flex gap-2 flex-wrap">
             {/* Save as New Niche */}

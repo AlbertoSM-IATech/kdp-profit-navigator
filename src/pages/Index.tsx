@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { useKdpCalculator } from '@/hooks/useKdpCalculator';
 import { useScoring } from '@/hooks/useScoring';
 import { useNicheComparator } from '@/hooks/useNicheComparator';
@@ -10,8 +10,6 @@ import { PositioningSection } from '@/components/kdp/PositioningSection';
 import { ResultsTable } from '@/components/kdp/ResultsTable';
 import { ReportSection } from '@/components/kdp/ReportSection';
 import { PaperbackSimulator } from '@/components/kdp/PaperbackSimulator';
-import { RoyaltyChart } from '@/components/kdp/RoyaltyChart';
-import { PageSensitivityChart } from '@/components/kdp/PageSensitivityChart';
 import { ScoreDisplay } from '@/components/kdp/ScoreDisplay';
 import { NicheComparator } from '@/components/kdp/NicheComparator';
 import { PrintingCostsTable } from '@/components/kdp/PrintingCostsTable';
@@ -22,14 +20,11 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Calculator, Eye, EyeOff, ChevronDown, ChevronUp, TrendingUp, FileText } from 'lucide-react';
+import { Calculator, Eye, EyeOff, ChevronDown, ChevronUp, Save, FileText } from 'lucide-react';
 import { SavedNiche } from '@/types/kdp';
 import { toast } from 'sonner';
 
 const Index = () => {
-  // Chart refs for PDF export
-  const royaltyChartRef = useRef<HTMLDivElement>(null);
-  const sensitivityChartRef = useRef<HTMLDivElement>(null);
   const {
     globalData,
     setGlobalData,
@@ -218,6 +213,51 @@ const Index = () => {
           <>
             <GlobalDataSection data={globalData} onChange={setGlobalData} />
 
+            {/* Saved Analyses Section - After GlobalDataSection */}
+            {niches.length > 0 && (
+              <Collapsible open={!isCollapsed('savedAnalyses')} onOpenChange={() => toggleSection('savedAnalyses')}>
+                <Card className="animate-fade-in">
+                  <CollapsibleTrigger asChild>
+                    <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="section-header">
+                          <Save className="h-5 w-5 text-primary" />
+                          Análisis guardados
+                        </CardTitle>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          {!isCollapsed('savedAnalyses') ? (
+                            <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                          ) : (
+                            <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                          )}
+                        </Button>
+                      </div>
+                      {!isCollapsed('savedAnalyses') && (
+                        <p className="text-sm text-muted-foreground">Carga o compara análisis anteriores</p>
+                      )}
+                    </CardHeader>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
+                    <CardContent>
+                      <NicheComparator 
+                        niches={niches} 
+                        onSaveNiche={handleSaveNiche} 
+                        onDeleteNiche={deleteNiche} 
+                        onClearAll={clearAllNiches} 
+                        onLoadNiche={handleLoadNiche}
+                        onUpdateNicheVersion={handleUpdateNicheVersion}
+                        onRestoreVersion={handleRestoreVersion}
+                        onStartNew={handleStartNew}
+                        bestNiche={getBestNiche()} 
+                        hasCurrentData={hasCurrentData}
+                        loadedNicheId={loadedNicheId}
+                      />
+                    </CardContent>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
+            )}
+
             {globalData.selectedFormat === 'EBOOK' && globalData.marketplace && (
               <EbookSection data={ebookData} results={ebookResults} globalData={globalData} onChange={setEbookData} />
             )}
@@ -231,149 +271,122 @@ const Index = () => {
                   <PaperbackSection data={paperbackData} results={paperbackResults} globalData={globalData} onChange={setPaperbackData} />
                   {paperbackResults && <PaperbackSimulator data={paperbackData} globalData={globalData} />}
                 </div>
-                {/* Charts Grid - Side by Side, Collapsible */}
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  {/* Royalty Chart - Collapsible */}
-                  <Collapsible open={!isCollapsed('royaltyChart')} onOpenChange={() => toggleSection('royaltyChart')}>
-                    <Card className="animate-fade-in">
-                      <CollapsibleTrigger asChild>
-                        <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="section-header">
-                              <TrendingUp className="h-5 w-5 text-primary" />
-                              📊 Simulador de Regalías por PVP
-                            </CardTitle>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              {!isCollapsed('royaltyChart') ? (
-                                <ChevronUp className="h-5 w-5 text-muted-foreground" />
-                              ) : (
-                                <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                              )}
-                            </Button>
-                          </div>
-                          {!isCollapsed('royaltyChart') && (
-                            <p className="text-sm text-muted-foreground">Visualiza cómo cambian las regalías según el precio.</p>
-                          )}
-                        </CardHeader>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <CardContent className="min-h-[450px]">
-                          <div ref={royaltyChartRef}>
-                            <RoyaltyChart globalData={globalData} paperbackData={paperbackData} embedded />
-                          </div>
-                        </CardContent>
-                      </CollapsibleContent>
-                    </Card>
-                  </Collapsible>
-
-                  {/* Page Sensitivity Chart - Collapsible */}
-                  <Collapsible open={!isCollapsed('sensitivityChart')} onOpenChange={() => toggleSection('sensitivityChart')}>
-                    <Card className="animate-fade-in">
-                      <CollapsibleTrigger asChild>
-                        <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="section-header">
-                              <FileText className="h-5 w-5 text-primary" />
-                              📄 Sensibilidad de Páginas
-                            </CardTitle>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              {!isCollapsed('sensitivityChart') ? (
-                                <ChevronUp className="h-5 w-5 text-muted-foreground" />
-                              ) : (
-                                <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                              )}
-                            </Button>
-                          </div>
-                          {!isCollapsed('sensitivityChart') && (
-                            <p className="text-sm text-muted-foreground">Analiza el impacto del número de páginas en rentabilidad.</p>
-                          )}
-                        </CardHeader>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <CardContent className="min-h-[450px]">
-                          <div ref={sensitivityChartRef}>
-                            <PageSensitivityChart 
-                              globalData={globalData} 
-                              paperbackData={paperbackData} 
-                              onPagesChange={(pages) => setPaperbackData({ ...paperbackData, pages })}
-                              embedded
-                            />
-                          </div>
-                        </CardContent>
-                      </CollapsibleContent>
-                    </Card>
-                  </Collapsible>
-                </div>
               </>
             )}
 
+            {/* Score + Report Grid - Side by Side */}
             {globalData.selectedFormat && globalData.marketplace && activeResults && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ScoreDisplay score={scoreBreakdown} currencySymbol={globalData.marketplace === 'COM' ? '$' : '€'} />
-                <PositioningSection results={positioningResults} globalData={globalData} activeResults={activeResults} />
+                {/* Score Global de Viabilidad with embedded ResultsTable */}
+                <Collapsible open={!isCollapsed('score')} onOpenChange={() => toggleSection('score')}>
+                  <Card className="animate-fade-in h-full">
+                    <CollapsibleTrigger asChild>
+                      <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="section-header">
+                            📊 Score Global de Viabilidad
+                          </CardTitle>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            {!isCollapsed('score') ? (
+                              <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                            ) : (
+                              <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                            )}
+                          </Button>
+                        </div>
+                        {!isCollapsed('score') && (
+                          <p className="text-sm text-muted-foreground">Indicador sintético de viabilidad para Ads</p>
+                        )}
+                      </CardHeader>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
+                      <CardContent className="space-y-6">
+                        <ScoreDisplay score={scoreBreakdown} currencySymbol={globalData.marketplace === 'COM' ? '$' : '€'} embedded />
+                        
+                        {/* Positioning Section */}
+                        <PositioningSection results={positioningResults} globalData={globalData} activeResults={activeResults} />
+                        
+                        {/* Embedded Results Table */}
+                        {tableData.length > 0 && (
+                          <div className="pt-4 border-t border-border">
+                            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                              <FileText className="h-4 w-4" />
+                              Tabla de Resultados
+                            </h4>
+                            <ResultsTable data={tableData} globalData={globalData} embedded />
+                          </div>
+                        )}
+                      </CardContent>
+                    </CollapsibleContent>
+                  </Card>
+                </Collapsible>
+
+                {/* Report Section */}
+                <Collapsible open={!isCollapsed('report')} onOpenChange={() => toggleSection('report')}>
+                  <Card className="animate-fade-in h-full">
+                    <CollapsibleTrigger asChild>
+                      <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="section-header">
+                            📋 Informe Final
+                          </CardTitle>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            {!isCollapsed('report') ? (
+                              <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                            ) : (
+                              <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                            )}
+                          </Button>
+                        </div>
+                        {!isCollapsed('report') && (
+                          <p className="text-sm text-muted-foreground">Resumen ejecutivo y recomendaciones</p>
+                        )}
+                      </CardHeader>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
+                      <CardContent>
+                        <ReportSection 
+                          globalData={globalData} 
+                          ebookData={ebookData} 
+                          ebookResults={ebookResults} 
+                          paperbackData={paperbackData} 
+                          paperbackResults={paperbackResults} 
+                          positioningResults={positioningResults} 
+                          tableData={tableData} 
+                          scoreBreakdown={scoreBreakdown}
+                          savedNiches={niches.map(n => ({
+                            name: n.name,
+                            scoreBreakdown: n.scoreBreakdown,
+                            clicsMaxPorVenta: n.clicsMaxPorVenta,
+                            bacos: n.bacos,
+                            pvp: n.pvp,
+                            precioMinRecomendado: n.precioMinRecomendado,
+                          }))}
+                          embedded={false}
+                        />
+                      </CardContent>
+                    </CollapsibleContent>
+                  </Card>
+                </Collapsible>
               </div>
             )}
 
-            {globalData.selectedFormat && tableData.length > 0 && (
-              <Collapsible open={!isCollapsed('results')} onOpenChange={() => toggleSection('results')}>
-                <Card className="animate-fade-in">
-                  <CollapsibleTrigger asChild>
-                    <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="section-header">
-                          📊 Tabla de Resultados
-                        </CardTitle>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          {!isCollapsed('results') ? (
-                            <ChevronUp className="h-5 w-5 text-muted-foreground" />
-                          ) : (
-                            <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                          )}
-                        </Button>
-                      </div>
-                    </CardHeader>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <CardContent>
-                      <ResultsTable data={tableData} globalData={globalData} embedded />
-                    </CardContent>
-                  </CollapsibleContent>
-                </Card>
-              </Collapsible>
+            {/* Save Niche Button when no niches exist */}
+            {niches.length === 0 && hasCurrentData && (
+              <NicheComparator 
+                niches={niches} 
+                onSaveNiche={handleSaveNiche} 
+                onDeleteNiche={deleteNiche} 
+                onClearAll={clearAllNiches} 
+                onLoadNiche={handleLoadNiche}
+                onUpdateNicheVersion={handleUpdateNicheVersion}
+                onRestoreVersion={handleRestoreVersion}
+                onStartNew={handleStartNew}
+                bestNiche={getBestNiche()} 
+                hasCurrentData={hasCurrentData}
+                loadedNicheId={loadedNicheId}
+              />
             )}
-
-            <NicheComparator 
-              niches={niches} 
-              onSaveNiche={handleSaveNiche} 
-              onDeleteNiche={deleteNiche} 
-              onClearAll={clearAllNiches} 
-              onLoadNiche={handleLoadNiche}
-              onUpdateNicheVersion={handleUpdateNicheVersion}
-              onRestoreVersion={handleRestoreVersion}
-              onStartNew={handleStartNew}
-              bestNiche={getBestNiche()} 
-              hasCurrentData={hasCurrentData}
-              loadedNicheId={loadedNicheId}
-            />
-
-            <ReportSection 
-              globalData={globalData} 
-              ebookData={ebookData} 
-              ebookResults={ebookResults} 
-              paperbackData={paperbackData} 
-              paperbackResults={paperbackResults} 
-              positioningResults={positioningResults} 
-              tableData={tableData} 
-              scoreBreakdown={scoreBreakdown}
-              savedNiches={niches.map(n => ({
-                name: n.name,
-                scoreBreakdown: n.scoreBreakdown,
-                clicsMaxPorVenta: n.clicsMaxPorVenta,
-                bacos: n.bacos,
-                pvp: n.pvp,
-                precioMinRecomendado: n.precioMinRecomendado,
-              }))}
-            />
             
             {/* Export PDF */}
             <ExportPdf 
@@ -385,8 +398,6 @@ const Index = () => {
               positioningResults={positioningResults}
               tableData={tableData}
               scoreBreakdown={scoreBreakdown}
-              royaltyChartRef={royaltyChartRef}
-              sensitivityChartRef={sensitivityChartRef}
             />
             
             {/* Calculador interactivo de costes */}
@@ -406,9 +417,12 @@ const Index = () => {
                         )}
                       </Button>
                     </div>
+                    {!isCollapsed('printingCalculator') && (
+                      <p className="text-sm text-muted-foreground">Calcula costes de impresión interactivamente</p>
+                    )}
                   </CardHeader>
                 </CollapsibleTrigger>
-                <CollapsibleContent>
+                <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
                   <CardContent>
                     <PrintingCalculator embedded />
                   </CardContent>
@@ -433,9 +447,12 @@ const Index = () => {
                         )}
                       </Button>
                     </div>
+                    {!isCollapsed('printingCosts') && (
+                      <p className="text-sm text-muted-foreground">Referencia de costes según tipo de interior y tamaño</p>
+                    )}
                   </CardHeader>
                 </CollapsibleTrigger>
-                <CollapsibleContent>
+                <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
                   <CardContent>
                     <PrintingCostsTable embedded />
                   </CardContent>
