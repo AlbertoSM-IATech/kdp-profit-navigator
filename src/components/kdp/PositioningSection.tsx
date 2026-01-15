@@ -5,11 +5,13 @@ interface PositioningSectionProps {
   results: PositioningResults | null;
   globalData: GlobalData;
   activeResults: EbookResults | PaperbackResults | null;
+  embedded?: boolean;
 }
 export const PositioningSection = ({
   results,
   globalData,
-  activeResults
+  activeResults,
+  embedded = false
 }: PositioningSectionProps) => {
   const currencySymbol = globalData.marketplace === 'COM' ? '$' : '€';
   const ventasDiarias = globalData.ventasDiariasCompetencia || 0;

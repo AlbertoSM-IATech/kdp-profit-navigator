@@ -34,6 +34,7 @@ interface ReportSectionProps {
   tableData: TableRow[];
   scoreBreakdown: ScoreBreakdown | null;
   savedNiches?: SavedNicheForPdf[];
+  embedded?: boolean;
 }
 
 const interiorLabels: Record<string, string> = {

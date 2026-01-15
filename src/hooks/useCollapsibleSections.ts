@@ -9,10 +9,8 @@ export type SectionKey =
   | 'positioning'
   | 'results'
   | 'simulator'
-  | 'comparator'
+  | 'savedAnalyses'
   | 'report'
-  | 'royaltyChart'
-  | 'sensitivityChart'
   | 'printingCalculator'
   | 'printingCosts';
 
@@ -69,8 +67,8 @@ export const useCollapsibleSections = () => {
   const collapseAll = useCallback(() => {
     const allSections: SectionKey[] = [
       'globalData', 'formatData', 'score', 'positioning', 
-      'results', 'simulator', 'comparator', 'report',
-      'royaltyChart', 'sensitivityChart', 'printingCalculator', 'printingCosts'
+      'results', 'simulator', 'savedAnalyses', 'report',
+      'printingCalculator', 'printingCosts'
     ];
     const next: CollapsedSections = {};
     allSections.forEach(key => { next[key] = true; });
