@@ -15,7 +15,7 @@ import { NicheComparator } from '@/components/kdp/NicheComparator';
 import { PrintingCostsTable } from '@/components/kdp/PrintingCostsTable';
 import { PrintingCalculator } from '@/components/kdp/PrintingCalculator';
 import { BreakevenAlert } from '@/components/kdp/BreakevenAlert';
-import { ExportPdf } from '@/components/kdp/ExportPdf';
+
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -220,10 +220,15 @@ const Index = () => {
                   <CollapsibleTrigger asChild>
                     <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="section-header">
-                          <Save className="h-5 w-5 text-primary" />
-                          Análisis guardados
-                        </CardTitle>
+                        <div className="flex items-center gap-3">
+                          <CardTitle className="section-header">
+                            <Save className="h-5 w-5 text-primary" />
+                            Análisis guardados
+                          </CardTitle>
+                          <span className="inline-flex items-center justify-center h-6 min-w-6 px-2 text-xs font-semibold rounded-full bg-primary/10 text-primary">
+                            {niches.length}
+                          </span>
+                        </div>
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                           {!isCollapsed('savedAnalyses') ? (
                             <ChevronUp className="h-5 w-5 text-muted-foreground" />
@@ -388,18 +393,6 @@ const Index = () => {
                 loadedNicheId={loadedNicheId}
               />
             )}
-            
-            {/* Export PDF */}
-            <ExportPdf 
-              globalData={globalData}
-              ebookData={ebookData}
-              ebookResults={ebookResults}
-              paperbackData={paperbackData}
-              paperbackResults={paperbackResults}
-              positioningResults={positioningResults}
-              tableData={tableData}
-              scoreBreakdown={scoreBreakdown}
-            />
             
             {/* Calculador interactivo de costes */}
             <Collapsible open={!isCollapsed('printingCalculator')} onOpenChange={() => toggleSection('printingCalculator')}>
