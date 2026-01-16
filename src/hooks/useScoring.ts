@@ -8,14 +8,30 @@ interface ScoringInput {
 }
 
 /**
- * Calculate the global viability score (0-100) based on 3 weighted components
+ * Calculate the global viability score (0-100) based on 2 weighted components
  * 
- * NEW SCORING v4:
+ * SCORING v5:
  * - Clics máx./Venta: 50 pts (CRITICAL - dominant criterion)
- * - BACOS: 30 pts 
- * - PVP vs Precio mínimo recomendado: 20 pts
+ * - BACOS: 40 pts 
+ * - PVP vs Precio mínimo: 10 pts (bonus)
  * 
- * IMPORTANT: If clics < 10, score is capped at 40 max (not viable for Ads)
+ * CLICK SCORING:
+ * <10 clicks = 0 pts (En riesgo)
+ * 11 clicks = 15 pts (Aceptable)
+ * 12 clicks = 25 pts (Aceptable)
+ * 13 clicks = 35 pts (Bueno)
+ * ≥14 clicks = 50 pts (Excelente)
+ * 
+ * BACOS SCORING:
+ * <30% = 0 pts (no viable para ads)
+ * ≥30% = 15 pts (Viable pero justo)
+ * ≥35% = 25 pts (Viable)
+ * ≥40% = 40 pts (Excelente)
+ * 
+ * STATUS RANGES:
+ * 80-100 = Excelente
+ * 50-79 = Aceptable
+ * <50 = En riesgo
  */
 export const calculateScore = ({
   activeResults,
@@ -29,46 +45,46 @@ export const calculateScore = ({
 
   // A) Clics máx./Venta — 50 points (CRITICAL)
   let clicsScore = 0;
-  if (clicsMaxPorVenta >= 13) {
+  if (clicsMaxPorVenta >= 14) {
     clicsScore = 50;
-  } else if (clicsMaxPorVenta >= 10) {
-    clicsScore = 30;
+  } else if (clicsMaxPorVenta === 13) {
+    clicsScore = 35;
+  } else if (clicsMaxPorVenta === 12) {
+    clicsScore = 25;
+  } else if (clicsMaxPorVenta === 11) {
+    clicsScore = 15;
   } else {
-    clicsScore = 0;
+    clicsScore = 0; // <10 clicks
   }
 
-  // B) BACOS (ACoS de equilibrio) — 30 points
+  // B) BACOS (ACoS de equilibrio) — 40 points
   let bacosScore = 0;
   if (bacos >= 40) {
-    bacosScore = 30;
+    bacosScore = 40;
+  } else if (bacos >= 35) {
+    bacosScore = 25;
   } else if (bacos >= 30) {
     bacosScore = 15;
   } else {
-    bacosScore = 0;
+    bacosScore = 0; // <30% no viable para ads
   }
 
-  // C) PVP actual vs Precio mínimo recomendado — 20 points
+  // C) PVP actual vs Precio mínimo recomendado — 10 points (bonus)
   let pvpVsMinScore = 0;
   if (pvp !== null && precioMinRecomendado !== null) {
     if (pvp > precioMinRecomendado) {
-      pvpVsMinScore = 20;
-    } else if (pvp === precioMinRecomendado || Math.abs(pvp - precioMinRecomendado) < 0.01) {
       pvpVsMinScore = 10;
+    } else if (pvp === precioMinRecomendado || Math.abs(pvp - precioMinRecomendado) < 0.01) {
+      pvpVsMinScore = 5;
     } else {
       pvpVsMinScore = 0;
     }
   } else if (pvp !== null && precioMinRecomendado === null) {
     // No min price calculated, assume OK
-    pvpVsMinScore = 20;
+    pvpVsMinScore = 10;
   }
 
-  let totalScore = clicsScore + bacosScore + pvpVsMinScore;
-  
-  // CRITICAL CAP: If clics < 10, the score cannot exceed 40
-  const clicsCapped = clicsMaxPorVenta < 10;
-  if (clicsCapped && totalScore > 40) {
-    totalScore = 40;
-  }
+  const totalScore = clicsScore + bacosScore + pvpVsMinScore;
 
   // Interpretation - NEW THRESHOLDS
   let status: ScoreBreakdown['status'];
@@ -78,17 +94,17 @@ export const calculateScore = ({
 
   if (totalScore >= 80) {
     status = 'excellent';
-    statusLabel = 'Nicho sano para Ads';
+    statusLabel = 'Excelente';
     statusEmoji = '🟢';
     statusColor = '#22C55E';
   } else if (totalScore >= 50) {
     status = 'viable';
-    statusLabel = 'Viable, pero con ajustes';
+    statusLabel = 'Aceptable';
     statusEmoji = '🟡';
     statusColor = '#EAB308';
   } else {
     status = 'not-recommended';
-    statusLabel = 'Riesgo alto / no recomendable';
+    statusLabel = 'En riesgo';
     statusEmoji = '🔴';
     statusColor = '#EF4444';
   }
@@ -98,7 +114,7 @@ export const calculateScore = ({
     bacosScore,
     pvpVsMinScore,
     totalScore,
-    clicsCapped,
+    clicsCapped: false, // No longer used in v5
     status,
     statusLabel,
     statusEmoji,
