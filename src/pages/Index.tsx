@@ -251,6 +251,7 @@ const Index = () => {
                         bestNiche={getBestNiche()} 
                         hasCurrentData={hasCurrentData}
                         loadedNicheId={loadedNicheId}
+                        embedded
                       />
                     </CardContent>
                   </CollapsibleContent>
