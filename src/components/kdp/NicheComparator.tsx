@@ -234,115 +234,108 @@ export const NicheComparator = ({
     return 'text-destructive';
   };
 
-  return (
-    <Card className="animate-fade-in">
-      <CardHeader className="pb-4">
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <CardTitle className="section-header">
-            <LayoutGrid className="h-5 w-5 text-primary" />
-            Análisis guardados
-          </CardTitle>
-          <div className="flex gap-2 flex-wrap">
-            {/* Save as New Niche */}
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+  const mainContent = (
+    <div className="space-y-4">
+      {/* Actions Bar */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex gap-2 flex-wrap">
+          {/* Save as New Niche */}
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" disabled={!hasCurrentData}>
+                <Plus className="h-4 w-4 mr-2" />
+                Guardar análisis actual
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Guardar como nicho</DialogTitle>
+                <DialogDescription>
+                  Guarda el análisis actual para compararlo con otros escenarios.
+                </DialogDescription>
+              </DialogHeader>
+              <Input
+                placeholder="Nombre del nicho (ej: 'Cuadernos yoga ES')"
+                value={newNicheName}
+                onChange={(e) => setNewNicheName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+              />
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleSave}>Guardar</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Save Version (if a niche is loaded) */}
+          {loadedNicheId && (
+            <Dialog open={isVersionDialogOpen} onOpenChange={setIsVersionDialogOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" disabled={!hasCurrentData}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Guardar análisis actual
+                <Button size="sm" variant="secondary" disabled={!hasCurrentData}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Guardar versión
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Guardar como nicho</DialogTitle>
+                  <DialogTitle>Guardar nueva versión</DialogTitle>
                   <DialogDescription>
-                    Guarda el análisis actual para compararlo con otros escenarios.
+                    Guarda los cambios actuales como nueva versión del nicho cargado.
                   </DialogDescription>
                 </DialogHeader>
-                <Input
-                  placeholder="Nombre del nicho (ej: 'Cuadernos yoga ES')"
-                  value={newNicheName}
-                  onChange={(e) => setNewNicheName(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+                <Textarea
+                  placeholder="Nota opcional (ej: 'Probado con PVP más alto')"
+                  value={versionNote}
+                  onChange={(e) => setVersionNote(e.target.value)}
+                  rows={3}
                 />
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  <Button variant="outline" onClick={() => setIsVersionDialogOpen(false)}>
                     Cancelar
                   </Button>
-                  <Button onClick={handleSave}>Guardar</Button>
+                  <Button onClick={handleSaveVersion}>Guardar versión</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-
-            {/* Save Version (if a niche is loaded) */}
-            {loadedNicheId && (
-              <Dialog open={isVersionDialogOpen} onOpenChange={setIsVersionDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button size="sm" variant="secondary" disabled={!hasCurrentData}>
-                    <Save className="h-4 w-4 mr-2" />
-                    Guardar versión
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Guardar nueva versión</DialogTitle>
-                    <DialogDescription>
-                      Guarda los cambios actuales como nueva versión del nicho cargado.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <Textarea
-                    placeholder="Nota opcional (ej: 'Probado con PVP más alto')"
-                    value={versionNote}
-                    onChange={(e) => setVersionNote(e.target.value)}
-                    rows={3}
-                  />
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsVersionDialogOpen(false)}>
-                      Cancelar
-                    </Button>
-                    <Button onClick={handleSaveVersion}>Guardar versión</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            )}
-            
-            {niches.length > 0 && (
-              <>
-                <NicheSideBySide niches={niches} />
-                {niches.length >= 2 && <NicheRadarChart niches={niches} />}
-                <Button size="sm" variant="outline" onClick={handleExportCSV}>
-                  <Download className="h-4 w-4 mr-2" />
-                  Exportar
-                </Button>
-                <Button size="sm" variant="ghost" onClick={onClearAll} className="text-destructive hover:text-destructive">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Limpiar todo
-                </Button>
-              </>
-            )}
-          </div>
+          )}
+          
+          {niches.length > 0 && (
+            <>
+              <NicheSideBySide niches={niches} />
+              {niches.length >= 2 && <NicheRadarChart niches={niches} />}
+              <Button size="sm" variant="outline" onClick={handleExportCSV}>
+                <Download className="h-4 w-4 mr-2" />
+                Exportar
+              </Button>
+              <Button size="sm" variant="ghost" onClick={onClearAll} className="text-destructive hover:text-destructive">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Limpiar todo
+              </Button>
+            </>
+          )}
         </div>
-        <p className="text-sm text-muted-foreground">
-          Guarda y compara diferentes escenarios para decidir en qué nicho empezar.
-        </p>
-        {loadedNicheId && (
-          <div className="mt-2 p-2 bg-muted/50 border border-border rounded-lg text-sm flex items-center justify-between">
-            <span className="text-muted-foreground">
-              Editando: <span className="font-medium text-foreground">{niches.find(n => n.id === loadedNicheId)?.name}</span>
-            </span>
-            <Button 
-              size="sm" 
-              variant="outline" 
-              onClick={onStartNew}
-              className="h-7 text-xs"
-            >
-              <Plus className="h-3 w-3 mr-1" />
-              Nuevo análisis
-            </Button>
-          </div>
-        )}
-      </CardHeader>
-      <CardContent>
-        {niches.length === 0 ? (
+      </div>
+      
+      {loadedNicheId && (
+        <div className="p-2 bg-muted/50 border border-border rounded-lg text-sm flex items-center justify-between">
+          <span className="text-muted-foreground">
+            Editando: <span className="font-medium text-foreground">{niches.find(n => n.id === loadedNicheId)?.name}</span>
+          </span>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            onClick={onStartNew}
+            className="h-7 text-xs"
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            Nuevo análisis
+          </Button>
+        </div>
+      )}
+
+      {niches.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 bg-muted/30 rounded-lg text-center p-4">
             <LayoutGrid className="h-8 w-8 text-muted-foreground mb-2" />
             <p className="text-sm text-muted-foreground">
@@ -562,106 +555,114 @@ export const NicheComparator = ({
             </div>
           </div>
         )}
-      </CardContent>
+    </div>
+  );
 
-      {/* Version History Dialog */}
-      <Dialog open={isHistoryDialogOpen} onOpenChange={setIsHistoryDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <History className="h-5 w-5" />
-              Historial de versiones: {selectedNicheForHistory?.name}
-            </DialogTitle>
-            <DialogDescription>
-              Compara y restaura versiones anteriores de este nicho.
-            </DialogDescription>
-          </DialogHeader>
-          <ScrollArea className="max-h-96">
-            <div className="space-y-3">
-              {selectedNicheForHistory?.versions?.map((version, index) => (
-                <div 
-                  key={version.id} 
-                  className={`p-4 rounded-lg border ${
-                    index === (selectedNicheForHistory.versions?.length || 0) - 1 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-border bg-muted/30'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-sm font-medium">
-                          Versión {index + 1}
-                        </span>
-                        {index === (selectedNicheForHistory.versions?.length || 0) - 1 && (
-                          <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded">
-                            Actual
-                          </span>
-                        )}
-                        <span className="text-xs text-muted-foreground">
-                          {version.createdAt.toLocaleDateString('es-ES', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </span>
-                      </div>
-                      {version.note && (
-                        <p className="text-sm text-muted-foreground mb-2 italic">
-                          "{version.note}"
-                        </p>
-                      )}
-                      <div className="grid grid-cols-4 gap-3 text-sm">
-                        <div>
-                          <span className="text-muted-foreground block text-xs">Score</span>
-                          <span className={`font-bold ${getScoreColor(version.scoreBreakdown.totalScore)}`}>
-                            {version.scoreBreakdown.totalScore}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground block text-xs">Clics</span>
-                          <span className={`font-semibold ${getClicksColor(version.clicsMaxPorVenta)}`}>
-                            {version.clicsMaxPorVenta}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground block text-xs">BACOS</span>
-                          <span className="font-semibold">{version.bacos.toFixed(1)}%</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground block text-xs">PVP</span>
-                          <span className="font-semibold">{version.pvp.toFixed(2)}€</span>
-                        </div>
-                      </div>
+  // Version History Dialog (always rendered)
+  const historyDialog = (
+    <Dialog open={isHistoryDialogOpen} onOpenChange={setIsHistoryDialogOpen}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <History className="h-5 w-5" />
+            Historial de versiones: {selectedNicheForHistory?.name}
+          </DialogTitle>
+          <DialogDescription>
+            Compara y restaura versiones anteriores de este nicho.
+          </DialogDescription>
+        </DialogHeader>
+        <ScrollArea className="max-h-[60vh]">
+          <div className="space-y-3">
+            {selectedNicheForHistory?.versions.map((version, index) => (
+              <div 
+                key={version.id}
+                className={`p-4 rounded-lg border ${index === 0 ? 'bg-primary/5 border-primary/30' : 'bg-muted/30 border-border'}`}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-medium">
+                        Versión {selectedNicheForHistory.versions.length - index}
+                        {index === 0 && <span className="text-primary ml-2">(Actual)</span>}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(version.createdAt).toLocaleDateString('es-ES', { 
+                          day: 'numeric', 
+                          month: 'short', 
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </span>
                     </div>
-                    {index !== (selectedNicheForHistory.versions?.length || 0) - 1 && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
+                    {version.note && (
+                      <p className="text-sm text-muted-foreground italic">"{version.note}"</p>
+                    )}
+                    <div className="flex gap-4 mt-2 text-xs">
+                      <span>Score: <strong className={getScoreColor(version.scoreBreakdown.totalScore)}>{version.scoreBreakdown.totalScore}</strong></span>
+                      <span>Clics: <strong className={getClicksColor(version.clicsMaxPorVenta)}>{version.clicsMaxPorVenta}</strong></span>
+                      <span>PVP: <strong>{version.pvp.toFixed(2)}€</strong></span>
+                    </div>
+                  </div>
+                  {index > 0 && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        if (selectedNicheForHistory) {
                           onRestoreVersion(selectedNicheForHistory.id, version.id);
                           setIsHistoryDialogOpen(false);
-                          toast.success('Versión restaurada');
-                        }}
-                      >
-                        <RotateCcw className="h-4 w-4 mr-1" />
-                        Restaurar
-                      </Button>
-                    )}
-                  </div>
+                        }
+                      }}
+                    >
+                      <RotateCcw className="h-3 w-3 mr-1" />
+                      Restaurar
+                    </Button>
+                  )}
                 </div>
-              ))}
-            </div>
-          </ScrollArea>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsHistoryDialogOpen(false)}>
-              Cerrar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+        <div className="bg-muted/30 rounded-lg p-4 text-sm text-muted-foreground">
+          <p className="flex items-center gap-2">
+            <History className="h-4 w-4" />
+            Este historial te permite ver cómo evoluciona la viabilidad de un nicho a medida que ajustas precio, costes o mercado.
+          </p>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setIsHistoryDialogOpen(false)}>
+            Cerrar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+
+  if (embedded) {
+    return (
+      <>
+        {mainContent}
+        {historyDialog}
+      </>
+    );
+  }
+
+  return (
+    <Card className="animate-fade-in">
+      <CardHeader className="pb-4">
+        <CardTitle className="section-header">
+          <LayoutGrid className="h-5 w-5 text-primary" />
+          Análisis guardados
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Guarda y compara diferentes escenarios para decidir en qué nicho empezar.
+        </p>
+      </CardHeader>
+      <CardContent>
+        {mainContent}
+      </CardContent>
+      {historyDialog}
     </Card>
   );
 };
