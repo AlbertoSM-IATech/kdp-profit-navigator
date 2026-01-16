@@ -48,18 +48,19 @@ const sizeLabels: Record<string, string> = {
   LARGE: 'Grande (>6x9")',
 };
 
-// Click status labels - NEW THRESHOLDS
+// Click status labels - NEW THRESHOLDS v5
 const getClicksStatus = (clicks: number) => {
-  if (clicks >= 13) return { emoji: '🟢', text: 'Excelente', color: '#22C55E' };
-  if (clicks >= 10) return { emoji: '🟡', text: 'Aceptable', color: '#EAB308' };
+  if (clicks >= 14) return { emoji: '🟢', text: 'Excelente', color: '#22C55E' };
+  if (clicks >= 13) return { emoji: '🟢', text: 'Bueno', color: '#22C55E' };
+  if (clicks >= 11) return { emoji: '🟡', text: 'Aceptable', color: '#EAB308' };
   return { emoji: '🔴', text: 'En riesgo', color: '#EF4444' };
 };
 
-// Score status for PDF - Updated thresholds
+// Score status for PDF - Updated thresholds v5
 const getScoreStatus = (score: number) => {
-  if (score >= 80) return { emoji: '🟢', text: 'Nicho sano para Ads', color: '#22C55E' };
-  if (score >= 50) return { emoji: '🟡', text: 'Viable con ajustes', color: '#EAB308' };
-  return { emoji: '🔴', text: 'Riesgo alto', color: '#EF4444' };
+  if (score >= 80) return { emoji: '🟢', text: 'Excelente', color: '#22C55E' };
+  if (score >= 50) return { emoji: '🟡', text: 'Aceptable', color: '#EAB308' };
+  return { emoji: '🔴', text: 'En riesgo', color: '#EF4444' };
 };
 
 // Generate SVG gauge for score (0-100)
@@ -458,15 +459,10 @@ export const ReportSection = ({
             <div class="score-info">
               <div class="score-title">Puntuación Global</div>
               <ul class="score-breakdown">
-                <li><strong>Clics máx./Venta:</strong> ${scoreBreakdown.clicsScore}/50 pts ${scoreBreakdown.clicsCapped ? '⚠️ (Limitado por <10 clics)' : ''}</li>
-                <li><strong>BACOS (margen Ads):</strong> ${scoreBreakdown.bacosScore}/30 pts</li>
-                <li><strong>PVP vs Mínimo:</strong> ${scoreBreakdown.pvpVsMinScore}/20 pts</li>
+                <li><strong>Clics máx./Venta:</strong> ${scoreBreakdown.clicsScore}/50 pts (≥14=50, 13=35, 12=25, 11=15, ≤10=0)</li>
+                <li><strong>BACOS (margen Ads):</strong> ${scoreBreakdown.bacosScore}/40 pts (≥40%=40, ≥35%=25, ≥30%=15, <30%=0)</li>
+                <li><strong>PVP vs Mínimo:</strong> ${scoreBreakdown.pvpVsMinScore}/10 pts</li>
               </ul>
-              ${scoreBreakdown.clicsCapped ? `
-                <div style="margin-top: 10px; padding: 8px 12px; background: #FEF2F2; border-radius: 6px; border: 1px solid #FECACA; font-size: 12px; color: #B91C1C;">
-                  ⚠️ Score limitado a máx. 40 por tener menos de 10 clics máx./venta
-                </div>
-              ` : ''}
             </div>
           </div>
           

@@ -48,13 +48,13 @@ const sizeLabels: Record<BookSize, string> = {
 // Simplified color scheme - more subtle
 const getClicksColor = (clicks: number) => {
   if (clicks >= 13) return 'text-foreground';
-  if (clicks >= 10) return 'text-muted-foreground';
+  if (clicks >= 11) return 'text-muted-foreground';
   return 'text-destructive';
 };
 
 const getClicksBg = (clicks: number) => {
   if (clicks >= 13) return 'bg-muted/40';
-  if (clicks >= 10) return 'bg-muted/30';
+  if (clicks >= 11) return 'bg-muted/30';
   return 'bg-destructive/10';
 };
 

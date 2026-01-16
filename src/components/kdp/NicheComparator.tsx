@@ -230,7 +230,7 @@ export const NicheComparator = ({
 
   const getClicksColor = (clicks: number) => {
     if (clicks >= 13) return 'text-success';
-    if (clicks >= 10) return 'text-warning';
+    if (clicks >= 11) return 'text-warning';
     return 'text-destructive';
   };
 

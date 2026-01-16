@@ -34,7 +34,7 @@ export const ResultsTable = ({ data, globalData, embedded = false }: ResultsTabl
   // Updated clicks thresholds: ≥13 green, 10-12 yellow, <10 red
   const getClicksClass = (clicks: number) => {
     if (clicks >= 13) return 'bg-success/20 text-success font-semibold';
-    if (clicks >= 10) return 'bg-warning/20 text-warning font-semibold';
+    if (clicks >= 11) return 'bg-warning/20 text-warning font-semibold';
     return 'bg-destructive/20 text-destructive font-semibold';
   };
 
