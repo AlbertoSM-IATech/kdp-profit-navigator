@@ -185,7 +185,7 @@ const Index = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-card rounded-lg border">
               <div className="text-center">
                 <span className="text-xs text-muted-foreground block">Clics máx./Venta</span>
-                <span className={`text-2xl font-bold ${activeResults?.clicsMaxPorVenta >= 13 ? 'text-success' : activeResults?.clicsMaxPorVenta >= 10 ? 'text-warning' : 'text-destructive'}`}>
+                <span className={`text-2xl font-bold ${activeResults?.clicsMaxPorVenta >= 13 ? 'text-success' : activeResults?.clicsMaxPorVenta >= 11 ? 'text-warning' : 'text-destructive'}`}>
                   {activeResults?.clicsMaxPorVenta || 0}
                 </span>
               </div>

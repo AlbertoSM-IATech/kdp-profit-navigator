@@ -1,7 +1,7 @@
 import { ScoreBreakdown } from '@/types/kdp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Gauge, MousePointer, TrendingUp, Tag, HelpCircle, AlertTriangle } from 'lucide-react';
+import { Gauge, MousePointer, TrendingUp, Tag, HelpCircle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 interface ScoreDisplayProps {
   score: ScoreBreakdown | null;
@@ -150,17 +150,6 @@ export const ScoreDisplay = ({
         </div>
       </div>
 
-      {/* Clics Cap Warning */}
-      {score.clicsCapped && <div className="flex items-start gap-3 p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
-          <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
-          <div>
-            <p className="text-sm font-semibold text-destructive">Score limitado a 40</p>
-            <p className="text-xs text-muted-foreground">
-              Con menos de 10 clics máx./venta, el nicho no es viable para Ads.
-            </p>
-          </div>
-        </div>}
-
       {/* Row 2: Score Breakdown */}
       <div className="pt-4 border-t border-border">
         <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
@@ -168,11 +157,11 @@ export const ScoreDisplay = ({
         </h4>
         
         <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-          <ScoreItem label="Clics máx./Venta (CRÍTICO)" value={score.clicsScore} max={50} icon={<MousePointer className="h-4 w-4 text-primary" />} tooltip="≥13 clics = 50pts, 10-12 = 30pts, <10 = 0pts" />
+          <ScoreItem label="Clics máx./Venta (CRÍTICO)" value={score.clicsScore} max={50} icon={<MousePointer className="h-4 w-4 text-primary" />} tooltip="≥14 clics = 50pts, 13 = 35pts, 12 = 25pts, 11 = 15pts, ≤10 = 0pts" />
           
-          <ScoreItem label="BACOS" value={score.bacosScore} max={30} icon={<TrendingUp className="h-4 w-4 text-success" />} tooltip="≥40% = 30pts, ≥30% = 15pts, <30% = 0pts" />
+          <ScoreItem label="BACOS" value={score.bacosScore} max={40} icon={<TrendingUp className="h-4 w-4 text-success" />} tooltip="≥40% = 40pts, ≥35% = 25pts, ≥30% = 15pts, <30% = 0pts" />
           
-          <ScoreItem label="PVP vs Mínimo" value={score.pvpVsMinScore} max={20} icon={<Tag className="h-4 w-4 text-secondary" />} tooltip="PVP > rec. = 20pts, PVP = rec. = 10pts, PVP < rec. = 0pts" />
+          <ScoreItem label="PVP vs Mínimo" value={score.pvpVsMinScore} max={10} icon={<Tag className="h-4 w-4 text-secondary" />} tooltip="PVP > rec. = 10pts, PVP = rec. = 5pts, PVP < rec. = 0pts" />
         </div>
       </div>
     </div>
