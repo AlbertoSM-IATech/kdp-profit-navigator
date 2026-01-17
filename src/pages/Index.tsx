@@ -155,6 +155,31 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {/* Micro-badges for quick score visualization */}
+              {hasCurrentData && scoreBreakdown && activeResults && (
+                <div className="hidden lg:flex items-center gap-2 mr-4 px-3 py-1.5 bg-muted/50 rounded-lg border">
+                  <div className="flex items-center gap-1.5" title={`Clics: ${activeResults.clicsMaxPorVenta}`}>
+                    <span className="text-xs text-muted-foreground">Clics</span>
+                    <span className={`text-sm font-bold ${activeResults.clicsMaxPorVenta >= 14 ? 'text-success' : activeResults.clicsMaxPorVenta >= 11 ? 'text-warning' : 'text-destructive'}`}>
+                      {activeResults.clicsMaxPorVenta >= 14 ? '🟢' : activeResults.clicsMaxPorVenta >= 11 ? '🟡' : '🔴'}
+                    </span>
+                  </div>
+                  <div className="w-px h-4 bg-border" />
+                  <div className="flex items-center gap-1.5" title={`BACOS: ${activeResults.margenPct.toFixed(1)}%`}>
+                    <span className="text-xs text-muted-foreground">BACOS</span>
+                    <span className={`text-sm font-bold ${activeResults.margenPct >= 40 ? 'text-success' : activeResults.margenPct >= 30 ? 'text-warning' : 'text-destructive'}`}>
+                      {activeResults.margenPct >= 40 ? '🟢' : activeResults.margenPct >= 30 ? '🟡' : '🔴'}
+                    </span>
+                  </div>
+                  <div className="w-px h-4 bg-border" />
+                  <div className="flex items-center gap-1.5" title={`Score: ${scoreBreakdown.totalScore}`}>
+                    <span className="text-sm font-bold" style={{ color: scoreBreakdown.statusColor }}>
+                      {scoreBreakdown.totalScore}
+                    </span>
+                    <span>{scoreBreakdown.statusEmoji}</span>
+                  </div>
+                </div>
+              )}
               <Button 
                 variant="outline" 
                 size="sm"

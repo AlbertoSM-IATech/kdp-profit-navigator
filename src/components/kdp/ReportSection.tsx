@@ -525,9 +525,21 @@ export const ReportSection = ({
         </div>
 
         <div class="legend">
-          <div class="legend-item"><span class="legend-dot" style="background: #22C55E"></span> ≥13 clics: Excelente</div>
-          <div class="legend-item"><span class="legend-dot" style="background: #EAB308"></span> 10-12 clics: Aceptable</div>
-          <div class="legend-item"><span class="legend-dot" style="background: #EF4444"></span> &lt;10 clics: En riesgo</div>
+          <div class="legend-item"><span class="legend-dot" style="background: #22C55E"></span> ≥14 clics: Excelente</div>
+          <div class="legend-item"><span class="legend-dot" style="background: #EAB308"></span> 11-13 clics: Aceptable</div>
+          <div class="legend-item"><span class="legend-dot" style="background: #EF4444"></span> ≤10 clics: En riesgo</div>
+        </div>
+        
+        <div class="legend" style="margin-top: 8px;">
+          <strong style="font-weight: 600; color: #374151;">Score Global:</strong>
+          <div class="legend-item"><span class="legend-dot" style="background: #22C55E"></span> 80-100: Excelente</div>
+          <div class="legend-item"><span class="legend-dot" style="background: #EAB308"></span> 50-79: Aceptable</div>
+          <div class="legend-item"><span class="legend-dot" style="background: #EF4444"></span> &lt;50: En riesgo</div>
+        </div>
+        
+        <div style="background: #FEF3C7; border: 1px solid #FCD34D; border-radius: 8px; padding: 12px 16px; margin-top: 16px; font-size: 12px;">
+          <strong style="color: #92400E;">⚠️ Nota importante:</strong>
+          <span style="color: #78350F;"> Estas puntuaciones son orientativas y no suponen la verdad absoluta. Cada nicho requiere un análisis profundo adicional.</span>
         </div>
 
         <!-- PÁGINA 2: PARÁMETROS DE ENTRADA -->

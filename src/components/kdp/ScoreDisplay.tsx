@@ -121,21 +121,21 @@ export const ScoreDisplay = ({
           </div>
         </div>
 
-        {/* Legend + Interpretation */}
+        {/* Legend + Interpretation + Action Guide */}
         <div className="space-y-3">
           {/* Score Legend */}
           <div className="grid grid-cols-3 gap-2 text-xs">
             <div className="flex items-center gap-1 p-2 rounded-lg bg-success/10">
               <span className="w-2 h-2 rounded-full bg-success"></span>
-              <span className="text-muted-foreground">80-100</span>
+              <span className="text-muted-foreground">80-100 Excelente</span>
             </div>
             <div className="flex items-center gap-1 p-2 rounded-lg bg-warning/10">
               <span className="w-2 h-2 rounded-full bg-warning"></span>
-              <span className="text-muted-foreground">50-79</span>
+              <span className="text-muted-foreground">50-79 Aceptable</span>
             </div>
             <div className="flex items-center gap-1 p-2 rounded-lg bg-destructive/10">
               <span className="w-2 h-2 rounded-full bg-destructive"></span>
-              <span className="text-muted-foreground">&lt;50</span>
+              <span className="text-muted-foreground">&lt;50 En riesgo</span>
             </div>
           </div>
 
@@ -146,6 +146,25 @@ export const ScoreDisplay = ({
               {score.status === 'viable' && 'Configuración viable pero requiere ajustes. Optimiza precio, CPC o busca keywords menos competidas.'}
               {score.status === 'not-recommended' && 'No recomendable para Ads en las condiciones actuales. Reformula antes de invertir.'}
             </p>
+          </div>
+
+          {/* Action Guide */}
+          <div className="p-3 rounded-lg border bg-muted/20 border-border">
+            <h5 className="text-xs font-semibold text-foreground mb-2">📋 Guía de acción según rango:</h5>
+            <ul className="text-xs text-muted-foreground space-y-1">
+              <li className="flex items-start gap-2">
+                <span className="text-success">●</span>
+                <span><strong>80-100:</strong> Lanza campaña, escala gradualmente, monitoriza ACoS</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-warning">●</span>
+                <span><strong>50-79:</strong> Sube PVP, baja CPC objetivo o busca keywords long-tail</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-destructive">●</span>
+                <span><strong>&lt;50:</strong> Reformula nicho, reduce páginas/costes o descarta para Ads</span>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -179,6 +198,9 @@ export const ScoreDisplay = ({
         </CardTitle>
         <p className="text-sm text-muted-foreground">
           Indicador sintético (0-100). Los clics por venta determinan la viabilidad en Ads.
+        </p>
+        <p className="text-xs text-muted-foreground/70 italic mt-1">
+          ⚠️ Puntuaciones orientativas. No sustituyen el análisis profundo de cada nicho.
         </p>
       </CardHeader>
       <CardContent>
