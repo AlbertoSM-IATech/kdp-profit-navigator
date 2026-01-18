@@ -20,7 +20,8 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Calculator, Eye, EyeOff, ChevronDown, ChevronUp, Save, FileText } from 'lucide-react';
+import { Calculator, Eye, EyeOff, ChevronDown, ChevronUp, Save, FileText, Download } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { SavedNiche } from '@/types/kdp';
 import { toast } from 'sonner';
 
@@ -155,30 +156,56 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {/* Micro-badges for quick score visualization */}
+              {/* Micro-badges for quick score visualization with tooltips */}
               {hasCurrentData && scoreBreakdown && activeResults && (
-                <div className="hidden lg:flex items-center gap-2 mr-4 px-3 py-1.5 bg-muted/50 rounded-lg border">
-                  <div className="flex items-center gap-1.5" title={`Clics: ${activeResults.clicsMaxPorVenta}`}>
-                    <span className="text-xs text-muted-foreground">Clics</span>
-                    <span className={`text-sm font-bold ${activeResults.clicsMaxPorVenta >= 14 ? 'text-success' : activeResults.clicsMaxPorVenta >= 11 ? 'text-warning' : 'text-destructive'}`}>
-                      {activeResults.clicsMaxPorVenta >= 14 ? '🟢' : activeResults.clicsMaxPorVenta >= 11 ? '🟡' : '🔴'}
-                    </span>
+                <TooltipProvider>
+                  <div className="hidden lg:flex items-center gap-2 mr-4 px-3 py-1.5 bg-muted/50 rounded-lg border">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center gap-1.5 cursor-help">
+                          <span className="text-xs text-muted-foreground">Clics</span>
+                          <span className={`text-sm font-bold ${activeResults.clicsMaxPorVenta >= 14 ? 'text-success' : activeResults.clicsMaxPorVenta >= 11 ? 'text-warning' : 'text-destructive'}`}>
+                            {activeResults.clicsMaxPorVenta >= 14 ? '🟢' : activeResults.clicsMaxPorVenta >= 11 ? '🟡' : '🔴'}
+                          </span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="text-xs">
+                        <p><strong>Clics máx./Venta:</strong> {activeResults.clicsMaxPorVenta}</p>
+                        <p className="text-muted-foreground">≥14 óptimo | 11-13 viable | &lt;11 riesgo</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <div className="w-px h-4 bg-border" />
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center gap-1.5 cursor-help">
+                          <span className="text-xs text-muted-foreground">BACOS</span>
+                          <span className={`text-sm font-bold ${activeResults.margenPct >= 40 ? 'text-success' : activeResults.margenPct >= 30 ? 'text-warning' : 'text-destructive'}`}>
+                            {activeResults.margenPct >= 40 ? '🟢' : activeResults.margenPct >= 30 ? '🟡' : '🔴'}
+                          </span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="text-xs">
+                        <p><strong>Margen BACOS:</strong> {activeResults.margenPct.toFixed(1)}%</p>
+                        <p className="text-muted-foreground">≥40% óptimo | 30-39% viable | &lt;30% riesgo</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <div className="w-px h-4 bg-border" />
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center gap-1.5 cursor-help">
+                          <span className="text-sm font-bold" style={{ color: scoreBreakdown.statusColor }}>
+                            {scoreBreakdown.totalScore}
+                          </span>
+                          <span>{scoreBreakdown.statusEmoji}</span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="text-xs">
+                        <p><strong>Score Global:</strong> {scoreBreakdown.totalScore}/100</p>
+                        <p className="text-muted-foreground">{scoreBreakdown.statusLabel}</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
-                  <div className="w-px h-4 bg-border" />
-                  <div className="flex items-center gap-1.5" title={`BACOS: ${activeResults.margenPct.toFixed(1)}%`}>
-                    <span className="text-xs text-muted-foreground">BACOS</span>
-                    <span className={`text-sm font-bold ${activeResults.margenPct >= 40 ? 'text-success' : activeResults.margenPct >= 30 ? 'text-warning' : 'text-destructive'}`}>
-                      {activeResults.margenPct >= 40 ? '🟢' : activeResults.margenPct >= 30 ? '🟡' : '🔴'}
-                    </span>
-                  </div>
-                  <div className="w-px h-4 bg-border" />
-                  <div className="flex items-center gap-1.5" title={`Score: ${scoreBreakdown.totalScore}`}>
-                    <span className="text-sm font-bold" style={{ color: scoreBreakdown.statusColor }}>
-                      {scoreBreakdown.totalScore}
-                    </span>
-                    <span>{scoreBreakdown.statusEmoji}</span>
-                  </div>
-                </div>
+                </TooltipProvider>
               )}
               <Button 
                 variant="outline" 
@@ -330,7 +357,7 @@ const Index = () => {
                   </CollapsibleTrigger>
                   <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
                     <CardContent className="space-y-6">
-                      <ScoreDisplay score={scoreBreakdown} currencySymbol={globalData.marketplace === 'COM' ? '$' : '€'} embedded />
+                      <ScoreDisplay score={scoreBreakdown} currencySymbol={globalData.marketplace === 'COM' ? '$' : '€'} embedded globalData={globalData} activeResults={activeResults} positioningResults={positioningResults} />
                       
                       {/* Grid layout for Positioning and Results Table */}
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
