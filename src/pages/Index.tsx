@@ -8,12 +8,14 @@ import { EbookSection } from '@/components/kdp/EbookSection';
 import { PaperbackSection } from '@/components/kdp/PaperbackSection';
 import { PositioningSection } from '@/components/kdp/PositioningSection';
 import { ResultsTable } from '@/components/kdp/ResultsTable';
+
 import { PaperbackSimulator } from '@/components/kdp/PaperbackSimulator';
 import { ScoreDisplay } from '@/components/kdp/ScoreDisplay';
 import { NicheComparator } from '@/components/kdp/NicheComparator';
 import { PrintingCostsTable } from '@/components/kdp/PrintingCostsTable';
 import { PrintingCalculator } from '@/components/kdp/PrintingCalculator';
 import { BreakevenAlert } from '@/components/kdp/BreakevenAlert';
+
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +24,7 @@ import { Calculator, Eye, EyeOff, ChevronDown, ChevronUp, Save, FileText, Downlo
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { SavedNiche } from '@/types/kdp';
 import { toast } from 'sonner';
+
 const Index = () => {
   const {
     globalData,
@@ -35,8 +38,10 @@ const Index = () => {
     positioningResults,
     tableData
   } = useKdpCalculator();
+
   const [loadedNicheId, setLoadedNicheId] = useState<string | null>(null);
   const [quickViewMode, setQuickViewMode] = useState(false);
+  
   const showPhysicalFormat = globalData.selectedFormat === 'PAPERBACK';
   const activeResults = globalData.selectedFormat === 'EBOOK' ? ebookResults : paperbackResults;
   const inversionDiaria = positioningResults?.inversionDiaria || 0;
@@ -57,16 +62,21 @@ const Index = () => {
   } = useNicheComparator();
 
   // Collapsible sections
-  const {
-    isCollapsed,
-    toggleSection,
-    expandAll,
-    collapseAll
-  } = useCollapsibleSections();
+  const { isCollapsed, toggleSection, expandAll, collapseAll } = useCollapsibleSections();
+
   const handleSaveNiche = (name: string) => {
-    const saved = saveCurrentAsNiche(name, globalData, globalData.selectedFormat === 'EBOOK' ? ebookData : null, showPhysicalFormat ? paperbackData : null, ebookResults, paperbackResults, inversionDiaria);
+    const saved = saveCurrentAsNiche(
+      name, 
+      globalData, 
+      globalData.selectedFormat === 'EBOOK' ? ebookData : null, 
+      showPhysicalFormat ? paperbackData : null, 
+      ebookResults, 
+      paperbackResults, 
+      inversionDiaria
+    );
     setLoadedNicheId(saved.id);
   };
+
   const handleLoadNiche = useCallback((niche: SavedNiche) => {
     // Load all data from the niche
     setGlobalData(niche.globalData);
@@ -79,28 +89,40 @@ const Index = () => {
     setLoadedNicheId(niche.id);
     toast.success(`Nicho "${niche.name}" cargado para editar`);
   }, [setGlobalData, setEbookData, setPaperbackData]);
+
   const handleUpdateNicheVersion = useCallback((nicheId: string, note?: string) => {
-    updateNicheWithNewVersion(nicheId, globalData, globalData.selectedFormat === 'EBOOK' ? ebookData : null, showPhysicalFormat ? paperbackData : null, ebookResults, paperbackResults, inversionDiaria, note);
+    updateNicheWithNewVersion(
+      nicheId,
+      globalData,
+      globalData.selectedFormat === 'EBOOK' ? ebookData : null,
+      showPhysicalFormat ? paperbackData : null,
+      ebookResults,
+      paperbackResults,
+      inversionDiaria,
+      note
+    );
   }, [globalData, ebookData, paperbackData, ebookResults, paperbackResults, inversionDiaria, showPhysicalFormat, updateNicheWithNewVersion]);
+
   const handleRestoreVersion = useCallback((nicheId: string, versionId: string) => {
     const restored = restoreVersion(nicheId, versionId);
     if (restored) {
       handleLoadNiche(restored);
     }
   }, [restoreVersion, handleLoadNiche]);
+
   const handleStartNew = useCallback(() => {
     setGlobalData({
       marketplace: null,
       margenObjetivoPct: null,
       cpc: null,
       ventasDiariasCompetencia: null,
-      selectedFormat: null
+      selectedFormat: null,
     });
     setEbookData({
       pvp: null,
       royaltyRate: 70,
       tamanoMb: null,
-      ivaType: 4
+      ivaType: 4,
     });
     setPaperbackData({
       interior: null,
@@ -108,13 +130,16 @@ const Index = () => {
       pages: null,
       pvp: null,
       ivaType: 4,
-      bookFormat: 'PAPERBACK'
+      bookFormat: 'PAPERBACK',
     });
     setLoadedNicheId(null);
     toast.success('Formulario limpio para nuevo análisis');
   }, [setGlobalData, setEbookData, setPaperbackData]);
+
   const hasCurrentData = !!(activeResults && globalData.marketplace);
-  return <div className="min-h-screen bg-background">
+
+  return (
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="w-[90%] max-w-[1800px] mx-auto py-4">
@@ -132,7 +157,8 @@ const Index = () => {
             </div>
             <div className="flex items-center gap-2">
               {/* Micro-badges for quick score visualization with tooltips */}
-              {hasCurrentData && scoreBreakdown && activeResults && <TooltipProvider>
+              {hasCurrentData && scoreBreakdown && activeResults && (
+                <TooltipProvider>
                   <div className="hidden lg:flex items-center gap-2 mr-4 px-3 py-1.5 bg-muted/50 rounded-lg border">
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -167,9 +193,7 @@ const Index = () => {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div className="flex items-center gap-1.5 cursor-help">
-                          <span className="text-sm font-bold" style={{
-                        color: scoreBreakdown.statusColor
-                      }}>
+                          <span className="text-sm font-bold" style={{ color: scoreBreakdown.statusColor }}>
                             {scoreBreakdown.totalScore}
                           </span>
                           <span>{scoreBreakdown.statusEmoji}</span>
@@ -181,8 +205,14 @@ const Index = () => {
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                </TooltipProvider>}
-              <Button variant="outline" size="sm" onClick={() => setQuickViewMode(!quickViewMode)} className="hidden md:flex">
+                </TooltipProvider>
+              )}
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setQuickViewMode(!quickViewMode)}
+                className="hidden md:flex"
+              >
                 {quickViewMode ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
                 {quickViewMode ? 'Vista completa' : 'Vista rápida'}
               </Button>
@@ -201,7 +231,8 @@ const Index = () => {
       {/* Main Content */}
       <main className="w-[90%] max-w-[1800px] mx-auto py-8 space-y-6">
         {/* Quick View Mode */}
-        {quickViewMode && hasCurrentData && scoreBreakdown && <div className="space-y-4">
+        {quickViewMode && hasCurrentData && scoreBreakdown && (
+          <div className="space-y-4">
             <ScoreDisplay score={scoreBreakdown} compact={true} />
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-card rounded-lg border">
               <div className="text-center">
@@ -226,14 +257,17 @@ const Index = () => {
             <Button variant="outline" className="w-full" onClick={() => setQuickViewMode(false)}>
               Ver análisis completo
             </Button>
-          </div>}
+          </div>
+        )}
 
         {/* Full View */}
-        {!quickViewMode && <>
+        {!quickViewMode && (
+          <>
             <GlobalDataSection data={globalData} onChange={setGlobalData} />
 
             {/* Saved Analyses Section - After GlobalDataSection */}
-            {niches.length > 0 && <Collapsible open={!isCollapsed('savedAnalyses')} onOpenChange={() => toggleSection('savedAnalyses')}>
+            {niches.length > 0 && (
+              <Collapsible open={!isCollapsed('savedAnalyses')} onOpenChange={() => toggleSection('savedAnalyses')}>
                 <Card className="animate-fade-in">
                   <CollapsibleTrigger asChild>
                     <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
@@ -248,23 +282,46 @@ const Index = () => {
                           </span>
                         </div>
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          {!isCollapsed('savedAnalyses') ? <ChevronUp className="h-5 w-5 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 text-muted-foreground" />}
+                          {!isCollapsed('savedAnalyses') ? (
+                            <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                          ) : (
+                            <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                          )}
                         </Button>
                       </div>
-                      {!isCollapsed('savedAnalyses') && <p className="text-sm text-muted-foreground">Carga o compara análisis anteriores</p>}
+                      {!isCollapsed('savedAnalyses') && (
+                        <p className="text-sm text-muted-foreground">Carga o compara análisis anteriores</p>
+                      )}
                     </CardHeader>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
                     <CardContent>
-                      <NicheComparator niches={niches} onSaveNiche={handleSaveNiche} onDeleteNiche={deleteNiche} onClearAll={clearAllNiches} onLoadNiche={handleLoadNiche} onUpdateNicheVersion={handleUpdateNicheVersion} onRestoreVersion={handleRestoreVersion} onStartNew={handleStartNew} bestNiche={getBestNiche()} hasCurrentData={hasCurrentData} loadedNicheId={loadedNicheId} embedded />
+                      <NicheComparator 
+                        niches={niches} 
+                        onSaveNiche={handleSaveNiche} 
+                        onDeleteNiche={deleteNiche} 
+                        onClearAll={clearAllNiches} 
+                        onLoadNiche={handleLoadNiche}
+                        onUpdateNicheVersion={handleUpdateNicheVersion}
+                        onRestoreVersion={handleRestoreVersion}
+                        onStartNew={handleStartNew}
+                        bestNiche={getBestNiche()} 
+                        hasCurrentData={hasCurrentData}
+                        loadedNicheId={loadedNicheId}
+                        embedded
+                      />
                     </CardContent>
                   </CollapsibleContent>
                 </Card>
-              </Collapsible>}
+              </Collapsible>
+            )}
 
-            {globalData.selectedFormat === 'EBOOK' && globalData.marketplace && <EbookSection data={ebookData} results={ebookResults} globalData={globalData} onChange={setEbookData} />}
+            {globalData.selectedFormat === 'EBOOK' && globalData.marketplace && (
+              <EbookSection data={ebookData} results={ebookResults} globalData={globalData} onChange={setEbookData} />
+            )}
 
-            {showPhysicalFormat && globalData.marketplace && <>
+            {showPhysicalFormat && globalData.marketplace && (
+              <>
                 {/* Breakeven Alert */}
                 <BreakevenAlert globalData={globalData} paperbackData={paperbackData} />
                 
@@ -272,10 +329,12 @@ const Index = () => {
                   <PaperbackSection data={paperbackData} results={paperbackResults} globalData={globalData} onChange={setPaperbackData} />
                   {paperbackResults && <PaperbackSimulator data={paperbackData} globalData={globalData} />}
                 </div>
-              </>}
+              </>
+            )}
 
             {/* Score Global de Viabilidad - Full Width */}
-            {globalData.selectedFormat && globalData.marketplace && activeResults && <Collapsible open={!isCollapsed('score')} onOpenChange={() => toggleSection('score')}>
+            {globalData.selectedFormat && globalData.marketplace && activeResults && (
+              <Collapsible open={!isCollapsed('score')} onOpenChange={() => toggleSection('score')}>
                 <Card className="animate-fade-in">
                   <CollapsibleTrigger asChild>
                     <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
@@ -284,10 +343,16 @@ const Index = () => {
                           📊 Score Global de Viabilidad
                         </CardTitle>
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          {!isCollapsed('score') ? <ChevronUp className="h-5 w-5 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 text-muted-foreground" />}
+                          {!isCollapsed('score') ? (
+                            <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                          ) : (
+                            <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                          )}
                         </Button>
                       </div>
-                      {!isCollapsed('score') && <p className="text-sm text-muted-foreground">Indicador sintético de viabilidad para Ads</p>}
+                      {!isCollapsed('score') && (
+                        <p className="text-sm text-muted-foreground">Indicador sintético de viabilidad para Ads</p>
+                      )}
                     </CardHeader>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
@@ -295,28 +360,45 @@ const Index = () => {
                       <ScoreDisplay score={scoreBreakdown} currencySymbol={globalData.marketplace === 'COM' ? '$' : '€'} embedded globalData={globalData} activeResults={activeResults} positioningResults={positioningResults} />
                       
                       {/* Grid layout for Positioning and Results Table */}
-                      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Positioning Section */}
                         <div>
                           <PositioningSection results={positioningResults} globalData={globalData} activeResults={activeResults} />
                         </div>
                         
                         {/* Embedded Results Table */}
-                        {tableData.length > 0 && <div className="pt-4 lg:pt-0">
+                        {tableData.length > 0 && (
+                          <div className="pt-4 lg:pt-0">
                             <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
                               <FileText className="h-4 w-4" />
                               Tabla de Resultados
                             </h4>
                             <ResultsTable data={tableData} globalData={globalData} embedded />
-                          </div>}
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </CollapsibleContent>
                 </Card>
-              </Collapsible>}
+              </Collapsible>
+            )}
 
             {/* Save Niche Button when no niches exist */}
-            {niches.length === 0 && hasCurrentData && <NicheComparator niches={niches} onSaveNiche={handleSaveNiche} onDeleteNiche={deleteNiche} onClearAll={clearAllNiches} onLoadNiche={handleLoadNiche} onUpdateNicheVersion={handleUpdateNicheVersion} onRestoreVersion={handleRestoreVersion} onStartNew={handleStartNew} bestNiche={getBestNiche()} hasCurrentData={hasCurrentData} loadedNicheId={loadedNicheId} />}
+            {niches.length === 0 && hasCurrentData && (
+              <NicheComparator 
+                niches={niches} 
+                onSaveNiche={handleSaveNiche} 
+                onDeleteNiche={deleteNiche} 
+                onClearAll={clearAllNiches} 
+                onLoadNiche={handleLoadNiche}
+                onUpdateNicheVersion={handleUpdateNicheVersion}
+                onRestoreVersion={handleRestoreVersion}
+                onStartNew={handleStartNew}
+                bestNiche={getBestNiche()} 
+                hasCurrentData={hasCurrentData}
+                loadedNicheId={loadedNicheId}
+              />
+            )}
             
             {/* Calculador interactivo de costes */}
             <Collapsible open={!isCollapsed('printingCalculator')} onOpenChange={() => toggleSection('printingCalculator')}>
@@ -328,10 +410,16 @@ const Index = () => {
                         🧮 Calculador de Costes de Impresión
                       </CardTitle>
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        {!isCollapsed('printingCalculator') ? <ChevronUp className="h-5 w-5 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 text-muted-foreground" />}
+                        {!isCollapsed('printingCalculator') ? (
+                          <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                        ) : (
+                          <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                        )}
                       </Button>
                     </div>
-                    {!isCollapsed('printingCalculator') && <p className="text-sm text-muted-foreground">Calcula costes de impresión interactivamente</p>}
+                    {!isCollapsed('printingCalculator') && (
+                      <p className="text-sm text-muted-foreground">Calcula costes de impresión interactivamente</p>
+                    )}
                   </CardHeader>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
@@ -352,10 +440,16 @@ const Index = () => {
                         💰 Tabla de Costes de Impresión KDP
                       </CardTitle>
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        {!isCollapsed('printingCosts') ? <ChevronUp className="h-5 w-5 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 text-muted-foreground" />}
+                        {!isCollapsed('printingCosts') ? (
+                          <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                        ) : (
+                          <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                        )}
                       </Button>
                     </div>
-                    {!isCollapsed('printingCosts') && <p className="text-sm text-muted-foreground">Referencia de costes según tipo de interior y tamaño</p>}
+                    {!isCollapsed('printingCosts') && (
+                      <p className="text-sm text-muted-foreground">Referencia de costes según tipo de interior y tamaño</p>
+                    )}
                   </CardHeader>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
@@ -365,7 +459,8 @@ const Index = () => {
                 </CollapsibleContent>
               </Card>
             </Collapsible>
-          </>}
+          </>
+        )}
       </main>
 
       {/* Footer */}
@@ -376,6 +471,8 @@ const Index = () => {
           </p>
         </div>
       </footer>
-    </div>;
+    </div>
+  );
 };
+
 export default Index;

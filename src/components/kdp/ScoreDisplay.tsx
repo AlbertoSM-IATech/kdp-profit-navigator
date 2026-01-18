@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Gauge, MousePointer, TrendingUp, Tag, HelpCircle, Download } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
+
 interface ScoreDisplayProps {
   score: ScoreBreakdown | null;
   currencySymbol?: string;
@@ -64,11 +65,13 @@ export const ScoreDisplay = ({
   activeResults,
   positioningResults
 }: ScoreDisplayProps) => {
+  
   const handleExportPDF = () => {
     if (!score || !globalData || !activeResults) {
       toast.error('No hay datos suficientes para exportar');
       return;
     }
+
     const marketplaceLabels: Record<string, string> = {
       'ES': 'Amazon España',
       'COM': 'Amazon USA',
@@ -76,18 +79,21 @@ export const ScoreDisplay = ({
       'UK': 'Amazon UK',
       'DE': 'Amazon Alemania',
       'FR': 'Amazon Francia',
-      'IT': 'Amazon Italia'
+      'IT': 'Amazon Italia',
     };
+
     const formatLabels: Record<string, string> = {
       'EBOOK': 'eBook',
       'PAPERBACK': 'Tapa blanda',
-      'HARDCOVER': 'Tapa dura'
+      'HARDCOVER': 'Tapa dura',
     };
+
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
       toast.error('No se pudo abrir la ventana de impresión');
       return;
     }
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -229,20 +235,25 @@ export const ScoreDisplay = ({
       </body>
       </html>
     `;
+
     printWindow.document.write(html);
     printWindow.document.close();
     printWindow.onload = () => {
       printWindow.print();
     };
+
     toast.success('PDF generado correctamente');
   };
+
   if (!score) {
     if (embedded) {
-      return <div className="flex items-center justify-center h-32 bg-muted/30 rounded-lg">
+      return (
+        <div className="flex items-center justify-center h-32 bg-muted/30 rounded-lg">
           <p className="text-sm text-muted-foreground">
             Completa los datos para ver el score global
           </p>
-        </div>;
+        </div>
+      );
     }
     return <Card className="animate-fade-in">
         <CardHeader className="pb-4">
@@ -280,7 +291,8 @@ export const ScoreDisplay = ({
         </div>
       </div>;
   }
-  const content = <div className="space-y-5">
+  const content = (
+    <div className="space-y-5">
       {/* Multi-column layout for reduced vertical scroll */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Column 1: Main Score + Interpretation */}
@@ -288,9 +300,7 @@ export const ScoreDisplay = ({
           {/* Main Score Display */}
           <div className={`flex items-center justify-between p-5 rounded-xl border-2 ${scoreBg}`}>
             <div className="text-center">
-              <span className="text-5xl font-extrabold" style={{
-              color: score.statusColor
-            }}>
+              <span className="text-5xl font-extrabold" style={{ color: score.statusColor }}>
                 {score.totalScore}
               </span>
               <span className="text-xl text-muted-foreground">/100</span>
@@ -311,7 +321,7 @@ export const ScoreDisplay = ({
           </div>
 
           {/* Score Legend */}
-          <div className="grid grid-cols-3 gap-2 text-xs">
+          <div className="grid grid-cols-1 gap-2 text-xs">
             <div className="flex items-center gap-1 p-2 rounded-lg bg-success/10">
               <span className="w-2 h-2 rounded-full bg-success"></span>
               <span className="text-muted-foreground">80-100 Excelente</span>
@@ -378,15 +388,20 @@ export const ScoreDisplay = ({
         <p className="text-xs text-muted-foreground/70 italic">
           ⚠️ Puntuaciones orientativas. No sustituyen el análisis profundo de cada nicho.
         </p>
-        {globalData && activeResults && <Button variant="outline" size="sm" onClick={handleExportPDF} className="shrink-0">
+        {globalData && activeResults && (
+          <Button variant="outline" size="sm" onClick={handleExportPDF} className="shrink-0">
             <Download className="h-4 w-4 mr-2" />
             Exportar PDF
-          </Button>}
+          </Button>
+        )}
       </div>
-    </div>;
+    </div>
+  );
+
   if (embedded) {
     return content;
   }
+
   return <Card className="animate-fade-in h-full">
       <CardHeader className="pb-4">
         <CardTitle className="section-header">

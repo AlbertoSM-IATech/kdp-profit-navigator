@@ -1,19 +1,30 @@
 import { TableRow, GlobalData } from '@/types/kdp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow as TRow } from '@/components/ui/table';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow as TRow,
+} from '@/components/ui/table';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { LayoutGrid, BookOpen, Book } from 'lucide-react';
+
 interface ResultsTableProps {
   data: TableRow[];
   globalData: GlobalData;
   embedded?: boolean;
 }
-export const ResultsTable = ({
-  data,
-  globalData,
-  embedded = false
-}: ResultsTableProps) => {
+
+export const ResultsTable = ({ data, globalData, embedded = false }: ResultsTableProps) => {
   const currencySymbol = globalData.marketplace === 'COM' ? '$' : '€';
+
   const getMarginClass = (margin: number) => {
     if (margin < 30) return 'bg-destructive/20 text-destructive font-semibold';
     if (margin <= 40) return 'bg-warning/20 text-warning font-semibold';
@@ -26,23 +37,33 @@ export const ResultsTable = ({
     if (clicks >= 11) return 'bg-warning/20 text-warning font-semibold';
     return 'bg-destructive/20 text-destructive font-semibold';
   };
+
   const getDiagnosticBadge = (diagnostico: string) => {
     switch (diagnostico) {
       case 'good':
-        return <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-success/15 text-success border border-success/30">
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-success/15 text-success border border-success/30">
             🟢 Excelente
-          </span>;
+          </span>
+        );
       case 'warning':
-        return <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-warning/15 text-warning border border-warning/30">
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-warning/15 text-warning border border-warning/30">
             🟠 Aceptable
-          </span>;
+          </span>
+        );
       case 'bad':
-        return <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-destructive/15 text-destructive border border-destructive/30">
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-destructive/15 text-destructive border border-destructive/30">
             🔴 En riesgo
-          </span>;
+          </span>
+        );
     }
   };
-  const renderContent = () => data.length > 0 ? <>
+
+  const renderContent = () => (
+    data.length > 0 ? (
+      <>
         <div className="overflow-x-auto rounded-lg border border-border">
           <Table>
             <TableHeader>
@@ -57,10 +78,18 @@ export const ResultsTable = ({
               </TRow>
             </TableHeader>
             <TableBody>
-              {data.map((row, idx) => <TRow key={idx} className="hover:bg-muted/30 transition-colors">
+              {data.map((row, idx) => (
+                <TRow 
+                  key={idx} 
+                  className="hover:bg-muted/30 transition-colors"
+                >
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      {row.tipo === 'eBook' ? <BookOpen className="h-4 w-4 text-secondary" /> : <Book className="h-4 w-4 text-primary" />}
+                      {row.tipo === 'eBook' ? (
+                        <BookOpen className="h-4 w-4 text-secondary" />
+                      ) : (
+                        <Book className="h-4 w-4 text-primary" />
+                      )}
                       <span className="font-medium">{row.tipo}</span>
                     </div>
                   </TableCell>
@@ -99,35 +128,43 @@ export const ResultsTable = ({
                       </Tooltip>
                     </TooltipProvider>
                   </TableCell>
-                </TRow>)}
+                </TRow>
+              ))}
             </TableBody>
           </Table>
         </div>
 
         {/* Legend */}
         <div className="mt-4 flex flex-wrap gap-4 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-success"></span>
             <span>Margen &gt; 40% / ≥13 clics — Excelente</span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-warning"></span>
             <span>Margen 30-40% / 10-12 clics — Aceptable</span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-destructive"></span>
             <span>Margen &lt; 30% / &lt;10 clics — En riesgo</span>
           </div>
         </div>
-      </> : <div className="flex items-center justify-center h-32 bg-muted/30 rounded-lg">
+      </>
+    ) : (
+      <div className="flex items-center justify-center h-32 bg-muted/30 rounded-lg">
         <p className="text-sm text-muted-foreground">
           Completa los datos del formato seleccionado para ver la tabla comparativa
         </p>
-      </div>;
+      </div>
+    )
+  );
+
   if (embedded) {
     return renderContent();
   }
-  return <Card className="animate-fade-in">
+
+  return (
+    <Card className="animate-fade-in">
       <CardHeader className="pb-4">
         <CardTitle className="section-header">
           <LayoutGrid className="h-5 w-5 text-primary" />
@@ -138,5 +175,6 @@ export const ResultsTable = ({
       <CardContent>
         {renderContent()}
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
