@@ -103,28 +103,35 @@ export const ScoreDisplay = ({
   }
   const content = (
     <div className="space-y-5">
-      {/* Row 1: Main Score + Legend */}
-      <div className="grid grid-cols-1 md:grid-cols-1 gap-4 items-start">
-        {/* Main Score Display */}
-        <div className={`flex items-center justify-between p-5 rounded-xl border-2 ${scoreBg}`}>
-          <div className="text-center">
-            <span className="text-5xl font-extrabold" style={{
-            color: score.statusColor
-          }}>
-              {score.totalScore}
-            </span>
-            <span className="text-xl text-muted-foreground">/100</span>
+      {/* Multi-column layout for reduced vertical scroll */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Column 1: Main Score + Interpretation */}
+        <div className="space-y-4">
+          {/* Main Score Display */}
+          <div className={`flex items-center justify-between p-5 rounded-xl border-2 ${scoreBg}`}>
+            <div className="text-center">
+              <span className="text-5xl font-extrabold" style={{ color: score.statusColor }}>
+                {score.totalScore}
+              </span>
+              <span className="text-xl text-muted-foreground">/100</span>
+            </div>
+            <div className="text-right">
+              <span className="text-2xl block mb-1">{score.statusEmoji}</span>
+              <span className={`text-base font-bold ${scoreColor}`}>{score.statusLabel}</span>
+            </div>
           </div>
-          <div className="text-right">
-            <span className="text-2xl block mb-1">{score.statusEmoji}</span>
-            <span className={`text-base font-bold ${scoreColor}`}>{score.statusLabel}</span>
+          
+          {/* Interpretation */}
+          <div className={`p-3 rounded-lg border ${scoreBg}`}>
+            <p className="text-sm text-foreground">
+              {score.status === 'excellent' && 'Excelente configuración para escalar campañas de Ads. Margen de maniobra amplio.'}
+              {score.status === 'viable' && 'Configuración viable pero requiere ajustes. Optimiza precio, CPC o busca keywords menos competidas.'}
+              {score.status === 'not-recommended' && 'No recomendable para Ads en las condiciones actuales. Reformula antes de invertir.'}
+            </p>
           </div>
-        </div>
 
-        {/* Legend + Interpretation + Action Guide */}
-        <div className="space-y-3">
           {/* Score Legend */}
-          <div className="grid grid-cols-3 gap-2 text-xs">
+          <div className="grid grid-cols-1 gap-2 text-xs">
             <div className="flex items-center gap-1 p-2 rounded-lg bg-success/10">
               <span className="w-2 h-2 rounded-full bg-success"></span>
               <span className="text-muted-foreground">80-100 Excelente</span>
@@ -138,51 +145,58 @@ export const ScoreDisplay = ({
               <span className="text-muted-foreground">&lt;50 En riesgo</span>
             </div>
           </div>
+        </div>
 
-          {/* Interpretation */}
-          <div className={`p-3 rounded-lg border ${scoreBg}`}>
-            <p className="text-sm text-foreground">
-              {score.status === 'excellent' && 'Excelente configuración para escalar campañas de Ads. Margen de maniobra amplio.'}
-              {score.status === 'viable' && 'Configuración viable pero requiere ajustes. Optimiza precio, CPC o busca keywords menos competidas.'}
-              {score.status === 'not-recommended' && 'No recomendable para Ads en las condiciones actuales. Reformula antes de invertir.'}
-            </p>
+        {/* Column 2: Score Breakdown */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Desglose del Score
+          </h4>
+          
+          <div className="space-y-3">
+            <ScoreItem label="Clics máx./Venta (CRÍTICO)" value={score.clicsScore} max={50} icon={<MousePointer className="h-4 w-4 text-primary" />} tooltip="≥14 clics = 50pts, 13 = 35pts, 12 = 25pts, 11 = 15pts, ≤10 = 0pts" />
+            
+            <ScoreItem label="BACOS" value={score.bacosScore} max={40} icon={<TrendingUp className="h-4 w-4 text-success" />} tooltip="≥40% = 40pts, ≥35% = 25pts, ≥30% = 15pts, <30% = 0pts" />
+            
+            <ScoreItem label="PVP vs Mínimo" value={score.pvpVsMinScore} max={10} icon={<Tag className="h-4 w-4 text-secondary" />} tooltip="PVP > rec. = 10pts, PVP = rec. = 5pts, PVP < rec. = 0pts" />
           </div>
+        </div>
 
-          {/* Action Guide */}
-          <div className="p-3 rounded-lg border bg-muted/20 border-border">
-            <h5 className="text-xs font-semibold text-foreground mb-2">📋 Guía de acción según rango:</h5>
-            <ul className="text-xs text-muted-foreground space-y-1">
+        {/* Column 3: Action Guide */}
+        <div className="space-y-4">
+          <div className="p-4 rounded-lg border bg-muted/20 border-border h-full">
+            <h5 className="text-sm font-semibold text-foreground mb-3">📋 Guía de acción según rango</h5>
+            <ul className="text-sm text-muted-foreground space-y-3">
               <li className="flex items-start gap-2">
-                <span className="text-success">●</span>
-                <span><strong>80-100:</strong> Lanza campaña, escala gradualmente, monitoriza ACoS</span>
+                <span className="text-success mt-0.5">●</span>
+                <div>
+                  <strong className="text-foreground">80-100:</strong>
+                  <p className="text-xs mt-0.5">Lanza campaña, escala gradualmente, monitoriza ACoS</p>
+                </div>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-warning">●</span>
-                <span><strong>50-79:</strong> Sube PVP, baja CPC objetivo o busca keywords long-tail</span>
+                <span className="text-warning mt-0.5">●</span>
+                <div>
+                  <strong className="text-foreground">50-79:</strong>
+                  <p className="text-xs mt-0.5">Sube PVP, baja CPC objetivo o busca keywords long-tail</p>
+                </div>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-destructive">●</span>
-                <span><strong>&lt;50:</strong> Reformula nicho, reduce páginas/costes o descarta para Ads</span>
+                <span className="text-destructive mt-0.5">●</span>
+                <div>
+                  <strong className="text-foreground">&lt;50:</strong>
+                  <p className="text-xs mt-0.5">Reformula nicho, reduce páginas/costes o descarta para Ads</p>
+                </div>
               </li>
             </ul>
           </div>
         </div>
       </div>
 
-      {/* Row 2: Score Breakdown */}
-      <div className="pt-4 border-t border-border">
-        <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-          Desglose del Score
-        </h4>
-        
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-          <ScoreItem label="Clics máx./Venta (CRÍTICO)" value={score.clicsScore} max={50} icon={<MousePointer className="h-4 w-4 text-primary" />} tooltip="≥14 clics = 50pts, 13 = 35pts, 12 = 25pts, 11 = 15pts, ≤10 = 0pts" />
-          
-          <ScoreItem label="BACOS" value={score.bacosScore} max={40} icon={<TrendingUp className="h-4 w-4 text-success" />} tooltip="≥40% = 40pts, ≥35% = 25pts, ≥30% = 15pts, <30% = 0pts" />
-          
-          <ScoreItem label="PVP vs Mínimo" value={score.pvpVsMinScore} max={10} icon={<Tag className="h-4 w-4 text-secondary" />} tooltip="PVP > rec. = 10pts, PVP = rec. = 5pts, PVP < rec. = 0pts" />
-        </div>
-      </div>
+      {/* Disclaimer */}
+      <p className="text-xs text-muted-foreground/70 italic text-center">
+        ⚠️ Puntuaciones orientativas. No sustituyen el análisis profundo de cada nicho.
+      </p>
     </div>
   );
 
