@@ -90,7 +90,8 @@ export const ScoreDisplay = ({
     }
     // Get paperback-specific data if available
     const isPaperback = globalData.selectedFormat === 'PAPERBACK';
-    const paperbackResults = isPaperback ? activeResults as any : null;
+    const paperbackResults = isPaperback ? (activeResults as any) : null;
+    
     const html = `
       <!DOCTYPE html>
       <html>
@@ -310,7 +311,14 @@ export const ScoreDisplay = ({
   }
   const content = <div className="space-y-5">
       {/* Export Button at top - highlighted */}
-      {globalData && activeResults}
+      {globalData && activeResults && (
+        <div className="flex justify-end">
+          <Button onClick={handleExportPDF} className="bg-orange-500 hover:bg-orange-600 text-white">
+            <Download className="h-4 w-4 mr-2" />
+            Exportar PDF del Análisis
+          </Button>
+        </div>
+      )}
       
       {/* 2-column layout for compact Score */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
