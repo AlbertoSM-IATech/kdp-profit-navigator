@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Calculator, Eye, EyeOff, ChevronDown, ChevronUp, Save, FileText, Download, BarChart3, Table2 } from 'lucide-react';
+import { Calculator, Eye, EyeOff, ChevronDown, ChevronUp, Save, FileText, Download, BarChart3, Table2, Plus } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { SavedNiche } from '@/types/kdp';
 import { toast } from 'sonner';
@@ -200,8 +200,49 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="w-[90%] max-w-[1800px] mx-auto py-8 space-y-6">
-        {/* Printing Costs Table Button - Top of page */}
-        <div className="flex justify-end">
+        {/* Action Buttons - Top of page */}
+        <div className="flex justify-end gap-2">
+          {/* Saved Analyses Button */}
+          {niches.length > 0 && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Save className="h-4 w-4 mr-2" />
+                  Análisis guardados
+                  <span className="ml-2 inline-flex items-center justify-center h-5 min-w-5 px-1.5 text-xs font-semibold rounded-full bg-primary/10 text-primary">
+                    {niches.length}
+                  </span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-6xl max-h-[85vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Save className="h-5 w-5 text-primary" />
+                    Análisis guardados
+                  </DialogTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Carga, compara o gestiona tus análisis guardados anteriormente.
+                  </p>
+                </DialogHeader>
+                <NicheComparator 
+                  niches={niches} 
+                  onSaveNiche={handleSaveNiche} 
+                  onDeleteNiche={deleteNiche} 
+                  onClearAll={clearAllNiches} 
+                  onLoadNiche={handleLoadNiche} 
+                  onUpdateNicheVersion={handleUpdateNicheVersion} 
+                  onRestoreVersion={handleRestoreVersion} 
+                  onStartNew={handleStartNew} 
+                  bestNiche={getBestNiche()} 
+                  hasCurrentData={hasCurrentData} 
+                  loadedNicheId={loadedNicheId} 
+                  embedded 
+                />
+              </DialogContent>
+            </Dialog>
+          )}
+          
+          {/* Printing Costs Table Button */}
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
@@ -255,35 +296,23 @@ const Index = () => {
         {!quickViewMode && <>
             <GlobalDataSection data={globalData} onChange={setGlobalData} />
 
-            {/* Saved Analyses Section - After GlobalDataSection */}
-            {niches.length > 0 && <Collapsible open={!isCollapsed('savedAnalyses')} onOpenChange={() => toggleSection('savedAnalyses')}>
-                <Card className="animate-fade-in">
-                  <CollapsibleTrigger asChild>
-                    <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <CardTitle className="section-header">
-                            <Save className="h-5 w-5 text-primary" />
-                            Análisis guardados
-                          </CardTitle>
-                          <span className="inline-flex items-center justify-center h-6 min-w-6 px-2 text-xs font-semibold rounded-full bg-primary/10 text-primary">
-                            {niches.length}
-                          </span>
-                        </div>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          {!isCollapsed('savedAnalyses') ? <ChevronUp className="h-5 w-5 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 text-muted-foreground" />}
-                        </Button>
-                      </div>
-                      {!isCollapsed('savedAnalyses') && <p className="text-sm text-muted-foreground">Carga o compara análisis anteriores</p>}
-                    </CardHeader>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
-                    <CardContent>
-                      <NicheComparator niches={niches} onSaveNiche={handleSaveNiche} onDeleteNiche={deleteNiche} onClearAll={clearAllNiches} onLoadNiche={handleLoadNiche} onUpdateNicheVersion={handleUpdateNicheVersion} onRestoreVersion={handleRestoreVersion} onStartNew={handleStartNew} bestNiche={getBestNiche()} hasCurrentData={hasCurrentData} loadedNicheId={loadedNicheId} embedded />
-                    </CardContent>
-                  </CollapsibleContent>
-                </Card>
-              </Collapsible>}
+            {/* Loaded Niche Indicator - After GlobalDataSection */}
+            {loadedNicheId && (
+              <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm flex items-center justify-between">
+                <span className="text-muted-foreground">
+                  Editando: <span className="font-medium text-foreground">{niches.find(n => n.id === loadedNicheId)?.name}</span>
+                </span>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={handleStartNew}
+                  className="h-7 text-xs"
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  Nuevo análisis
+                </Button>
+              </div>
+            )}
 
             {globalData.selectedFormat === 'EBOOK' && globalData.marketplace && <EbookSection data={ebookData} results={ebookResults} globalData={globalData} onChange={setEbookData} />}
 

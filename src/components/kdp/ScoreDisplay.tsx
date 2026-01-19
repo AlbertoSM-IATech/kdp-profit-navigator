@@ -88,11 +88,15 @@ export const ScoreDisplay = ({
       toast.error('No se pudo abrir la ventana de impresión');
       return;
     }
+    // Get paperback-specific data if available
+    const isPaperback = globalData.selectedFormat === 'PAPERBACK';
+    const paperbackResults = isPaperback ? (activeResults as any) : null;
+    
     const html = `
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Score de Viabilidad - ${new Date().toLocaleDateString('es-ES')}</title>
+        <title>Análisis de Viabilidad KDP - ${new Date().toLocaleDateString('es-ES')}</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 40px; color: #1a1a1a; line-height: 1.6; }
@@ -107,6 +111,7 @@ export const ScoreDisplay = ({
           .score-label { font-size: 18px; font-weight: 600; color: ${score.statusColor}; }
           .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
           .card { border: 1px solid #e5e5e5; border-radius: 8px; padding: 20px; }
+          .card.full-width { grid-column: 1 / -1; }
           .card h3 { font-size: 14px; text-transform: uppercase; color: #666; margin-bottom: 15px; letter-spacing: 0.5px; }
           .metric { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
           .metric:last-child { border-bottom: none; }
@@ -121,13 +126,16 @@ export const ScoreDisplay = ({
           .legend-dot.success { background: #16a34a; }
           .legend-dot.warning { background: #ca8a04; }
           .legend-dot.danger { background: #dc2626; }
+          .advice-box { background: linear-gradient(135deg, #f0f9ff, #ecfdf5); border: 1px solid #d1fae5; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+          .advice-box h4 { color: #065f46; margin-bottom: 10px; font-size: 16px; }
+          .advice-box p { color: #374151; font-size: 14px; margin-bottom: 10px; }
           .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e5e5; color: #999; font-size: 12px; }
           @media print { body { padding: 20px; } }
         </style>
       </head>
       <body>
         <div class="header">
-          <h1>📊 Score de Viabilidad KDP</h1>
+          <h1>📊 Análisis de Viabilidad KDP</h1>
           <p>Generado el ${new Date().toLocaleDateString('es-ES')} a las ${new Date().toLocaleTimeString('es-ES')}</p>
         </div>
 
@@ -161,6 +169,10 @@ export const ScoreDisplay = ({
               <span class="metric-label">Ventas diarias competencia</span>
               <span class="metric-value">${globalData.ventasDiariasCompetencia || '-'}</span>
             </div>
+            <div class="metric">
+              <span class="metric-label">Margen objetivo</span>
+              <span class="metric-value">${globalData.margenObjetivoPct || '-'}%</span>
+            </div>
           </div>
 
           <div class="card">
@@ -180,9 +192,9 @@ export const ScoreDisplay = ({
           </div>
 
           <div class="card">
-            <h3>Métricas clave</h3>
+            <h3>Métricas clave del formato</h3>
             <div class="metric">
-              <span class="metric-label">Regalía</span>
+              <span class="metric-label">Regalía neta</span>
               <span class="metric-value">${currencySymbol}${activeResults.regalias?.toFixed(2) || '-'}</span>
             </div>
             <div class="metric">
@@ -193,26 +205,43 @@ export const ScoreDisplay = ({
               <span class="metric-label">Margen BACOS</span>
               <span class="metric-value ${activeResults.margenPct >= 40 ? 'success' : activeResults.margenPct >= 30 ? 'warning' : 'danger'}">${activeResults.margenPct?.toFixed(1)}%</span>
             </div>
+            <div class="metric">
+              <span class="metric-label">CPC máx. rentable</span>
+              <span class="metric-value">${currencySymbol}${activeResults.cpcMaxRentable?.toFixed(2) || '-'}</span>
+            </div>
+            ${isPaperback && paperbackResults?.gastosImpresion ? `
+            <div class="metric">
+              <span class="metric-label">Coste de impresión</span>
+              <span class="metric-value">${currencySymbol}${paperbackResults.gastosImpresion?.toFixed(2) || '-'}</span>
+            </div>
+            ` : ''}
           </div>
 
           <div class="card">
-            <h3>Posicionamiento</h3>
+            <h3>Posicionamiento y Ads</h3>
             <div class="metric">
-              <span class="metric-label">Inversión diaria</span>
-              <span class="metric-value">${currencySymbol}${positioningResults?.inversionDiaria?.toFixed(2) || '-'}</span>
+              <span class="metric-label">Clics diarios necesarios</span>
+              <span class="metric-value">${positioningResults?.clicsDiarios?.toFixed(0) || '-'}</span>
             </div>
             <div class="metric">
-              <span class="metric-label">Clics diarios</span>
-              <span class="metric-value">${positioningResults?.clicsDiarios?.toFixed(0) || '-'}</span>
+              <span class="metric-label">Inversión diaria estimada</span>
+              <span class="metric-value">${currencySymbol}${positioningResults?.inversionDiaria?.toFixed(2) || '-'}</span>
             </div>
             <div class="metric">
               <span class="metric-label">Ventas necesarias/día</span>
               <span class="metric-value">${positioningResults?.ventasDiariasNecesarias?.toFixed(1) || '-'}</span>
             </div>
             <div class="metric">
-              <span class="metric-label">Días para breakeven</span>
-              <span class="metric-value">${positioningResults?.diasParaBreakeven || '-'}</span>
+              <span class="metric-label">Tasa de conversión ref.</span>
+              <span class="metric-value">10%</span>
             </div>
+          </div>
+
+          <div class="card full-width advice-box">
+            <h4>💡 Consejo estratégico</h4>
+            <p>Para competir con los libros mejor posicionados de tu nicho, necesitarás conseguir aproximadamente <strong>${globalData.ventasDiariasCompetencia || 0} copias vendidas al día</strong>.</p>
+            <p>Con una conversión del 10%, esto requiere <strong>${positioningResults?.clicsDiarios?.toFixed(0) || 0} clics diarios</strong> y una inversión de <strong>${currencySymbol}${positioningResults?.inversionDiaria?.toFixed(2) || 0}/día</strong> en Amazon Ads.</p>
+            <p>Breakeven publicitario: necesitas <strong>1 pedido cada ${activeResults.clicsMaxPorVenta} clics</strong> para no perder dinero.</p>
           </div>
         </div>
 
@@ -224,7 +253,7 @@ export const ScoreDisplay = ({
 
         <div class="footer">
           <p>⚠️ Puntuaciones orientativas. No sustituyen el análisis profundo de cada nicho.</p>
-          <p>Calculadora de Viabilidad KDP</p>
+          <p>Calculadora de Viabilidad KDP - Publify</p>
         </div>
       </body>
       </html>
@@ -281,6 +310,16 @@ export const ScoreDisplay = ({
       </div>;
   }
   const content = <div className="space-y-5">
+      {/* Export Button at top - highlighted */}
+      {globalData && activeResults && (
+        <div className="flex justify-end">
+          <Button onClick={handleExportPDF} className="bg-orange-500 hover:bg-orange-600 text-white">
+            <Download className="h-4 w-4 mr-2" />
+            Exportar PDF del Análisis
+          </Button>
+        </div>
+      )}
+      
       {/* 2-column layout for compact Score */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Column 1: Main Score + Interpretation + Legend */}
@@ -365,15 +404,15 @@ export const ScoreDisplay = ({
         </div>
       </div>
 
-      {/* Export Button + Disclaimer */}
+      {/* Export Button (highlighted) + Disclaimer */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
+        {globalData && activeResults && <Button onClick={handleExportPDF} className="shrink-0 bg-orange-500 hover:bg-orange-600 text-white">
+            <Download className="h-4 w-4 mr-2" />
+            Exportar PDF del Análisis
+          </Button>}
         <p className="text-xs text-muted-foreground/70 italic">
           Puntuaciones orientativas. No sustituyen el análisis profundo de cada nicho.
         </p>
-        {globalData && activeResults && <Button variant="outline" size="sm" onClick={handleExportPDF} className="shrink-0">
-            <Download className="h-4 w-4 mr-2" />
-            Exportar PDF
-          </Button>}
       </div>
     </div>;
   if (embedded) {
