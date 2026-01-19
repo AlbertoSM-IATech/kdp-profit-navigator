@@ -281,9 +281,9 @@ export const ScoreDisplay = ({
       </div>;
   }
   const content = <div className="space-y-5">
-      {/* Multi-column layout for reduced vertical scroll */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Column 1: Main Score + Interpretation */}
+      {/* 2-column layout for compact Score */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Column 1: Main Score + Interpretation + Legend */}
         <div className="space-y-4">
           {/* Main Score Display */}
           <div className={`flex items-center justify-between p-5 rounded-xl border-2 ${scoreBg}`}>
@@ -327,46 +327,38 @@ export const ScoreDisplay = ({
           </div>
         </div>
 
-        {/* Column 2: Score Breakdown */}
+        {/* Column 2: Score Breakdown + Action Guide */}
         <div className="space-y-4">
-          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-            Desglose del Score
-          </h4>
-          
-          <div className="space-y-3">
-            <ScoreItem label="Clics máx./Venta (CRÍTICO)" value={score.clicsScore} max={50} icon={<MousePointer className="h-4 w-4 text-primary" />} tooltip="≥14 clics = 50pts, 13 = 35pts, 12 = 25pts, 11 = 15pts, ≤10 = 0pts" />
+          {/* Score Breakdown */}
+          <div>
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+              Desglose del Score
+            </h4>
             
-            <ScoreItem label="BACOS" value={score.bacosScore} max={40} icon={<TrendingUp className="h-4 w-4 text-success" />} tooltip="≥40% = 40pts, ≥35% = 25pts, ≥30% = 15pts, <30% = 0pts" />
-            
-            <ScoreItem label="PVP vs Mínimo" value={score.pvpVsMinScore} max={10} icon={<Tag className="h-4 w-4 text-secondary" />} tooltip="PVP > rec. = 10pts, PVP = rec. = 5pts, PVP < rec. = 0pts" />
+            <div className="space-y-3">
+              <ScoreItem label="Clics máx./Venta (CRÍTICO)" value={score.clicsScore} max={50} icon={<MousePointer className="h-4 w-4 text-primary" />} tooltip="≥14 clics = 50pts, 13 = 35pts, 12 = 25pts, 11 = 15pts, ≤10 = 0pts" />
+              
+              <ScoreItem label="BACOS" value={score.bacosScore} max={40} icon={<TrendingUp className="h-4 w-4 text-success" />} tooltip="≥40% = 40pts, ≥35% = 25pts, ≥30% = 15pts, <30% = 0pts" />
+              
+              <ScoreItem label="PVP vs Mínimo" value={score.pvpVsMinScore} max={10} icon={<Tag className="h-4 w-4 text-secondary" />} tooltip="PVP > rec. = 10pts, PVP = rec. = 5pts, PVP < rec. = 0pts" />
+            </div>
           </div>
-        </div>
 
-        {/* Column 3: Action Guide */}
-        <div className="space-y-4">
-          <div className="p-4 rounded-lg border bg-muted/20 border-border h-full">
-            <h5 className="text-sm font-semibold text-foreground mb-3">📋 Guía de acción según rango</h5>
-            <ul className="text-sm text-muted-foreground space-y-3">
+          {/* Action Guide - Compact */}
+          <div className="p-4 rounded-lg border bg-muted/20 border-border">
+            <h5 className="text-sm font-semibold text-foreground mb-2">Guía de acción</h5>
+            <ul className="text-xs text-muted-foreground space-y-1.5">
               <li className="flex items-start gap-2">
                 <span className="text-success mt-0.5">●</span>
-                <div>
-                  <strong className="text-foreground">80-100:</strong>
-                  <p className="text-xs mt-0.5">Lanza campaña, escala gradualmente, monitoriza ACoS</p>
-                </div>
+                <span><strong className="text-foreground">80-100:</strong> Lanza campaña y escala</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-warning mt-0.5">●</span>
-                <div>
-                  <strong className="text-foreground">50-79:</strong>
-                  <p className="text-xs mt-0.5">Sube PVP, baja CPC objetivo o busca keywords long-tail</p>
-                </div>
+                <span><strong className="text-foreground">50-79:</strong> Ajusta PVP o CPC</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-destructive mt-0.5">●</span>
-                <div>
-                  <strong className="text-foreground">&lt;50:</strong>
-                  <p className="text-xs mt-0.5">Reformula nicho, reduce páginas/costes o descarta para Ads</p>
-                </div>
+                <span><strong className="text-foreground">&lt;50:</strong> Reformula o descarta</span>
               </li>
             </ul>
           </div>
@@ -376,7 +368,7 @@ export const ScoreDisplay = ({
       {/* Export Button + Disclaimer */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
         <p className="text-xs text-muted-foreground/70 italic">
-          ⚠️ Puntuaciones orientativas. No sustituyen el análisis profundo de cada nicho.
+          Puntuaciones orientativas. No sustituyen el análisis profundo de cada nicho.
         </p>
         {globalData && activeResults && <Button variant="outline" size="sm" onClick={handleExportPDF} className="shrink-0">
             <Download className="h-4 w-4 mr-2" />

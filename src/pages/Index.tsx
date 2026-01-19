@@ -13,14 +13,14 @@ import { PaperbackSimulator } from '@/components/kdp/PaperbackSimulator';
 import { ScoreDisplay } from '@/components/kdp/ScoreDisplay';
 import { NicheComparator } from '@/components/kdp/NicheComparator';
 import { PrintingCostsTable } from '@/components/kdp/PrintingCostsTable';
-import { PrintingCalculator } from '@/components/kdp/PrintingCalculator';
 import { BreakevenAlert } from '@/components/kdp/BreakevenAlert';
 
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Calculator, Eye, EyeOff, ChevronDown, ChevronUp, Save, FileText, Download } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Calculator, Eye, EyeOff, ChevronDown, ChevronUp, Save, FileText, Download, BarChart3, Table2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { SavedNiche } from '@/types/kdp';
 import { toast } from 'sonner';
@@ -230,6 +230,29 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="w-[90%] max-w-[1800px] mx-auto py-8 space-y-6">
+        {/* Printing Costs Table Button - Top of page */}
+        <div className="flex justify-end">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Table2 className="h-4 w-4 mr-2" />
+                Ver Tabla de Costes KDP
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Table2 className="h-5 w-5 text-primary" />
+                  Costes de Impresión KDP - Todos los Marketplaces
+                </DialogTitle>
+                <p className="text-sm text-muted-foreground">
+                  Referencia oficial de costes según tipo de interior, tamaño y rango de páginas.
+                </p>
+              </DialogHeader>
+              <PrintingCostsTable embedded />
+            </DialogContent>
+          </Dialog>
+        </div>
         {/* Quick View Mode */}
         {quickViewMode && hasCurrentData && scoreBreakdown && (
           <div className="space-y-4">
@@ -340,7 +363,8 @@ const Index = () => {
                     <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
                       <div className="flex items-center justify-between">
                         <CardTitle className="section-header">
-                          📊 Score Global de Viabilidad
+                          <BarChart3 className="h-5 w-5 text-primary" />
+                          Score Global de Viabilidad
                         </CardTitle>
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                           {!isCollapsed('score') ? (
@@ -357,25 +381,24 @@ const Index = () => {
                   </CollapsibleTrigger>
                   <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
                     <CardContent className="space-y-6">
-                      <ScoreDisplay score={scoreBreakdown} currencySymbol={globalData.marketplace === 'COM' ? '$' : '€'} embedded globalData={globalData} activeResults={activeResults} positioningResults={positioningResults} />
-                      
-                      {/* Grid layout for Positioning and Results Table */}
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Positioning Section */}
+                      {/* Results Table - Full width on top */}
+                      {tableData.length > 0 && (
                         <div>
-                          <PositioningSection results={positioningResults} globalData={globalData} activeResults={activeResults} />
+                          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Tabla de Resultados
+                          </h4>
+                          <ResultsTable data={tableData} globalData={globalData} embedded />
                         </div>
+                      )}
+                      
+                      {/* Score Display + Positioning in 2 columns */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Left Column: ScoreDisplay */}
+                        <ScoreDisplay score={scoreBreakdown} currencySymbol={globalData.marketplace === 'COM' ? '$' : '€'} embedded globalData={globalData} activeResults={activeResults} positioningResults={positioningResults} />
                         
-                        {/* Embedded Results Table */}
-                        {tableData.length > 0 && (
-                          <div className="pt-4 lg:pt-0">
-                            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
-                              <FileText className="h-4 w-4" />
-                              Tabla de Resultados
-                            </h4>
-                            <ResultsTable data={tableData} globalData={globalData} embedded />
-                          </div>
-                        )}
+                        {/* Right Column: Positioning Section */}
+                        <PositioningSection results={positioningResults} globalData={globalData} activeResults={activeResults} embedded />
                       </div>
                     </CardContent>
                   </CollapsibleContent>
@@ -400,65 +423,6 @@ const Index = () => {
               />
             )}
             
-            {/* Calculador interactivo de costes */}
-            <Collapsible open={!isCollapsed('printingCalculator')} onOpenChange={() => toggleSection('printingCalculator')}>
-              <Card className="animate-fade-in">
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="section-header">
-                        🧮 Calculador de Costes de Impresión
-                      </CardTitle>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        {!isCollapsed('printingCalculator') ? (
-                          <ChevronUp className="h-5 w-5 text-muted-foreground" />
-                        ) : (
-                          <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                        )}
-                      </Button>
-                    </div>
-                    {!isCollapsed('printingCalculator') && (
-                      <p className="text-sm text-muted-foreground">Calcula costes de impresión interactivamente</p>
-                    )}
-                  </CardHeader>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
-                  <CardContent>
-                    <PrintingCalculator embedded />
-                  </CardContent>
-                </CollapsibleContent>
-              </Card>
-            </Collapsible>
-            
-            {/* Tabla de precios de impresión */}
-            <Collapsible open={!isCollapsed('printingCosts')} onOpenChange={() => toggleSection('printingCosts')}>
-              <Card className="animate-fade-in">
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="pb-4 cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="section-header">
-                        💰 Tabla de Costes de Impresión KDP
-                      </CardTitle>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        {!isCollapsed('printingCosts') ? (
-                          <ChevronUp className="h-5 w-5 text-muted-foreground" />
-                        ) : (
-                          <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                        )}
-                      </Button>
-                    </div>
-                    {!isCollapsed('printingCosts') && (
-                      <p className="text-sm text-muted-foreground">Referencia de costes según tipo de interior y tamaño</p>
-                    )}
-                  </CardHeader>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
-                  <CardContent>
-                    <PrintingCostsTable embedded />
-                  </CardContent>
-                </CollapsibleContent>
-              </Card>
-            </Collapsible>
           </>
         )}
       </main>
