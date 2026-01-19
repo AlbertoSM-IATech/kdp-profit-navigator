@@ -68,16 +68,16 @@ export const PrintingCostsTable = ({ embedded = false }: PrintingCostsTableProps
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-xs">Marketplace</TableHead>
-                    <TableHead className="text-xs text-center" colSpan={2}>Tamaño Normal</TableHead>
-                    <TableHead className="text-xs text-center" colSpan={2}>Tamaño Grande</TableHead>
+                    <TableHead className="text-xs">País/Moneda</TableHead>
+                    <TableHead className="text-xs text-center" colSpan={2}>Tamaño Normal (&lt;7.5"x9.25")</TableHead>
+                    <TableHead className="text-xs text-center" colSpan={2}>Tamaño Grande (≥7.5"x9.25")</TableHead>
                   </TableRow>
                   <TableRow>
                     <TableHead className="text-xs"></TableHead>
-                    <TableHead className="text-xs">24-108</TableHead>
-                    <TableHead className="text-xs">110+ (fijo + /pág)</TableHead>
-                    <TableHead className="text-xs">24-108</TableHead>
-                    <TableHead className="text-xs">110+ (fijo + /pág)</TableHead>
+                    <TableHead className="text-xs">24-108 págs (fijo)</TableHead>
+                    <TableHead className="text-xs">110+ págs (fijo + €/pág)</TableHead>
+                    <TableHead className="text-xs">24-108 págs (fijo)</TableHead>
+                    <TableHead className="text-xs">110+ págs (fijo + €/pág)</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -115,16 +115,16 @@ export const PrintingCostsTable = ({ embedded = false }: PrintingCostsTableProps
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-xs">Marketplace</TableHead>
-                    <TableHead className="text-xs text-center" colSpan={2}>Tamaño Normal</TableHead>
-                    <TableHead className="text-xs text-center" colSpan={2}>Tamaño Grande</TableHead>
+                    <TableHead className="text-xs">País/Moneda</TableHead>
+                    <TableHead className="text-xs text-center" colSpan={2}>Tamaño Normal (&lt;7.5"x9.25")</TableHead>
+                    <TableHead className="text-xs text-center" colSpan={2}>Tamaño Grande (≥7.5"x9.25")</TableHead>
                   </TableRow>
                   <TableRow>
                     <TableHead className="text-xs"></TableHead>
-                    <TableHead className="text-xs">24-40</TableHead>
-                    <TableHead className="text-xs">42+ (fijo + /pág)</TableHead>
-                    <TableHead className="text-xs">24-40</TableHead>
-                    <TableHead className="text-xs">42+ (fijo + /pág)</TableHead>
+                    <TableHead className="text-xs">24-40 págs (fijo)</TableHead>
+                    <TableHead className="text-xs">42+ págs (fijo + €/pág)</TableHead>
+                    <TableHead className="text-xs">24-40 págs (fijo)</TableHead>
+                    <TableHead className="text-xs">42+ págs (fijo + €/pág)</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -162,10 +162,10 @@ export const PrintingCostsTable = ({ embedded = false }: PrintingCostsTableProps
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-xs">Marketplace</TableHead>
-                    <TableHead className="text-xs">Disponible</TableHead>
-                    <TableHead className="text-xs">Normal (fijo + /pág)</TableHead>
-                    <TableHead className="text-xs">Grande (fijo + /pág)</TableHead>
+                    <TableHead className="text-xs">País/Moneda</TableHead>
+                    <TableHead className="text-xs">Disponibilidad</TableHead>
+                    <TableHead className="text-xs">Normal (fijo + €/pág) 72-600 págs</TableHead>
+                    <TableHead className="text-xs">Grande (fijo + €/pág) 72-600 págs</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
