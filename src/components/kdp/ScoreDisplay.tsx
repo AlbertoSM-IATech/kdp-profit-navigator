@@ -2,7 +2,7 @@ import { ScoreBreakdown, GlobalData, EbookResults, PaperbackResults, Positioning
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Gauge, MousePointer, TrendingUp, Tag, HelpCircle, Download } from 'lucide-react';
+import { Gauge, MousePointer, TrendingUp, Tag, HelpCircle, Download, Save } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 interface ScoreDisplayProps {
@@ -14,6 +14,8 @@ interface ScoreDisplayProps {
   activeResults?: EbookResults | PaperbackResults | null;
   positioningResults?: PositioningResults | null;
   onExportPdf?: () => void;
+  loadedNicheId?: string | null;
+  onQuickSave?: () => void;
 }
 interface ScoreItemProps {
   label: string;
@@ -62,7 +64,9 @@ export const ScoreDisplay = ({
   embedded = false,
   globalData,
   activeResults,
-  positioningResults
+  positioningResults,
+  loadedNicheId,
+  onQuickSave
 }: ScoreDisplayProps) => {
   const handleExportPDF = () => {
     if (!score || !globalData || !activeResults) {
@@ -310,15 +314,6 @@ export const ScoreDisplay = ({
       </div>;
   }
   const content = <div className="space-y-5">
-      {/* Export Button at top - highlighted */}
-      {globalData && activeResults && (
-        <div className="flex justify-end">
-          <Button onClick={handleExportPDF} className="bg-orange-500 hover:bg-orange-600 text-white">
-            <Download className="h-4 w-4 mr-2" />
-            Exportar PDF del Análisis
-          </Button>
-        </div>
-      )}
       
       {/* 2-column layout for compact Score */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -404,12 +399,22 @@ export const ScoreDisplay = ({
         </div>
       </div>
 
-      {/* Export Button (highlighted) + Disclaimer */}
+      {/* Export Button (highlighted) + Quick Save + Disclaimer */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
-        {globalData && activeResults && <Button onClick={handleExportPDF} className="shrink-0 bg-orange-500 hover:bg-orange-600 text-white">
-            <Download className="h-4 w-4 mr-2" />
-            Exportar PDF del Análisis
-          </Button>}
+        <div className="flex items-center gap-2">
+          {globalData && activeResults && (
+            <Button onClick={handleExportPDF} className="shrink-0 bg-orange-500 hover:bg-orange-600 text-white">
+              <Download className="h-4 w-4 mr-2" />
+              Exportar PDF
+            </Button>
+          )}
+          {loadedNicheId && onQuickSave && (
+            <Button onClick={() => { onQuickSave(); toast.success('Versión guardada'); }} variant="outline" className="shrink-0">
+              <Save className="h-4 w-4 mr-2" />
+              Guardar versión
+            </Button>
+          )}
+        </div>
         <p className="text-xs text-muted-foreground/70 italic">
           Puntuaciones orientativas. No sustituyen el análisis profundo de cada nicho.
         </p>
