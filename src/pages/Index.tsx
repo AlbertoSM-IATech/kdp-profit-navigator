@@ -131,6 +131,27 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {/* Loaded Niche Indicator in Header */}
+              {loadedNicheId && (
+                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-lg border border-primary/20">
+                  <span className="text-sm text-primary font-medium truncate max-w-[200px]">
+                    {niches.find(n => n.id === loadedNicheId)?.name}
+                  </span>
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    onClick={handleStartNew}
+                    className="h-6 w-6 p-0 hover:bg-primary/20"
+                  >
+                    <span className="sr-only">Cerrar nicho</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </Button>
+                </div>
+              )}
+              
               {/* Micro-badges for quick score visualization with tooltips */}
               {hasCurrentData && scoreBreakdown && activeResults && <TooltipProvider>
                   <div className="hidden lg:flex items-center gap-2 mr-4 px-3 py-1.5 bg-muted/50 rounded-lg border">
@@ -296,9 +317,9 @@ const Index = () => {
         {!quickViewMode && <>
             <GlobalDataSection data={globalData} onChange={setGlobalData} />
 
-            {/* Loaded Niche Indicator - After GlobalDataSection */}
+            {/* Loaded Niche Indicator - Mobile only (desktop shows in header) */}
             {loadedNicheId && (
-              <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm flex items-center justify-between">
+              <div className="md:hidden p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm flex items-center justify-between">
                 <span className="text-muted-foreground">
                   Editando: <span className="font-medium text-foreground">{niches.find(n => n.id === loadedNicheId)?.name}</span>
                 </span>
@@ -357,7 +378,7 @@ const Index = () => {
                       {/* Score Display + Positioning in 2 columns */}
                       <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
                         {/* Left Column: ScoreDisplay */}
-                        <ScoreDisplay score={scoreBreakdown} currencySymbol={globalData.marketplace === 'COM' ? '$' : '€'} embedded globalData={globalData} activeResults={activeResults} positioningResults={positioningResults} />
+                        <ScoreDisplay score={scoreBreakdown} currencySymbol={globalData.marketplace === 'COM' ? '$' : '€'} embedded globalData={globalData} activeResults={activeResults} positioningResults={positioningResults} loadedNicheId={loadedNicheId} onQuickSave={loadedNicheId ? () => handleUpdateNicheVersion(loadedNicheId) : undefined} />
                         
                         {/* Right Column: Positioning Section */}
                         <PositioningSection results={positioningResults} globalData={globalData} activeResults={activeResults} embedded />
