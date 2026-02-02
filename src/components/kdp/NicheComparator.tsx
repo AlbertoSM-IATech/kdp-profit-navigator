@@ -115,10 +115,14 @@ export const NicheComparator = ({
 
   const handleSaveVersion = () => {
     if (loadedNicheId) {
+      const niche = niches.find(n => n.id === loadedNicheId);
+      const newVersionNumber = (niche?.versions?.length || 0) + 1;
       onUpdateNicheVersion(loadedNicheId, versionNote.trim() || undefined);
       setVersionNote('');
       setIsVersionDialogOpen(false);
-      toast.success('Nueva versión guardada');
+      toast.success(`Versión ${newVersionNumber} guardada`, {
+        description: `Nicho "${niche?.name}" actualizado correctamente`,
+      });
     }
   };
 
@@ -441,98 +445,172 @@ export const NicheComparator = ({
                       const isBest = bestNiche?.id === niche.id && niches.length > 1;
                       const isLoaded = loadedNicheId === niche.id;
                       const hasVersions = (niche.versions?.length || 0) > 1;
+                      const isExpanded = expandedNiches.has(niche.id);
                       
                       return (
-                        <TableRow 
-                          key={niche.id} 
-                          className={`${isBest ? 'bg-success/5' : ''} ${isLoaded ? 'bg-primary/5 border-l-2 border-l-primary' : ''}`}
-                        >
-                          <TableCell className="w-8">
-                            {hasVersions && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => toggleExpand(niche.id)}
-                                className="h-6 w-6 p-0"
-                              >
-                                {expandedNiches.has(niche.id) ? 
-                                  <ChevronDown className="h-4 w-4" /> : 
-                                  <ChevronRight className="h-4 w-4" />
-                                }
-                              </Button>
-                            )}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            <div className="flex items-center gap-2">
-                              {isBest && <Star className="h-4 w-4 text-success" />}
-                              {isLoaded && <span className="text-primary">✏️</span>}
-                              {niche.name}
-                              {hasVersions && (
-                                <span className="text-xs bg-muted px-1.5 py-0.5 rounded">
-                                  v{niche.versions?.length || 1}
-                                </span>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {config?.name || 'N/A'}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {niche.globalData.selectedFormat === 'EBOOK' ? 'eBook' : 'Formato impreso'}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {niche.pvp.toFixed(2)}{config?.currencySymbol || '€'}
-                          </TableCell>
-                          <TableCell className={`text-right font-semibold ${getClicksColor(niche.clicsMaxPorVenta)}`}>
-                            {niche.clicsMaxPorVenta}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {niche.bacos.toFixed(1)}%
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <span className={`font-bold ${getScoreColor(niche.scoreBreakdown.totalScore)}`}>
-                              {niche.scoreBreakdown.totalScore}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <span title={niche.scoreBreakdown.statusLabel}>
-                              {niche.scoreBreakdown.statusEmoji}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center justify-end gap-1">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => onLoadNiche(niche)}
-                                className="h-8 w-8 p-0 text-muted-foreground hover:text-primary"
-                                title="Cargar para editar"
-                              >
-                                <Upload className="h-4 w-4" />
-                              </Button>
+                        <>
+                          <TableRow 
+                            key={niche.id} 
+                            className={`${isBest ? 'bg-success/5' : ''} ${isLoaded ? 'bg-primary/5 border-l-2 border-l-primary' : ''}`}
+                          >
+                            <TableCell className="w-8">
                               {hasVersions && (
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  onClick={() => openHistoryDialog(niche)}
-                                  className="h-8 w-8 p-0 text-muted-foreground hover:text-secondary"
-                                  title="Ver historial"
+                                  onClick={() => toggleExpand(niche.id)}
+                                  className="h-6 w-6 p-0"
                                 >
-                                  <History className="h-4 w-4" />
+                                  {isExpanded ? 
+                                    <ChevronDown className="h-4 w-4" /> : 
+                                    <ChevronRight className="h-4 w-4" />
+                                  }
                                 </Button>
                               )}
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => onDeleteNiche(niche.id)}
-                                className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
-                                title="Eliminar"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              <div className="flex items-center gap-2">
+                                {isBest && <Star className="h-4 w-4 text-success" />}
+                                {isLoaded && <span className="text-primary">✏️</span>}
+                                {niche.name}
+                                {hasVersions && (
+                                  <span className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                                    v{niche.versions?.length || 1}
+                                  </span>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {config?.name || 'N/A'}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {niche.globalData.selectedFormat === 'EBOOK' ? 'eBook' : 'Formato impreso'}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {niche.pvp.toFixed(2)}{config?.currencySymbol || '€'}
+                            </TableCell>
+                            <TableCell className={`text-right font-semibold ${getClicksColor(niche.clicsMaxPorVenta)}`}>
+                              {niche.clicsMaxPorVenta}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {niche.bacos.toFixed(1)}%
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <span className={`font-bold ${getScoreColor(niche.scoreBreakdown.totalScore)}`}>
+                                {niche.scoreBreakdown.totalScore}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <span title={niche.scoreBreakdown.statusLabel}>
+                                {niche.scoreBreakdown.statusEmoji}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center justify-end gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => onLoadNiche(niche)}
+                                  className="h-8 w-8 p-0 text-muted-foreground hover:text-primary"
+                                  title="Cargar para editar"
+                                >
+                                  <Upload className="h-4 w-4" />
+                                </Button>
+                                {hasVersions && (
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => openHistoryDialog(niche)}
+                                    className="h-8 w-8 p-0 text-muted-foreground hover:text-secondary"
+                                    title="Ver historial"
+                                  >
+                                    <History className="h-4 w-4" />
+                                  </Button>
+                                )}
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => onDeleteNiche(niche.id)}
+                                  className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                                  title="Eliminar"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                          
+                          {/* Inline Version History */}
+                          {isExpanded && hasVersions && niche.versions?.map((version, vIndex) => (
+                            <TableRow 
+                              key={version.id}
+                              className="bg-muted/20 border-l-4 border-l-muted"
+                            >
+                              <TableCell></TableCell>
+                              <TableCell colSpan={2} className="text-sm">
+                                <div className="flex items-center gap-2">
+                                  <History className="h-3 w-3 text-muted-foreground" />
+                                  <span className="font-medium text-muted-foreground">
+                                    v{niche.versions!.length - vIndex}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {new Date(version.createdAt).toLocaleDateString('es-ES', {
+                                      day: 'numeric',
+                                      month: 'short',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </span>
+                                  {version.note && (
+                                    <span className="text-xs italic text-muted-foreground truncate max-w-[150px]" title={version.note}>
+                                      "{version.note}"
+                                    </span>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-right text-sm text-muted-foreground">
+                                {version.pvp.toFixed(2)}€
+                              </TableCell>
+                              <TableCell></TableCell>
+                              <TableCell className={`text-right text-sm ${getClicksColor(version.clicsMaxPorVenta)}`}>
+                                {version.clicsMaxPorVenta}
+                              </TableCell>
+                              <TableCell className="text-right text-sm text-muted-foreground">
+                                {version.bacos.toFixed(1)}%
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <span className={`text-sm ${getScoreColor(version.scoreBreakdown.totalScore)}`}>
+                                  {version.scoreBreakdown.totalScore}
+                                </span>
+                              </TableCell>
+                              <TableCell className="text-center text-sm">
+                                {version.scoreBreakdown.statusEmoji}
+                              </TableCell>
+                              <TableCell>
+                                {vIndex > 0 && (
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => {
+                                      onRestoreVersion(niche.id, version.id);
+                                      toast.success(`Restaurado a versión ${niche.versions!.length - vIndex}`, {
+                                        description: 'Los datos del análisis han sido restaurados',
+                                      });
+                                    }}
+                                    className="h-7 text-xs text-muted-foreground hover:text-primary"
+                                    title="Restaurar esta versión"
+                                  >
+                                    <RotateCcw className="h-3 w-3 mr-1" />
+                                    Restaurar
+                                  </Button>
+                                )}
+                                {vIndex === 0 && (
+                                  <span className="text-xs text-primary font-medium px-2">Actual</span>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </>
                       );
                     })}
                   </TableBody>
