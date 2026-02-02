@@ -541,75 +541,81 @@ export const NicheComparator = ({
                           </TableRow>
                           
                           {/* Inline Version History */}
-                          {isExpanded && hasVersions && niche.versions?.map((version, vIndex) => (
-                            <TableRow 
-                              key={version.id}
-                              className="bg-muted/20 border-l-4 border-l-muted"
-                            >
-                              <TableCell></TableCell>
-                              <TableCell colSpan={2} className="text-sm">
-                                <div className="flex items-center gap-2">
-                                  <History className="h-3 w-3 text-muted-foreground" />
-                                  <span className="font-medium text-muted-foreground">
-                                    v{niche.versions!.length - vIndex}
-                                  </span>
-                                  <span className="text-xs text-muted-foreground">
-                                    {new Date(version.createdAt).toLocaleDateString('es-ES', {
-                                      day: 'numeric',
-                                      month: 'short',
-                                      hour: '2-digit',
-                                      minute: '2-digit'
-                                    })}
-                                  </span>
-                                  {version.note && (
-                                    <span className="text-xs italic text-muted-foreground truncate max-w-[150px]" title={version.note}>
-                                      "{version.note}"
+                          {isExpanded && hasVersions && niche.versions?.map((version, vIndex) => {
+                            // Check if this version is the active one
+                            const isActiveVersion = niche.activeVersionId 
+                              ? version.id === niche.activeVersionId 
+                              : vIndex === 0; // Default to first (most recent) if no activeVersionId set
+                            
+                            return (
+                              <TableRow 
+                                key={version.id}
+                                className={`bg-muted/20 border-l-4 ${isActiveVersion ? 'border-l-primary bg-primary/5' : 'border-l-muted'}`}
+                              >
+                                <TableCell></TableCell>
+                                <TableCell colSpan={2} className="text-sm">
+                                  <div className="flex items-center gap-2">
+                                    <History className="h-3 w-3 text-muted-foreground" />
+                                    <span className="font-medium text-muted-foreground">
+                                      v{niche.versions!.length - vIndex}
                                     </span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {new Date(version.createdAt).toLocaleDateString('es-ES', {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </span>
+                                    {version.note && (
+                                      <span className="text-xs italic text-muted-foreground truncate max-w-[150px]" title={version.note}>
+                                        "{version.note}"
+                                      </span>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-right text-sm text-muted-foreground">
+                                  {version.pvp.toFixed(2)}€
+                                </TableCell>
+                                <TableCell></TableCell>
+                                <TableCell className={`text-right text-sm ${getClicksColor(version.clicsMaxPorVenta)}`}>
+                                  {version.clicsMaxPorVenta}
+                                </TableCell>
+                                <TableCell className="text-right text-sm text-muted-foreground">
+                                  {version.bacos.toFixed(1)}%
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  <span className={`text-sm ${getScoreColor(version.scoreBreakdown.totalScore)}`}>
+                                    {version.scoreBreakdown.totalScore}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="text-center text-sm">
+                                  {version.scoreBreakdown.statusEmoji}
+                                </TableCell>
+                                <TableCell>
+                                  {isActiveVersion ? (
+                                    <span className="text-xs text-primary font-medium px-2">Actual</span>
+                                  ) : (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => {
+                                        onRestoreVersion(niche.id, version.id);
+                                        toast.success(`Restaurado a versión ${niche.versions!.length - vIndex}`, {
+                                          description: 'Los datos del análisis han sido restaurados',
+                                        });
+                                      }}
+                                      className="h-7 text-xs text-muted-foreground hover:text-primary"
+                                      title="Restaurar esta versión"
+                                    >
+                                      <RotateCcw className="h-3 w-3 mr-1" />
+                                      Restaurar
+                                    </Button>
                                   )}
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-right text-sm text-muted-foreground">
-                                {version.pvp.toFixed(2)}€
-                              </TableCell>
-                              <TableCell></TableCell>
-                              <TableCell className={`text-right text-sm ${getClicksColor(version.clicsMaxPorVenta)}`}>
-                                {version.clicsMaxPorVenta}
-                              </TableCell>
-                              <TableCell className="text-right text-sm text-muted-foreground">
-                                {version.bacos.toFixed(1)}%
-                              </TableCell>
-                              <TableCell className="text-center">
-                                <span className={`text-sm ${getScoreColor(version.scoreBreakdown.totalScore)}`}>
-                                  {version.scoreBreakdown.totalScore}
-                                </span>
-                              </TableCell>
-                              <TableCell className="text-center text-sm">
-                                {version.scoreBreakdown.statusEmoji}
-                              </TableCell>
-                              <TableCell>
-                                {vIndex > 0 && (
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => {
-                                      onRestoreVersion(niche.id, version.id);
-                                      toast.success(`Restaurado a versión ${niche.versions!.length - vIndex}`, {
-                                        description: 'Los datos del análisis han sido restaurados',
-                                      });
-                                    }}
-                                    className="h-7 text-xs text-muted-foreground hover:text-primary"
-                                    title="Restaurar esta versión"
-                                  >
-                                    <RotateCcw className="h-3 w-3 mr-1" />
-                                    Restaurar
-                                  </Button>
-                                )}
-                                {vIndex === 0 && (
-                                  <span className="text-xs text-primary font-medium px-2">Actual</span>
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          ))}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
                         </>
                       );
                     })}

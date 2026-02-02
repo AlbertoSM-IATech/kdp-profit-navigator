@@ -137,6 +137,7 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
       regalias: activeResults?.regalias || 0,
       scoreBreakdown,
       versions: [initialVersion],
+      activeVersionId: initialVersion.id,
     };
 
     const updated = [...niches, newNiche];
@@ -203,6 +204,7 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
       regalias: activeResults?.regalias || 0,
       scoreBreakdown,
       versions: [...(existingNiche.versions || []), newVersion],
+      activeVersionId: newVersion.id,
     };
 
     const updated = [...niches];
@@ -225,7 +227,7 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
     if (!version) return null;
 
     // Just update the niche with the version data WITHOUT creating a new version entry
-    // This restores the niche to that version's state
+    // This restores the niche to that version's state and marks this version as active
     const updatedNiche: SavedNiche = {
       ...niche,
       updatedAt: new Date(),
@@ -241,6 +243,8 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
       scoreBreakdown: version.scoreBreakdown,
       // Keep the same versions array - don't add a new entry
       versions: niche.versions || [],
+      // Mark this version as the active one
+      activeVersionId: version.id,
     };
 
     const updated = [...niches];

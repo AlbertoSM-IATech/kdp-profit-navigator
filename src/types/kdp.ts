@@ -161,6 +161,8 @@ export interface SavedNiche {
   scoreBreakdown: ScoreBreakdown;
   // Version history
   versions: NicheVersion[];
+  // Active version ID (which version is currently loaded)
+  activeVersionId?: string;
 }
 
 // Helper types for currency and market-specific settings
