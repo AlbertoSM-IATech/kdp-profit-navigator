@@ -224,28 +224,11 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
     const version = niche.versions?.find(v => v.id === versionId);
     if (!version) return null;
 
-    const now = new Date();
-    
-    // Create a new version from the restored one
-    const restoredVersion: NicheVersion = {
-      id: generateId(),
-      createdAt: now,
-      note: `Restaurado desde versión del ${version.createdAt.toLocaleDateString('es-ES')}`,
-      globalData: { ...version.globalData },
-      ebookData: version.ebookData ? { ...version.ebookData } : null,
-      paperbackData: version.paperbackData ? { ...version.paperbackData } : null,
-      clicsMaxPorVenta: version.clicsMaxPorVenta,
-      bacos: version.bacos,
-      inversionDiaria: version.inversionDiaria,
-      pvp: version.pvp,
-      precioMinRecomendado: version.precioMinRecomendado,
-      regalias: version.regalias,
-      scoreBreakdown: version.scoreBreakdown,
-    };
-
+    // Just update the niche with the version data WITHOUT creating a new version entry
+    // This restores the niche to that version's state
     const updatedNiche: SavedNiche = {
       ...niche,
-      updatedAt: now,
+      updatedAt: new Date(),
       globalData: { ...version.globalData },
       ebookData: version.ebookData ? { ...version.ebookData } : null,
       paperbackData: version.paperbackData ? { ...version.paperbackData } : null,
@@ -256,7 +239,8 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
       precioMinRecomendado: version.precioMinRecomendado,
       regalias: version.regalias,
       scoreBreakdown: version.scoreBreakdown,
-      versions: [...(niche.versions || []), restoredVersion],
+      // Keep the same versions array - don't add a new entry
+      versions: niche.versions || [],
     };
 
     const updated = [...niches];

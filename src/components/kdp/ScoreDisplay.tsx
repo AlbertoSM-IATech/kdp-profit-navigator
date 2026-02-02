@@ -96,168 +96,397 @@ export const ScoreDisplay = ({
     const isPaperback = globalData.selectedFormat === 'PAPERBACK';
     const paperbackResults = isPaperback ? (activeResults as any) : null;
     
+    // Enhanced PDF styling matching the app's design system
+    const scoreBgColor = score.status === 'excellent' ? '#f0fdf4' : score.status === 'viable' ? '#fef9c3' : '#fef2f2';
+    const scoreBorderColor = score.status === 'excellent' ? '#22c55e' : score.status === 'viable' ? '#eab308' : '#ef4444';
+    
     const html = `
       <!DOCTYPE html>
       <html>
       <head>
         <title>Análisis de Viabilidad KDP - ${new Date().toLocaleDateString('es-ES')}</title>
         <style>
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+          
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 40px; color: #1a1a1a; line-height: 1.6; }
-          .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #e5e5e5; padding-bottom: 20px; }
-          .header h1 { font-size: 24px; color: #1a1a1a; margin-bottom: 5px; }
-          .header p { color: #666; font-size: 14px; }
-          .score-main { display: flex; justify-content: center; align-items: center; gap: 20px; padding: 30px; background: ${score.status === 'excellent' ? '#f0fdf4' : score.status === 'viable' ? '#fefce8' : '#fef2f2'}; border-radius: 12px; margin-bottom: 30px; }
-          .score-number { font-size: 72px; font-weight: 800; color: ${score.statusColor}; }
-          .score-max { font-size: 24px; color: #666; }
-          .score-status { text-align: center; }
-          .score-emoji { font-size: 48px; }
-          .score-label { font-size: 18px; font-weight: 600; color: ${score.statusColor}; }
-          .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-          .card { border: 1px solid #e5e5e5; border-radius: 8px; padding: 20px; }
+          body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            padding: 32px; 
+            color: #0f172a; 
+            line-height: 1.5;
+            background: #fafafa;
+          }
+          
+          .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            overflow: hidden;
+          }
+          
+          .header { 
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 24px 32px;
+            text-align: center;
+          }
+          .header h1 { 
+            font-size: 22px; 
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+          }
+          .header p { 
+            color: #94a3b8; 
+            font-size: 13px; 
+            font-weight: 400;
+          }
+          
+          .content {
+            padding: 24px 32px;
+          }
+          
+          .score-main { 
+            display: flex; 
+            justify-content: space-between;
+            align-items: center; 
+            padding: 24px; 
+            background: ${scoreBgColor}; 
+            border: 2px solid ${scoreBorderColor}20;
+            border-radius: 16px; 
+            margin-bottom: 24px; 
+          }
+          .score-left {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+          }
+          .score-number { 
+            font-size: 64px; 
+            font-weight: 800; 
+            color: ${score.statusColor}; 
+            line-height: 1;
+          }
+          .score-max { font-size: 20px; color: #64748b; font-weight: 500; }
+          .score-right { text-align: right; }
+          .score-emoji { font-size: 40px; margin-bottom: 4px; }
+          .score-label { 
+            font-size: 16px; 
+            font-weight: 700; 
+            color: ${score.statusColor}; 
+          }
+          .score-interpretation {
+            font-size: 13px;
+            color: #475569;
+            margin-top: 8px;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+          }
+          
+          .grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 16px; 
+            margin-bottom: 24px; 
+          }
+          
+          .card { 
+            background: #f8fafc;
+            border: 1px solid #e2e8f0; 
+            border-radius: 12px; 
+            padding: 20px; 
+          }
           .card.full-width { grid-column: 1 / -1; }
-          .card h3 { font-size: 14px; text-transform: uppercase; color: #666; margin-bottom: 15px; letter-spacing: 0.5px; }
-          .metric { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+          .card h3 { 
+            font-size: 11px; 
+            text-transform: uppercase; 
+            color: #64748b; 
+            margin-bottom: 16px; 
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+          }
+          .card h3 .icon { font-size: 14px; }
+          
+          .metric { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            padding: 10px 0; 
+            border-bottom: 1px solid #e2e8f0; 
+          }
           .metric:last-child { border-bottom: none; }
-          .metric-label { color: #666; }
-          .metric-value { font-weight: 600; }
+          .metric-label { color: #475569; font-size: 13px; }
+          .metric-value { font-weight: 600; font-size: 14px; color: #0f172a; }
           .metric-value.success { color: #16a34a; }
           .metric-value.warning { color: #ca8a04; }
           .metric-value.danger { color: #dc2626; }
-          .legend { display: flex; gap: 20px; justify-content: center; margin-top: 20px; }
-          .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
-          .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-          .legend-dot.success { background: #16a34a; }
-          .legend-dot.warning { background: #ca8a04; }
-          .legend-dot.danger { background: #dc2626; }
-          .advice-box { background: linear-gradient(135deg, #f0f9ff, #ecfdf5); border: 1px solid #d1fae5; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
-          .advice-box h4 { color: #065f46; margin-bottom: 10px; font-size: 16px; }
-          .advice-box p { color: #374151; font-size: 14px; margin-bottom: 10px; }
-          .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e5e5; color: #999; font-size: 12px; }
-          @media print { body { padding: 20px; } }
+          
+          .progress-bar {
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 6px;
+          }
+          .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+          }
+          .progress-fill.primary { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+          .progress-fill.success { background: linear-gradient(90deg, #22c55e, #4ade80); }
+          .progress-fill.secondary { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+          
+          .score-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+          }
+          .score-item:last-child { border-bottom: none; }
+          .score-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+          }
+          .score-item-label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 500;
+          }
+          .score-item-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0f172a;
+          }
+          
+          .advice-box { 
+            background: linear-gradient(135deg, #f0f9ff 0%, #ecfdf5 100%); 
+            border: 1px solid #86efac; 
+            border-radius: 12px; 
+            padding: 20px;
+          }
+          .advice-box h4 { 
+            color: #166534; 
+            margin-bottom: 12px; 
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+          .advice-box p { 
+            color: #374151; 
+            font-size: 13px; 
+            margin-bottom: 8px;
+            line-height: 1.6;
+          }
+          .advice-box p:last-child { margin-bottom: 0; }
+          .advice-box strong { color: #0f172a; font-weight: 600; }
+          
+          .legend { 
+            display: flex; 
+            gap: 24px; 
+            justify-content: center; 
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-top: 16px;
+          }
+          .legend-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 500;
+          }
+          .legend-dot { 
+            width: 10px; 
+            height: 10px; 
+            border-radius: 50%; 
+          }
+          .legend-dot.success { background: #22c55e; }
+          .legend-dot.warning { background: #eab308; }
+          .legend-dot.danger { background: #ef4444; }
+          
+          .footer { 
+            text-align: center; 
+            padding: 20px 32px;
+            background: #f1f5f9;
+            border-top: 1px solid #e2e8f0;
+          }
+          .footer p { 
+            color: #64748b; 
+            font-size: 11px;
+            margin-bottom: 4px;
+          }
+          .footer p:last-child { margin-bottom: 0; }
+          .footer .brand {
+            font-weight: 600;
+            color: #475569;
+          }
+          
+          @media print { 
+            body { padding: 0; background: white; }
+            .container { box-shadow: none; border-radius: 0; }
+          }
         </style>
       </head>
       <body>
-        <div class="header">
-          <h1>📊 Análisis de Viabilidad KDP</h1>
-          <p>Generado el ${new Date().toLocaleDateString('es-ES')} a las ${new Date().toLocaleTimeString('es-ES')}</p>
-        </div>
-
-        <div class="score-main">
-          <div>
-            <span class="score-number">${score.totalScore}</span>
-            <span class="score-max">/100</span>
-          </div>
-          <div class="score-status">
-            <div class="score-emoji">${score.statusEmoji}</div>
-            <div class="score-label">${score.statusLabel}</div>
-          </div>
-        </div>
-
-        <div class="grid">
-          <div class="card">
-            <h3>Configuración del análisis</h3>
-            <div class="metric">
-              <span class="metric-label">Marketplace</span>
-              <span class="metric-value">${marketplaceLabels[globalData.marketplace || ''] || globalData.marketplace}</span>
-            </div>
-            <div class="metric">
-              <span class="metric-label">Formato</span>
-              <span class="metric-value">${formatLabels[globalData.selectedFormat || ''] || globalData.selectedFormat}</span>
-            </div>
-            <div class="metric">
-              <span class="metric-label">CPC</span>
-              <span class="metric-value">${currencySymbol}${globalData.cpc?.toFixed(2) || '-'}</span>
-            </div>
-            <div class="metric">
-              <span class="metric-label">Ventas diarias competencia</span>
-              <span class="metric-value">${globalData.ventasDiariasCompetencia || '-'}</span>
-            </div>
-            <div class="metric">
-              <span class="metric-label">Margen objetivo</span>
-              <span class="metric-value">${globalData.margenObjetivoPct || '-'}%</span>
-            </div>
+        <div class="container">
+          <div class="header">
+            <h1>📊 Análisis de Viabilidad KDP</h1>
+            <p>Generado el ${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} a las ${new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</p>
           </div>
 
-          <div class="card">
-            <h3>Desglose del Score</h3>
-            <div class="metric">
-              <span class="metric-label">Clics máx./Venta (50pts)</span>
-              <span class="metric-value">${score.clicsScore}/50</span>
+          <div class="content">
+            <div class="score-main">
+              <div class="score-left">
+                <span class="score-number">${score.totalScore}</span>
+                <span class="score-max">/100</span>
+              </div>
+              <div class="score-right">
+                <div class="score-emoji">${score.statusEmoji}</div>
+                <div class="score-label">${score.statusLabel}</div>
+              </div>
             </div>
-            <div class="metric">
-              <span class="metric-label">BACOS (40pts)</span>
-              <span class="metric-value">${score.bacosScore}/40</span>
+            
+            <div class="score-interpretation">
+              ${score.status === 'excellent' ? '✅ Excelente configuración para escalar campañas de Ads. Margen de maniobra amplio.' : ''}
+              ${score.status === 'viable' ? '⚠️ Configuración viable pero requiere ajustes. Optimiza precio, CPC o busca keywords menos competidas.' : ''}
+              ${score.status === 'not-recommended' ? '❌ No recomendable para Ads en las condiciones actuales. Reformula antes de invertir.' : ''}
             </div>
-            <div class="metric">
-              <span class="metric-label">PVP vs Mínimo (10pts)</span>
-              <span class="metric-value">${score.pvpVsMinScore}/10</span>
+
+            <div class="grid" style="margin-top: 24px;">
+              <div class="card">
+                <h3><span class="icon">⚙️</span> Configuración del análisis</h3>
+                <div class="metric">
+                  <span class="metric-label">Marketplace</span>
+                  <span class="metric-value">${marketplaceLabels[globalData.marketplace || ''] || globalData.marketplace}</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-label">Formato</span>
+                  <span class="metric-value">${formatLabels[globalData.selectedFormat || ''] || globalData.selectedFormat}</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-label">CPC</span>
+                  <span class="metric-value">${currencySymbol}${globalData.cpc?.toFixed(2) || '-'}</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-label">Ventas diarias competencia</span>
+                  <span class="metric-value">${globalData.ventasDiariasCompetencia || '-'}</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-label">Margen objetivo</span>
+                  <span class="metric-value">${globalData.margenObjetivoPct || '-'}%</span>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3><span class="icon">📊</span> Desglose del Score</h3>
+                <div class="score-item">
+                  <div class="score-item-header">
+                    <span class="score-item-label">🖱️ Clics máx./Venta (CRÍTICO)</span>
+                    <span class="score-item-value">${score.clicsScore}/50</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill primary" style="width: ${(score.clicsScore / 50) * 100}%"></div>
+                  </div>
+                </div>
+                <div class="score-item">
+                  <div class="score-item-header">
+                    <span class="score-item-label">📈 BACOS</span>
+                    <span class="score-item-value">${score.bacosScore}/40</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill success" style="width: ${(score.bacosScore / 40) * 100}%"></div>
+                  </div>
+                </div>
+                <div class="score-item">
+                  <div class="score-item-header">
+                    <span class="score-item-label">🏷️ PVP vs Mínimo</span>
+                    <span class="score-item-value">${score.pvpVsMinScore}/10</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill secondary" style="width: ${(score.pvpVsMinScore / 10) * 100}%"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3><span class="icon">💰</span> Métricas clave del formato</h3>
+                <div class="metric">
+                  <span class="metric-label">Regalía neta</span>
+                  <span class="metric-value success">${currencySymbol}${activeResults.regalias?.toFixed(2) || '-'}</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-label">Clics máx./Venta</span>
+                  <span class="metric-value ${activeResults.clicsMaxPorVenta >= 14 ? 'success' : activeResults.clicsMaxPorVenta >= 11 ? 'warning' : 'danger'}">${activeResults.clicsMaxPorVenta}</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-label">Margen BACOS</span>
+                  <span class="metric-value ${activeResults.margenPct >= 40 ? 'success' : activeResults.margenPct >= 30 ? 'warning' : 'danger'}">${activeResults.margenPct?.toFixed(1)}%</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-label">CPC máx. rentable</span>
+                  <span class="metric-value">${currencySymbol}${activeResults.cpcMaxRentable?.toFixed(2) || '-'}</span>
+                </div>
+                ${isPaperback && paperbackResults?.gastosImpresion ? `
+                <div class="metric">
+                  <span class="metric-label">Coste de impresión</span>
+                  <span class="metric-value">${currencySymbol}${paperbackResults.gastosImpresion?.toFixed(2) || '-'}</span>
+                </div>
+                ` : ''}
+              </div>
+
+              <div class="card">
+                <h3><span class="icon">📍</span> Posicionamiento y Ads</h3>
+                <div class="metric">
+                  <span class="metric-label">Clics diarios necesarios</span>
+                  <span class="metric-value">${positioningResults?.clicsDiarios?.toFixed(0) || '-'}</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-label">Inversión diaria estimada</span>
+                  <span class="metric-value">${currencySymbol}${positioningResults?.inversionDiaria?.toFixed(2) || '-'}</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-label">Ventas necesarias/día</span>
+                  <span class="metric-value">${positioningResults?.ventasDiariasNecesarias?.toFixed(1) || '-'}</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-label">Tasa de conversión ref.</span>
+                  <span class="metric-value">10%</span>
+                </div>
+              </div>
+
+              <div class="card full-width advice-box">
+                <h4>💡 Consejo estratégico</h4>
+                <p>Para competir con los libros mejor posicionados de tu nicho, necesitarás conseguir aproximadamente <strong>${globalData.ventasDiariasCompetencia || 0} copias vendidas al día</strong>.</p>
+                <p>Con una conversión del 10%, esto requiere <strong>${positioningResults?.clicsDiarios?.toFixed(0) || 0} clics diarios</strong> y una inversión de <strong>${currencySymbol}${positioningResults?.inversionDiaria?.toFixed(2) || 0}/día</strong> en Amazon Ads.</p>
+                <p>📊 Breakeven publicitario: necesitas <strong>1 pedido cada ${activeResults.clicsMaxPorVenta} clics</strong> para no perder dinero.</p>
+              </div>
+            </div>
+
+            <div class="legend">
+              <div class="legend-item"><span class="legend-dot success"></span> 80-100 Excelente</div>
+              <div class="legend-item"><span class="legend-dot warning"></span> 50-79 Aceptable</div>
+              <div class="legend-item"><span class="legend-dot danger"></span> &lt;50 En riesgo</div>
             </div>
           </div>
 
-          <div class="card">
-            <h3>Métricas clave del formato</h3>
-            <div class="metric">
-              <span class="metric-label">Regalía neta</span>
-              <span class="metric-value">${currencySymbol}${activeResults.regalias?.toFixed(2) || '-'}</span>
-            </div>
-            <div class="metric">
-              <span class="metric-label">Clics máx./Venta</span>
-              <span class="metric-value ${activeResults.clicsMaxPorVenta >= 14 ? 'success' : activeResults.clicsMaxPorVenta >= 11 ? 'warning' : 'danger'}">${activeResults.clicsMaxPorVenta}</span>
-            </div>
-            <div class="metric">
-              <span class="metric-label">Margen BACOS</span>
-              <span class="metric-value ${activeResults.margenPct >= 40 ? 'success' : activeResults.margenPct >= 30 ? 'warning' : 'danger'}">${activeResults.margenPct?.toFixed(1)}%</span>
-            </div>
-            <div class="metric">
-              <span class="metric-label">CPC máx. rentable</span>
-              <span class="metric-value">${currencySymbol}${activeResults.cpcMaxRentable?.toFixed(2) || '-'}</span>
-            </div>
-            ${isPaperback && paperbackResults?.gastosImpresion ? `
-            <div class="metric">
-              <span class="metric-label">Coste de impresión</span>
-              <span class="metric-value">${currencySymbol}${paperbackResults.gastosImpresion?.toFixed(2) || '-'}</span>
-            </div>
-            ` : ''}
+          <div class="footer">
+            <p>⚠️ Puntuaciones orientativas. No sustituyen el análisis profundo de cada nicho.</p>
+            <p class="brand">Calculadora de Viabilidad KDP - Publify</p>
           </div>
-
-          <div class="card">
-            <h3>Posicionamiento y Ads</h3>
-            <div class="metric">
-              <span class="metric-label">Clics diarios necesarios</span>
-              <span class="metric-value">${positioningResults?.clicsDiarios?.toFixed(0) || '-'}</span>
-            </div>
-            <div class="metric">
-              <span class="metric-label">Inversión diaria estimada</span>
-              <span class="metric-value">${currencySymbol}${positioningResults?.inversionDiaria?.toFixed(2) || '-'}</span>
-            </div>
-            <div class="metric">
-              <span class="metric-label">Ventas necesarias/día</span>
-              <span class="metric-value">${positioningResults?.ventasDiariasNecesarias?.toFixed(1) || '-'}</span>
-            </div>
-            <div class="metric">
-              <span class="metric-label">Tasa de conversión ref.</span>
-              <span class="metric-value">10%</span>
-            </div>
-          </div>
-
-          <div class="card full-width advice-box">
-            <h4>💡 Consejo estratégico</h4>
-            <p>Para competir con los libros mejor posicionados de tu nicho, necesitarás conseguir aproximadamente <strong>${globalData.ventasDiariasCompetencia || 0} copias vendidas al día</strong>.</p>
-            <p>Con una conversión del 10%, esto requiere <strong>${positioningResults?.clicsDiarios?.toFixed(0) || 0} clics diarios</strong> y una inversión de <strong>${currencySymbol}${positioningResults?.inversionDiaria?.toFixed(2) || 0}/día</strong> en Amazon Ads.</p>
-            <p>Breakeven publicitario: necesitas <strong>1 pedido cada ${activeResults.clicsMaxPorVenta} clics</strong> para no perder dinero.</p>
-          </div>
-        </div>
-
-        <div class="legend">
-          <div class="legend-item"><span class="legend-dot success"></span> 80-100 Excelente</div>
-          <div class="legend-item"><span class="legend-dot warning"></span> 50-79 Aceptable</div>
-          <div class="legend-item"><span class="legend-dot danger"></span> &lt;50 En riesgo</div>
-        </div>
-
-        <div class="footer">
-          <p>⚠️ Puntuaciones orientativas. No sustituyen el análisis profundo de cada nicho.</p>
-          <p>Calculadora de Viabilidad KDP - Publify</p>
         </div>
       </body>
       </html>
@@ -409,7 +638,16 @@ export const ScoreDisplay = ({
             </Button>
           )}
           {loadedNicheId && onQuickSave && (
-            <Button onClick={() => { onQuickSave(); toast.success('Versión guardada'); }} variant="outline" className="shrink-0">
+            <Button 
+              onClick={() => { 
+                onQuickSave(); 
+                toast.success('Nueva versión guardada', {
+                  description: 'El historial de versiones se ha actualizado',
+                });
+              }} 
+              variant="outline" 
+              className="shrink-0"
+            >
               <Save className="h-4 w-4 mr-2" />
               Guardar versión
             </Button>
