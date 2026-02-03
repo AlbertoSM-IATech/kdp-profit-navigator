@@ -1,6 +1,8 @@
 import { PositioningResults, GlobalData, EbookResults, PaperbackResults } from '@/types/kdp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Target, MousePointer, TrendingUp, AlertTriangle, CheckCircle, Euro, BarChart3 } from 'lucide-react';
+import { Target, MousePointer, TrendingUp, AlertTriangle, CheckCircle, Euro, BarChart3, Info } from 'lucide-react';
+
+const DISCLAIMER_TEXT = `Aviso importante: Los valores mostrados son estimaciones orientativas basadas en los datos introducidos y en tasas de referencia del sector. No constituyen predicciones exactas de resultados. El rendimiento real de tus campañas dependerá de múltiples factores como la calidad creativa, la competencia del momento, las tendencias del mercado y la ejecución de la estrategia.`;
 
 interface PositioningSectionProps {
   results: PositioningResults | null;
@@ -116,6 +118,16 @@ export const PositioningSection = ({
                   </p>
                 </div>
               )}
+
+              {/* Disclaimer */}
+              <div className="mt-4 pt-4 border-t border-border/50">
+                <div className="flex items-start gap-2">
+                  <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                  <p className="text-xs text-muted-foreground/80 leading-relaxed italic">
+                    {DISCLAIMER_TEXT}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
