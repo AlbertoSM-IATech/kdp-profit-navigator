@@ -94,12 +94,11 @@ export const ScoreDisplay = ({
     }
     // Get paperback-specific data if available
     const isPaperback = globalData.selectedFormat === 'PAPERBACK';
-    const paperbackResults = isPaperback ? (activeResults as any) : null;
-    
+    const paperbackResults = isPaperback ? activeResults as any : null;
+
     // Enhanced PDF styling matching the app's design system
     const scoreBgColor = score.status === 'excellent' ? '#f0fdf4' : score.status === 'viable' ? '#fef9c3' : '#fef2f2';
     const scoreBorderColor = score.status === 'excellent' ? '#22c55e' : score.status === 'viable' ? '#eab308' : '#ef4444';
-    
     const html = `
       <!DOCTYPE html>
       <html>
@@ -345,7 +344,15 @@ export const ScoreDisplay = ({
         <div class="container">
           <div class="header">
             <h1>Análisis de Viabilidad KDP</h1>
-            <p>Generado el ${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} a las ${new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</p>
+            <p>Generado el ${new Date().toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })} a las ${new Date().toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit'
+    })}</p>
           </div>
 
           <div class="content">
@@ -398,7 +405,7 @@ export const ScoreDisplay = ({
                     <span class="score-item-value">${score.clicsScore}/50</span>
                   </div>
                   <div class="progress-bar">
-                    <div class="progress-fill primary" style="width: ${(score.clicsScore / 50) * 100}%"></div>
+                    <div class="progress-fill primary" style="width: ${score.clicsScore / 50 * 100}%"></div>
                   </div>
                 </div>
                 <div class="score-item">
@@ -407,7 +414,7 @@ export const ScoreDisplay = ({
                     <span class="score-item-value">${score.bacosScore}/40</span>
                   </div>
                   <div class="progress-bar">
-                    <div class="progress-fill success" style="width: ${(score.bacosScore / 40) * 100}%"></div>
+                    <div class="progress-fill success" style="width: ${score.bacosScore / 40 * 100}%"></div>
                   </div>
                 </div>
                 <div class="score-item">
@@ -416,7 +423,7 @@ export const ScoreDisplay = ({
                     <span class="score-item-value">${score.pvpVsMinScore}/10</span>
                   </div>
                   <div class="progress-bar">
-                    <div class="progress-fill secondary" style="width: ${(score.pvpVsMinScore / 10) * 100}%"></div>
+                    <div class="progress-fill secondary" style="width: ${score.pvpVsMinScore / 10 * 100}%"></div>
                   </div>
                 </div>
               </div>
@@ -570,7 +577,7 @@ export const ScoreDisplay = ({
           </div>
 
           {/* Score Legend */}
-          <div className="grid grid-cols-3 gap-2 text-xs">
+          <div className="grid grid-cols-1 gap-2 text-xs">
             <div className="flex items-center gap-1 p-2 rounded-lg bg-success/10">
               <span className="w-2 h-2 rounded-full bg-success"></span>
               <span className="text-muted-foreground">80-100 Excelente</span>
@@ -626,27 +633,19 @@ export const ScoreDisplay = ({
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
         <div className="flex items-center gap-2">
-          {globalData && activeResults && (
-            <Button onClick={handleExportPDF} className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground">
+          {globalData && activeResults && <Button onClick={handleExportPDF} className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground">
               <Download className="h-4 w-4 mr-2" />
               Exportar PDF
-            </Button>
-          )}
-          {loadedNicheId && onQuickSave && (
-            <Button 
-              onClick={() => { 
-                onQuickSave(); 
-                toast.success('Nueva versión guardada', {
-                  description: 'El historial de versiones se ha actualizado',
-                });
-              }} 
-              variant="outline" 
-              className="shrink-0"
-            >
+            </Button>}
+          {loadedNicheId && onQuickSave && <Button onClick={() => {
+          onQuickSave();
+          toast.success('Nueva versión guardada', {
+            description: 'El historial de versiones se ha actualizado'
+          });
+        }} variant="outline" className="shrink-0">
               <Save className="h-4 w-4 mr-2" />
               Guardar versión
-            </Button>
-          )}
+            </Button>}
         </div>
         <p className="text-xs text-muted-foreground/70 italic">
           Puntuaciones orientativas. No sustituyen el análisis profundo de cada nicho.
