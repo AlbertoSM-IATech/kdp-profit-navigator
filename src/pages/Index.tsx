@@ -15,7 +15,6 @@ import { toast } from 'sonner';
 // Import Publify logos
 import publifyLogo from '@/assets/publify-logo.png';
 import publifyIcon from '@/assets/publify-icon.png';
-
 const Index = () => {
   const {
     globalData,
@@ -29,7 +28,6 @@ const Index = () => {
     positioningResults,
     tableData
   } = useKdpCalculator();
-
   const [loadedNicheId, setLoadedNicheId] = useState<string | null>(null);
   const activeResults = globalData.selectedFormat === 'EBOOK' ? ebookResults : paperbackResults;
   const inversionDiaria = positioningResults?.inversionDiaria || 0;
@@ -48,20 +46,10 @@ const Index = () => {
     clearAllNiches,
     getBestNiche
   } = useNicheComparator();
-
   const handleSaveNiche = (name: string) => {
-    const saved = saveCurrentAsNiche(
-      name, 
-      globalData, 
-      globalData.selectedFormat === 'EBOOK' ? ebookData : null, 
-      globalData.selectedFormat === 'PAPERBACK' ? paperbackData : null, 
-      ebookResults, 
-      paperbackResults, 
-      inversionDiaria
-    );
+    const saved = saveCurrentAsNiche(name, globalData, globalData.selectedFormat === 'EBOOK' ? ebookData : null, globalData.selectedFormat === 'PAPERBACK' ? paperbackData : null, ebookResults, paperbackResults, inversionDiaria);
     setLoadedNicheId(saved.id);
   };
-
   const handleLoadNiche = useCallback((niche: SavedNiche) => {
     setGlobalData(niche.globalData);
     if (niche.ebookData) {
@@ -73,27 +61,15 @@ const Index = () => {
     setLoadedNicheId(niche.id);
     toast.success(`Nicho "${niche.name}" cargado para editar`);
   }, [setGlobalData, setEbookData, setPaperbackData]);
-
   const handleUpdateNicheVersion = useCallback((nicheId: string, note?: string) => {
-    updateNicheWithNewVersion(
-      nicheId, 
-      globalData, 
-      globalData.selectedFormat === 'EBOOK' ? ebookData : null, 
-      globalData.selectedFormat === 'PAPERBACK' ? paperbackData : null, 
-      ebookResults, 
-      paperbackResults, 
-      inversionDiaria, 
-      note
-    );
+    updateNicheWithNewVersion(nicheId, globalData, globalData.selectedFormat === 'EBOOK' ? ebookData : null, globalData.selectedFormat === 'PAPERBACK' ? paperbackData : null, ebookResults, paperbackResults, inversionDiaria, note);
   }, [globalData, ebookData, paperbackData, ebookResults, paperbackResults, inversionDiaria, updateNicheWithNewVersion]);
-
   const handleRestoreVersion = useCallback((nicheId: string, versionId: string) => {
     const restored = restoreVersion(nicheId, versionId);
     if (restored) {
       handleLoadNiche(restored);
     }
   }, [restoreVersion, handleLoadNiche]);
-
   const handleStartNew = useCallback(() => {
     setGlobalData({
       marketplace: null,
@@ -119,30 +95,19 @@ const Index = () => {
     setLoadedNicheId(null);
     toast.success('Formulario limpio para nuevo análisis');
   }, [setGlobalData, setEbookData, setPaperbackData]);
-
   const hasCurrentData = !!(activeResults && globalData.marketplace);
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="w-[90%] max-w-[1400px] mx-auto py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {/* Publify Logo */}
-              <img 
-                src={publifyLogo} 
-                alt="Publify" 
-                className="h-8 hidden md:block" 
-              />
-              <img 
-                src={publifyIcon} 
-                alt="Publify" 
-                className="h-8 w-8 md:hidden" 
-              />
+              <img src={publifyLogo} alt="Publify" className="h-8 hidden md:block" />
+              <img src={publifyIcon} alt="Publify" className="h-8 w-8 md:hidden" />
               <div className="hidden sm:block">
                 <h1 className="text-lg font-heading font-bold text-foreground">
-                  Calculadora de Viabilidad
+                  Calculadora de Viabilidad de nicho y Optimización de libro
                 </h1>
                 <p className="text-xs text-muted-foreground">
                   Análisis profesional para publishers
@@ -152,29 +117,21 @@ const Index = () => {
 
             <div className="flex items-center gap-2">
               {/* Loaded Niche Indicator */}
-              {loadedNicheId && (
-                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-lg border border-primary/20">
+              {loadedNicheId && <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-lg border border-primary/20">
                   <span className="text-sm text-primary font-medium truncate max-w-[150px]">
                     {niches.find(n => n.id === loadedNicheId)?.name}
                   </span>
-                  <Button 
-                    size="sm" 
-                    variant="ghost" 
-                    onClick={handleStartNew}
-                    className="h-6 w-6 p-0 hover:bg-primary/20"
-                  >
+                  <Button size="sm" variant="ghost" onClick={handleStartNew} className="h-6 w-6 p-0 hover:bg-primary/20">
                     <span className="sr-only">Cerrar nicho</span>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="18" y1="6" x2="6" y2="18"></line>
                       <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                   </Button>
-                </div>
-              )}
+                </div>}
 
               {/* Saved Analyses Button */}
-              {niches.length > 0 && (
-                <Dialog>
+              {niches.length > 0 && <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm">
                       <Save className="h-4 w-4 mr-2" />
@@ -194,23 +151,9 @@ const Index = () => {
                         Carga, compara o gestiona tus análisis guardados.
                       </p>
                     </DialogHeader>
-                    <NicheComparator 
-                      niches={niches} 
-                      onSaveNiche={handleSaveNiche} 
-                      onDeleteNiche={deleteNiche} 
-                      onClearAll={clearAllNiches} 
-                      onLoadNiche={handleLoadNiche} 
-                      onUpdateNicheVersion={handleUpdateNicheVersion} 
-                      onRestoreVersion={handleRestoreVersion} 
-                      onStartNew={handleStartNew} 
-                      bestNiche={getBestNiche()} 
-                      hasCurrentData={hasCurrentData} 
-                      loadedNicheId={loadedNicheId} 
-                      embedded 
-                    />
+                    <NicheComparator niches={niches} onSaveNiche={handleSaveNiche} onDeleteNiche={deleteNiche} onClearAll={clearAllNiches} onLoadNiche={handleLoadNiche} onUpdateNicheVersion={handleUpdateNicheVersion} onRestoreVersion={handleRestoreVersion} onStartNew={handleStartNew} bestNiche={getBestNiche()} hasCurrentData={hasCurrentData} loadedNicheId={loadedNicheId} embedded />
                   </DialogContent>
-                </Dialog>
-              )}
+                </Dialog>}
               
               {/* Printing Costs Table Button */}
               <Dialog>
@@ -242,42 +185,12 @@ const Index = () => {
 
       {/* Main Content - Wizard */}
       <main className="w-full max-w-[1400px] mx-auto px-4 md:px-8 py-8">
-        <WizardContainer
-          globalData={globalData}
-          ebookData={ebookData}
-          paperbackData={paperbackData}
-          ebookResults={ebookResults}
-          paperbackResults={paperbackResults}
-          positioningResults={positioningResults}
-          scoreBreakdown={scoreBreakdown}
-          tableData={tableData}
-          setGlobalData={setGlobalData}
-          setEbookData={setEbookData}
-          setPaperbackData={setPaperbackData}
-          loadedNicheId={loadedNicheId}
-          onQuickSave={loadedNicheId ? () => handleUpdateNicheVersion(loadedNicheId) : undefined}
-          onSaveNiche={handleSaveNiche}
-          onStartNew={handleStartNew}
-        />
+        <WizardContainer globalData={globalData} ebookData={ebookData} paperbackData={paperbackData} ebookResults={ebookResults} paperbackResults={paperbackResults} positioningResults={positioningResults} scoreBreakdown={scoreBreakdown} tableData={tableData} setGlobalData={setGlobalData} setEbookData={setEbookData} setPaperbackData={setPaperbackData} loadedNicheId={loadedNicheId} onQuickSave={loadedNicheId ? () => handleUpdateNicheVersion(loadedNicheId) : undefined} onSaveNiche={handleSaveNiche} onStartNew={handleStartNew} />
 
         {/* Save Niche Button when no niches exist */}
-        {niches.length === 0 && hasCurrentData && (
-          <div className="mt-8">
-            <NicheComparator 
-              niches={niches} 
-              onSaveNiche={handleSaveNiche} 
-              onDeleteNiche={deleteNiche} 
-              onClearAll={clearAllNiches} 
-              onLoadNiche={handleLoadNiche} 
-              onUpdateNicheVersion={handleUpdateNicheVersion} 
-              onRestoreVersion={handleRestoreVersion} 
-              onStartNew={handleStartNew} 
-              bestNiche={getBestNiche()} 
-              hasCurrentData={hasCurrentData} 
-              loadedNicheId={loadedNicheId} 
-            />
-          </div>
-        )}
+        {niches.length === 0 && hasCurrentData && <div className="mt-8">
+            <NicheComparator niches={niches} onSaveNiche={handleSaveNiche} onDeleteNiche={deleteNiche} onClearAll={clearAllNiches} onLoadNiche={handleLoadNiche} onUpdateNicheVersion={handleUpdateNicheVersion} onRestoreVersion={handleRestoreVersion} onStartNew={handleStartNew} bestNiche={getBestNiche()} hasCurrentData={hasCurrentData} loadedNicheId={loadedNicheId} />
+          </div>}
       </main>
 
       {/* Footer */}
@@ -288,8 +201,6 @@ const Index = () => {
           </p>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
