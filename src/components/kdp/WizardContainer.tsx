@@ -1,12 +1,20 @@
 import { useState, useCallback } from 'react';
-import { GlobalData, EbookData, PaperbackData, EbookResults, PaperbackResults, PositioningResults, ScoreBreakdown, TableRow, FormatType, SavedNiche } from '@/types/kdp';
+import { GlobalData, EbookData, PaperbackData, EbookResults, PaperbackResults, PositioningResults, ScoreBreakdown, TableRow, FormatType } from '@/types/kdp';
 import { Button } from '@/components/ui/button';
 import { WizardProgress } from './wizard/WizardProgress';
 import { StepFormat } from './wizard/StepFormat';
 import { StepMarket } from './wizard/StepMarket';
 import { StepBookData } from './wizard/StepBookData';
 import { StepResults } from './wizard/StepResults';
-import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
+import { PaperbackSimulator } from './PaperbackSimulator';
+import { ChevronLeft, ChevronRight, RotateCcw, SlidersHorizontal } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 interface WizardContainerProps {
   // Data
@@ -26,6 +34,7 @@ interface WizardContainerProps {
   // Niche management
   loadedNicheId: string | null;
   onQuickSave: (() => void) | undefined;
+  onSaveNiche: (name: string) => void;
   onStartNew: () => void;
 }
 
@@ -45,6 +54,7 @@ export const WizardContainer = ({
   setPaperbackData,
   loadedNicheId,
   onQuickSave,
+  onSaveNiche,
   onStartNew,
 }: WizardContainerProps) => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -141,6 +151,8 @@ export const WizardContainer = ({
             tableData={tableData}
             loadedNicheId={loadedNicheId}
             onQuickSave={onQuickSave}
+            onSaveNiche={onSaveNiche}
+            paperbackData={paperbackData}
           />
         );
       default:

@@ -288,9 +288,9 @@ export const EbookSection = ({ data, results, globalData, onChange }: EbookSecti
                               <br /><br />
                               <strong>Cuantos más clics puedas permitirte, más sano es tu margen.</strong>
                               <br /><br />
-                              <span className="text-success">🟢 ≥13: Excelente — Campaña sana</span><br />
-                              <span className="text-warning">🟠 10-12: Aceptable — Funciona, pero ajustable</span><br />
-                              <span className="text-destructive">🔴 &lt;10: En riesgo — Ajusta antes de invertir</span>
+                              <span className="text-success">● ≥13: Excelente — Campaña sana</span><br />
+                              <span className="text-warning">● 10-12: Aceptable — Funciona, pero ajustable</span><br />
+                              <span className="text-destructive">● &lt;10: En riesgo — Ajusta antes de invertir</span>
                             </p>
                           </TooltipContent>
                         </Tooltip>

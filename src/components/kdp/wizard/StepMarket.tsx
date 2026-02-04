@@ -83,8 +83,8 @@ export const StepMarket = ({ globalData, onChange }: StepMarketProps) => {
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs p-3">
                     <p className="text-sm">
-                      Coste por clic estimado en tus campañas. Debes investigarlo por nicho/keyword. 
-                      No uses valores por defecto.
+                      CPC medio aproximado del nicho. Debes investigarlo usando herramientas de keywords 
+                      o referencias del sector. No es el CPC de tus campañas actuales.
                     </p>
                   </TooltipContent>
                 </Tooltip>

@@ -344,7 +344,7 @@ export const ScoreDisplay = ({
       <body>
         <div class="container">
           <div class="header">
-            <h1>📊 Análisis de Viabilidad KDP</h1>
+            <h1>Análisis de Viabilidad KDP</h1>
             <p>Generado el ${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} a las ${new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</p>
           </div>
 
@@ -355,20 +355,19 @@ export const ScoreDisplay = ({
                 <span class="score-max">/100</span>
               </div>
               <div class="score-right">
-                <div class="score-emoji">${score.statusEmoji}</div>
                 <div class="score-label">${score.statusLabel}</div>
               </div>
             </div>
             
             <div class="score-interpretation">
-              ${score.status === 'excellent' ? '✅ Excelente configuración para escalar campañas de Ads. Margen de maniobra amplio.' : ''}
-              ${score.status === 'viable' ? '⚠️ Configuración viable pero requiere ajustes. Optimiza precio, CPC o busca keywords menos competidas.' : ''}
-              ${score.status === 'not-recommended' ? '❌ No recomendable para Ads en las condiciones actuales. Reformula antes de invertir.' : ''}
+              ${score.status === 'excellent' ? 'Excelente configuración para escalar campañas de Ads. Margen de maniobra amplio.' : ''}
+              ${score.status === 'viable' ? 'Configuración viable pero requiere ajustes. Optimiza precio, CPC o busca keywords menos competidas.' : ''}
+              ${score.status === 'not-recommended' ? 'No recomendable para Ads en las condiciones actuales. Reformula antes de invertir.' : ''}
             </div>
 
             <div class="grid" style="margin-top: 24px;">
               <div class="card">
-                <h3><span class="icon">⚙️</span> Configuración del análisis</h3>
+                <h3>Configuración del análisis</h3>
                 <div class="metric">
                   <span class="metric-label">Marketplace</span>
                   <span class="metric-value">${marketplaceLabels[globalData.marketplace || ''] || globalData.marketplace}</span>
@@ -392,10 +391,10 @@ export const ScoreDisplay = ({
               </div>
 
               <div class="card">
-                <h3><span class="icon">📊</span> Desglose del Score</h3>
+                <h3>Desglose del Score</h3>
                 <div class="score-item">
                   <div class="score-item-header">
-                    <span class="score-item-label">🖱️ Clics máx./Venta (CRÍTICO)</span>
+                    <span class="score-item-label">Clics máx./Venta (CRÍTICO)</span>
                     <span class="score-item-value">${score.clicsScore}/50</span>
                   </div>
                   <div class="progress-bar">
@@ -404,7 +403,7 @@ export const ScoreDisplay = ({
                 </div>
                 <div class="score-item">
                   <div class="score-item-header">
-                    <span class="score-item-label">📈 BACOS</span>
+                    <span class="score-item-label">BACOS</span>
                     <span class="score-item-value">${score.bacosScore}/40</span>
                   </div>
                   <div class="progress-bar">
@@ -413,7 +412,7 @@ export const ScoreDisplay = ({
                 </div>
                 <div class="score-item">
                   <div class="score-item-header">
-                    <span class="score-item-label">🏷️ PVP vs Mínimo</span>
+                    <span class="score-item-label">PVP vs Mínimo</span>
                     <span class="score-item-value">${score.pvpVsMinScore}/10</span>
                   </div>
                   <div class="progress-bar">
@@ -423,7 +422,7 @@ export const ScoreDisplay = ({
               </div>
 
               <div class="card">
-                <h3><span class="icon">💰</span> Métricas clave del formato</h3>
+                <h3>Métricas clave del formato</h3>
                 <div class="metric">
                   <span class="metric-label">Regalía neta</span>
                   <span class="metric-value success">${currencySymbol}${activeResults.regalias?.toFixed(2) || '-'}</span>
@@ -449,7 +448,7 @@ export const ScoreDisplay = ({
               </div>
 
               <div class="card">
-                <h3><span class="icon">📍</span> Posicionamiento y Ads</h3>
+                <h3>Posicionamiento y Ads</h3>
                 <div class="metric">
                   <span class="metric-label">Clics diarios necesarios</span>
                   <span class="metric-value">${positioningResults?.clicsDiarios?.toFixed(0) || '-'}</span>
@@ -469,10 +468,10 @@ export const ScoreDisplay = ({
               </div>
 
               <div class="card full-width advice-box">
-                <h4>💡 Consejo estratégico</h4>
+                <h4>Consejo estratégico</h4>
                 <p>Para competir con los libros mejor posicionados de tu nicho, necesitarás conseguir aproximadamente <strong>${globalData.ventasDiariasCompetencia || 0} copias vendidas al día</strong>.</p>
                 <p>Con una conversión del 10%, esto requiere <strong>${positioningResults?.clicsDiarios?.toFixed(0) || 0} clics diarios</strong> y una inversión de <strong>${currencySymbol}${positioningResults?.inversionDiaria?.toFixed(2) || 0}/día</strong> en Amazon Ads.</p>
-                <p>📊 Breakeven publicitario: necesitas <strong>1 pedido cada ${activeResults.clicsMaxPorVenta} clics</strong> para no perder dinero.</p>
+                <p>Breakeven publicitario: necesitas <strong>1 pedido cada ${activeResults.clicsMaxPorVenta} clics</strong> para no perder dinero.</p>
               </div>
             </div>
 
@@ -484,7 +483,7 @@ export const ScoreDisplay = ({
           </div>
 
           <div class="footer">
-            <p>⚠️ Puntuaciones orientativas. No sustituyen el análisis profundo de cada nicho.</p>
+            <p>Puntuaciones orientativas. No sustituyen el análisis profundo de cada nicho.</p>
             <p class="brand">Calculadora de Viabilidad KDP - Publify</p>
           </div>
         </div>
@@ -537,8 +536,7 @@ export const ScoreDisplay = ({
           <span className="text-lg text-muted-foreground">/100</span>
         </div>
         <div className="text-right">
-          <span className="text-2xl block mb-1">{score.statusEmoji}</span>
-          <span className={`text-sm font-bold ${scoreColor}`}>{score.statusLabel}</span>
+          <span className={`text-base font-bold ${scoreColor}`}>{score.statusLabel}</span>
         </div>
       </div>;
   }
@@ -559,12 +557,10 @@ export const ScoreDisplay = ({
               <span className="text-xl text-muted-foreground">/100</span>
             </div>
             <div className="text-right">
-              <span className="text-2xl block mb-1">{score.statusEmoji}</span>
               <span className={`text-base font-bold ${scoreColor}`}>{score.statusLabel}</span>
             </div>
           </div>
           
-          {/* Interpretation */}
           <div className={`p-3 rounded-lg border ${scoreBg}`}>
             <p className="text-sm text-foreground">
               {score.status === 'excellent' && 'Excelente configuración para escalar campañas de Ads. Margen de maniobra amplio.'}
@@ -628,11 +624,10 @@ export const ScoreDisplay = ({
         </div>
       </div>
 
-      {/* Export Button (highlighted) + Quick Save + Disclaimer */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
         <div className="flex items-center gap-2">
           {globalData && activeResults && (
-            <Button onClick={handleExportPDF} className="shrink-0 bg-orange-500 hover:bg-orange-600 text-white">
+            <Button onClick={handleExportPDF} className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground">
               <Download className="h-4 w-4 mr-2" />
               Exportar PDF
             </Button>
@@ -671,7 +666,7 @@ export const ScoreDisplay = ({
           Indicador sintético (0-100). Los clics por venta determinan la viabilidad en Ads.
         </p>
         <p className="text-xs text-muted-foreground/70 italic mt-1">
-          ⚠️ Puntuaciones orientativas. No sustituyen el análisis profundo de cada nicho.
+          Puntuaciones orientativas. No sustituyen el análisis profundo de cada nicho.
         </p>
       </CardHeader>
       <CardContent>

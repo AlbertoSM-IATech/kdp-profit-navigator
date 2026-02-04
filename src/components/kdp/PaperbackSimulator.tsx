@@ -152,11 +152,11 @@ export const PaperbackSimulator = ({ data, globalData }: PaperbackSimulatorProps
 
   // Diagnostic message
   const getDiagnosticMessage = () => {
-    if (regalias < 0) return { text: '🔴 Con este PVP pierdes dinero incluso antes de invertir en Ads.', color: 'text-destructive' };
-    if (margenBacos < 30) return { text: '🔴 En riesgo — Este precio te deja poco margen para Ads. Ajusta precio o costes.', color: 'text-destructive' };
-    if (clicsMaxPorVenta < 10) return { text: '🔴 En riesgo — Margen muy ajustado para campañas de Ads. Sube PVP o reduce CPC.', color: 'text-destructive' };
-    if (clicsMaxPorVenta < 13) return { text: '🟡 Aceptable — Funciona, pero hay riesgo si el CPC sube. Optimiza si es posible.', color: 'text-warning' };
-    return { text: '🟢 Excelente — Campaña sana, buen margen de maniobra para escalar.', color: 'text-success' };
+    if (regalias < 0) return { text: 'Con este PVP pierdes dinero incluso antes de invertir en Ads.', color: 'text-destructive' };
+    if (margenBacos < 30) return { text: 'En riesgo — Este precio te deja poco margen para Ads. Ajusta precio o costes.', color: 'text-destructive' };
+    if (clicsMaxPorVenta < 10) return { text: 'En riesgo — Margen muy ajustado para campañas de Ads. Sube PVP o reduce CPC.', color: 'text-destructive' };
+    if (clicsMaxPorVenta < 13) return { text: 'Aceptable — Funciona, pero hay riesgo si el CPC sube. Optimiza si es posible.', color: 'text-warning' };
+    return { text: 'Excelente — Campaña sana, buen margen de maniobra para escalar.', color: 'text-success' };
   };
 
   const diagnostic = getDiagnosticMessage();
@@ -364,9 +364,9 @@ export const PaperbackSimulator = ({ data, globalData }: PaperbackSimulatorProps
                         </TooltipTrigger>
                         <TooltipContent className="max-w-xs p-3">
                           <p className="text-sm">
-                            🟢 ≥13: Excelente<br />
-                            🟠 10-12: Aceptable<br />
-                            🔴 &lt;10: En riesgo
+                            <span className="text-success">●</span> ≥13: Excelente<br />
+                            <span className="text-warning">●</span> 10-12: Aceptable<br />
+                            <span className="text-destructive">●</span> &lt;10: En riesgo
                           </p>
                         </TooltipContent>
                       </Tooltip>

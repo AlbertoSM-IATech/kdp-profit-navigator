@@ -241,7 +241,7 @@ const Index = () => {
       </header>
 
       {/* Main Content - Wizard */}
-      <main className="w-[90%] max-w-[1000px] mx-auto py-8">
+      <main className="w-full max-w-[1400px] mx-auto px-4 md:px-8 py-8">
         <WizardContainer
           globalData={globalData}
           ebookData={ebookData}
@@ -256,6 +256,7 @@ const Index = () => {
           setPaperbackData={setPaperbackData}
           loadedNicheId={loadedNicheId}
           onQuickSave={loadedNicheId ? () => handleUpdateNicheVersion(loadedNicheId) : undefined}
+          onSaveNiche={handleSaveNiche}
           onStartNew={handleStartNew}
         />
 
