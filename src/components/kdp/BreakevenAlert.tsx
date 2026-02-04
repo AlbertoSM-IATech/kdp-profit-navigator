@@ -64,7 +64,7 @@ export const BreakevenAlert = ({ globalData, paperbackData }: BreakevenAlertProp
     return (
       <Alert variant="destructive" className="animate-fade-in">
         <TrendingDown className="h-4 w-4" />
-        <AlertTitle className="font-semibold">⚠️ PVP por debajo del Breakeven</AlertTitle>
+        <AlertTitle className="font-semibold">PVP por debajo del Breakeven</AlertTitle>
         <AlertDescription className="text-sm">
           <p>
             Con <strong>{alertData.pvp}{currencySymbol}</strong> pierdes{' '}
@@ -74,7 +74,7 @@ export const BreakevenAlert = ({ globalData, paperbackData }: BreakevenAlertProp
             PVP mínimo (breakeven): <strong>{alertData.breakevenPvp.toFixed(2)}{currencySymbol}</strong>
           </p>
           <p className="mt-1 text-xs">
-            💡 Recomendación: sube el PVP a mínimo <strong>{alertData.suggestedPvp.toFixed(2)}{currencySymbol}</strong> para obtener margen.
+            Recomendación: sube el PVP a mínimo <strong>{alertData.suggestedPvp.toFixed(2)}{currencySymbol}</strong> para obtener margen.
           </p>
         </AlertDescription>
       </Alert>

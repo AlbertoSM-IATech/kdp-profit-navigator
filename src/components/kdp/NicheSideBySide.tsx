@@ -16,7 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Columns, ArrowRight, ArrowLeft, Filter } from 'lucide-react';
+import { Columns, ArrowRight, ArrowLeft, Filter, AlertTriangle } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface NicheSideBySideProps {
@@ -230,8 +230,9 @@ export const NicheSideBySide = ({ niches }: NicheSideBySideProps) => {
         </div>
 
         {niche.scoreBreakdown.clicsCapped && (
-          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg text-sm text-destructive">
-            ⚠️ Score limitado: menos de 10 clics por venta
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg text-sm text-destructive flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            Score limitado: menos de 10 clics por venta
           </div>
         )}
       </div>
