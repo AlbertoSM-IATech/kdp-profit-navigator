@@ -7,17 +7,8 @@ import { PaperbackSimulator } from '@/components/kdp/PaperbackSimulator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AlertTriangle, SlidersHorizontal, Save, Plus } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-
 interface StepResultsProps {
   globalData: GlobalData;
   activeResults: EbookResults | PaperbackResults | null;
@@ -29,9 +20,7 @@ interface StepResultsProps {
   onSaveNiche: (name: string) => void;
   paperbackData: PaperbackData;
 }
-
 const DISCLAIMER_TEXT = `Aviso importante: Los valores mostrados son estimaciones orientativas basadas en los datos introducidos y en tasas de referencia del sector. No constituyen predicciones exactas de resultados. El rendimiento real de tus campañas dependerá de múltiples factores como la calidad creativa, la competencia del momento, las tendencias del mercado y la ejecución de la estrategia.`;
-
 export const StepResults = ({
   globalData,
   activeResults,
@@ -41,16 +30,14 @@ export const StepResults = ({
   loadedNicheId,
   onQuickSave,
   onSaveNiche,
-  paperbackData,
+  paperbackData
 }: StepResultsProps) => {
   const currencySymbol = globalData.marketplace === 'COM' ? '$' : '€';
   const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [newNicheName, setNewNicheName] = useState('');
-
   const isPaperback = globalData.selectedFormat === 'PAPERBACK';
   const canShowSimulator = isPaperback && paperbackData.interior && paperbackData.size;
-
   const handleSaveNiche = () => {
     if (!newNicheName.trim()) {
       toast.error('Introduce un nombre para el análisis');
@@ -61,19 +48,14 @@ export const StepResults = ({
     setIsSaveDialogOpen(false);
     toast.success('Análisis guardado correctamente');
   };
-
   if (!activeResults || !scoreBreakdown) {
-    return (
-      <div className="flex items-center justify-center h-64 bg-muted/30 rounded-xl">
+    return <div className="flex items-center justify-center h-64 bg-muted/30 rounded-xl">
         <p className="text-muted-foreground">
           Completa los pasos anteriores para ver los resultados
         </p>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-8">
+  return <div className="space-y-8">
       <div className="text-center mb-4">
         <h2 className="text-2xl font-bold text-foreground mb-2">
           Resultados del Análisis
@@ -84,38 +66,21 @@ export const StepResults = ({
       </div>
 
       {/* Score Display */}
-      <ScoreDisplay 
-        score={scoreBreakdown} 
-        currencySymbol={currencySymbol}
-        embedded
-        globalData={globalData}
-        activeResults={activeResults}
-        positioningResults={positioningResults}
-        loadedNicheId={loadedNicheId}
-        onQuickSave={onQuickSave}
-      />
+      <ScoreDisplay score={scoreBreakdown} currencySymbol={currencySymbol} embedded globalData={globalData} activeResults={activeResults} positioningResults={positioningResults} loadedNicheId={loadedNicheId} onQuickSave={onQuickSave} />
 
       {/* Results Table */}
-      {tableData.length > 0 && (
-        <div className="space-y-3">
+      {tableData.length > 0 && <div className="space-y-3">
           <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
             Tabla de Resultados
           </h4>
           <ResultsTable data={tableData} globalData={globalData} embedded />
-        </div>
-      )}
+        </div>}
 
       {/* Positioning Section */}
-      <PositioningSection 
-        results={positioningResults} 
-        globalData={globalData} 
-        activeResults={activeResults} 
-        embedded 
-      />
+      <PositioningSection results={positioningResults} globalData={globalData} activeResults={activeResults} embedded />
 
       {/* Simulator Section (only for Paperback) */}
-      {canShowSimulator && (
-        <div className="space-y-4 p-6 bg-muted/20 border border-border rounded-xl">
+      {canShowSimulator && <div className="space-y-4 p-6 bg-muted/20 border border-border rounded-xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-secondary/10 rounded-lg">
@@ -143,15 +108,11 @@ export const StepResults = ({
                     Ajusta los parámetros para ver cómo afectan a la rentabilidad. Los cambios aquí no modifican tu análisis base.
                   </DialogDescription>
                 </DialogHeader>
-                <PaperbackSimulator 
-                  data={paperbackData} 
-                  globalData={globalData}
-                />
+                <PaperbackSimulator data={paperbackData} globalData={globalData} />
               </DialogContent>
             </Dialog>
           </div>
-        </div>
-      )}
+        </div>}
 
       {/* Save Actions */}
       <div className="flex flex-wrap items-center justify-center gap-3 pt-4 border-t border-border">
@@ -170,12 +131,7 @@ export const StepResults = ({
                 Guarda este análisis para compararlo con otros escenarios.
               </DialogDescription>
             </DialogHeader>
-            <Input
-              placeholder="Nombre del análisis (ej: 'Cuadernos yoga ES')"
-              value={newNicheName}
-              onChange={(e) => setNewNicheName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSaveNiche()}
-            />
+            <Input placeholder="Nombre del análisis (ej: 'Cuadernos yoga ES')" value={newNicheName} onChange={e => setNewNicheName(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSaveNiche()} />
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsSaveDialogOpen(false)}>
                 Cancelar
@@ -186,29 +142,16 @@ export const StepResults = ({
         </Dialog>
 
         {/* Save Version (if niche is loaded) */}
-        {loadedNicheId && onQuickSave && (
-          <Button 
-            onClick={() => { 
-              onQuickSave(); 
-              toast.success('Nueva versión guardada');
-            }} 
-            variant="secondary"
-          >
+        {loadedNicheId && onQuickSave && <Button onClick={() => {
+        onQuickSave();
+        toast.success('Nueva versión guardada');
+      }} variant="secondary">
             <Save className="h-4 w-4 mr-2" />
             Guardar versión
-          </Button>
-        )}
+          </Button>}
       </div>
 
       {/* Disclaimer */}
-      <div className="p-4 bg-muted/30 border border-border rounded-xl">
-        <div className="flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            {DISCLAIMER_TEXT}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+      
+    </div>;
 };
