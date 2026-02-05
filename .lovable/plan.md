@@ -1,197 +1,232 @@
 
-# Plan: Rediseno UX - Wizard de Viabilidad con Branding Publify
+# Plan: Simulador Desplegable con Persistencia de Datos
 
-## Resumen Ejecutivo
+## Resumen
 
-Transformar la interfaz actual de multiples modulos en un **wizard guiado paso a paso** que simplifique la experiencia. Se integraran los logos de Publify en el header y se anadiran disclaimers de referencia en los consejos estrategicos.
-
----
-
-## Logos Publify
-
-Se copiaran los logos subidos al proyecto:
-- **Logo completo** (`Artboard_26@2x.png`) → `src/assets/publify-logo.png` (para header desktop)
-- **Logo icono** (`Artboard_23@2x.png`) → `src/assets/publify-icon.png` (para mobile/favicon)
+Transformar el simulador de optimizacion de ventana emergente (Dialog) a componente desplegable in-situ (Collapsible), con persistencia de datos del simulador en los analisis guardados.
 
 ---
 
-## Estructura Visual del Wizard
+## Cambios Requeridos
 
-```text
-+------------------------------------------------------------------+
-|  HEADER                                                          |
-|  [Logo Publify]  Calculadora de Viabilidad   [Guardados] [Costes]|
-+------------------------------------------------------------------+
-|                                                                  |
-|  WIZARD - Indicador de Progreso                                  |
-|  [1. Formato] → [2. Mercado] → [3. Libro] → [4. Resultados]     |
-|                                                                  |
-|  +------------------------------------------------------------+  |
-|  |                                                            |  |
-|  |  CONTENIDO DEL PASO ACTUAL                                 |  |
-|  |                                                            |  |
-|  +------------------------------------------------------------+  |
-|                                                                  |
-|  [← Anterior]                               [Siguiente →]        |
-|                                                                  |
-+------------------------------------------------------------------+
+### 1. Nuevos Tipos para Estado del Simulador
+
+**Archivo: `src/types/kdp.ts`**
+
+Agregar una nueva interfaz para el estado del simulador:
+
+```typescript
+export interface SimulatorData {
+  interior: InteriorType;
+  size: BookSize;
+  pvp: number;
+  pages: number;
+  cpc: number;
+  margenObjetivo: number;
+}
+```
+
+Modificar `NicheVersion` y `SavedNiche` para incluir:
+
+```typescript
+// En NicheVersion
+simulatorData?: SimulatorData;
+
+// En SavedNiche
+simulatorData?: SimulatorData;
 ```
 
 ---
 
-## Pasos del Wizard
+### 2. Refactorizar PaperbackSimulator
 
-### Paso 1: Formato
-- Cards grandes con iconos claros
-- eBook (icono BookOpen, color azul)
-- Formato impreso (icono Book, color naranja)
-- Sin otros campos, solo la seleccion
+**Archivo: `src/components/kdp/PaperbackSimulator.tsx`**
 
-### Paso 2: Mercado y Competencia
-- Marketplace (dropdown ES/COM)
-- CPC estimado (input con tooltip explicativo)
-- Ventas diarias competencia (input con tooltip)
-- Margen objetivo (input con advertencia si menor a 30%)
+Cambios principales:
+- Recibir estado inicial opcional via props (`initialSimState`)
+- Emitir cambios de estado via callback (`onStateChange`)
+- El Card wrapper se elimina para que el componente pueda integrarse dentro de un Collapsible
+- Agregar boton "Aplicar como nueva version" cuando hay un nicho cargado
 
-### Paso 3: Datos del Libro
-**Si eBook:**
-- PVP, Regalia (70%/35%), Tamano MB (solo 70%), IVA (solo ES)
+Nueva interfaz de props:
 
-**Si Formato Impreso:**
-- Encuadernacion (Tapa blanda/dura)
-- Tipo impresion, Tamano, Paginas, PVP, IVA (solo ES)
-- Muestra coste de impresion calculado en tiempo real
-
-### Paso 4: Resultados Finales
-Layout completo:
-
-1. **Score Global** (destacado arriba)
-   - Numero grande con estado visual
-   - Desglose: Clics, BACOS, PVP vs Min
-
-2. **Tabla de Resultados** (ancho completo)
-
-3. **Metricas + Consejo Estrategico** (2 columnas: 25/75)
-   - Izquierda: Conversion Ref., Clics Diarios, Inversion Diaria
-   - Derecha: Texto de consejo + breakeven + **DISCLAIMER**
-
-4. **Acciones** (botones)
-   - Exportar PDF (naranja, destacado)
-   - Guardar version (si hay nicho cargado)
+```typescript
+interface PaperbackSimulatorProps {
+  data: PaperbackData;
+  globalData: GlobalData;
+  initialSimState?: SimulatorData;
+  onStateChange?: (state: SimulatorData) => void;
+  onApplyAsVersion?: () => void;
+  showApplyButton?: boolean;
+  embedded?: boolean; // Para quitar el Card wrapper
+}
+```
 
 ---
 
-## Disclaimer Obligatorio
+### 3. Modificar StepResults para Collapsible
 
-Texto a mostrar al final del consejo estrategico y en el PDF:
+**Archivo: `src/components/kdp/wizard/StepResults.tsx`**
 
-> **Aviso importante:** Los valores mostrados son estimaciones orientativas basadas en los datos introducidos y en tasas de referencia del sector. No constituyen predicciones exactas de resultados. El rendimiento real de tus campanas dependera de multiples factores como la calidad creativa, la competencia del momento, las tendencias del mercado y la ejecucion de la estrategia.
+Cambios:
+- Reemplazar Dialog por Collapsible de Radix UI
+- Mantener el estado del simulador localmente (`simulatorState`)
+- Pasar el estado al componente `PaperbackSimulator`
+- Incluir el estado del simulador al guardar analisis/version
+- Agregar boton "Aplicar como nueva version" dentro del simulador
+
+Estructura visual:
+
+```text
+[Simulador de optimizacion]  [Expandir/Contraer]
++------------------------------------------------------------+
+| (Cuando expandido)                                          |
+|                                                             |
+|  [Controles del simulador: sliders, selects, etc.]          |
+|                                                             |
+|  [Resultados simulados]                                     |
+|                                                             |
+|  [Aplicar como nueva version] (si hay nicho cargado)        |
++------------------------------------------------------------+
+```
 
 ---
 
-## Nuevos Archivos a Crear
+### 4. Actualizar Hook useNicheComparator
 
-| Archivo | Proposito |
-|---------|-----------|
-| `src/assets/publify-logo.png` | Logo completo (copiado) |
-| `src/assets/publify-icon.png` | Icono logo (copiado) |
-| `src/components/kdp/WizardContainer.tsx` | Contenedor principal del wizard con navegacion |
-| `src/components/kdp/wizard/StepFormat.tsx` | Paso 1: Seleccion de formato |
-| `src/components/kdp/wizard/StepMarket.tsx` | Paso 2: Mercado y competencia |
-| `src/components/kdp/wizard/StepBookData.tsx` | Paso 3: Datos del libro (dinamico) |
-| `src/components/kdp/wizard/StepResults.tsx` | Paso 4: Resultados finales |
-| `src/components/kdp/wizard/WizardProgress.tsx` | Indicador de progreso visual |
+**Archivo: `src/hooks/useNicheComparator.ts`**
+
+Modificar funciones para incluir `simulatorData`:
+
+- `saveCurrentAsNiche`: Recibir `simulatorData` como parametro opcional
+- `updateNicheWithNewVersion`: Recibir `simulatorData` como parametro opcional
+- Al restaurar version: Cargar tambien el `simulatorData` si existe
+
+Nueva firma de funciones:
+
+```typescript
+saveCurrentAsNiche: (
+  name: string,
+  globalData: GlobalData,
+  ebookData: EbookData | null,
+  paperbackData: PaperbackData | null,
+  ebookResults: EbookResults | null,
+  paperbackResults: PaperbackResults | null,
+  inversionDiaria: number,
+  simulatorData?: SimulatorData  // NUEVO
+) => SavedNiche;
+
+updateNicheWithNewVersion: (
+  id: string,
+  ...
+  simulatorData?: SimulatorData  // NUEVO
+) => SavedNiche | null;
+```
 
 ---
 
-## Archivos a Modificar
+### 5. Actualizar WizardContainer
 
-| Archivo | Cambios |
-|---------|---------|
-| `src/pages/Index.tsx` | Reemplazar layout actual por WizardContainer, integrar logo Publify en header |
-| `src/components/kdp/PositioningSection.tsx` | Anadir disclaimer al final |
-| `src/components/kdp/ScoreDisplay.tsx` | Anadir disclaimer en guia de accion y PDF |
+**Archivo: `src/components/kdp/WizardContainer.tsx`**
+
+- Mantener estado del simulador a nivel del wizard (`simulatorState`)
+- Pasar el estado al `StepResults`
+- Recibir actualizaciones del simulador via callback
+- Pasar `simulatorData` a las funciones de guardado
+
+---
+
+### 6. Actualizar Index.tsx
+
+**Archivo: `src/pages/Index.tsx`**
+
+- Mantener estado del simulador
+- Al cargar un nicho guardado, tambien cargar su `simulatorData`
+- Pasar el estado y callbacks al `WizardContainer`
+
+---
+
+## Flujo de Datos
+
+```text
+Index.tsx
+  |
+  |-- simulatorState (useState)
+  |-- Carga simulatorData al cargar nicho
+  |
+  v
+WizardContainer
+  |
+  |-- Recibe simulatorState
+  |-- Pasa a StepResults
+  |
+  v
+StepResults
+  |
+  |-- Collapsible expandible
+  |-- PaperbackSimulator (embedded)
+  |     |-- Emite cambios via onStateChange
+  |     |-- Muestra boton "Aplicar como nueva version"
+  |
+  |-- Al guardar analisis: incluye simulatorData
+  v
+useNicheComparator
+  |
+  |-- Persiste simulatorData en localStorage
+```
 
 ---
 
 ## Seccion Tecnica
 
-### Componente WizardContainer
+### Archivos a Modificar
+
+| Archivo | Cambios |
+|---------|---------|
+| `src/types/kdp.ts` | Agregar `SimulatorData`, modificar `NicheVersion` y `SavedNiche` |
+| `src/components/kdp/PaperbackSimulator.tsx` | Agregar props para estado externo, modo embedded, boton aplicar |
+| `src/components/kdp/wizard/StepResults.tsx` | Cambiar Dialog por Collapsible, gestionar estado simulador |
+| `src/hooks/useNicheComparator.ts` | Agregar simulatorData a funciones de guardado |
+| `src/components/kdp/WizardContainer.tsx` | Gestionar estado simulador a nivel wizard |
+| `src/pages/Index.tsx` | Mantener estado simulador, cargar al abrir nicho |
+
+### Dependencias a Usar
+
+- `@radix-ui/react-collapsible` (ya instalado: `src/components/ui/collapsible.tsx`)
+- Lucide icons: `ChevronDown`, `ChevronUp`
+
+### Estado del Simulador por Defecto
+
+Cuando no hay datos previos:
 
 ```typescript
-// Estados principales
-const [currentStep, setCurrentStep] = useState(0);
-const steps = ['Formato', 'Mercado', 'Libro', 'Resultados'];
-
-// Validacion por paso
-const canProceed = (step: number) => {
-  switch(step) {
-    case 0: return !!globalData.selectedFormat;
-    case 1: return !!globalData.marketplace && 
-                   globalData.cpc !== null && 
-                   globalData.ventasDiariasCompetencia !== null;
-    case 2: return isBookDataComplete(); // Depende del formato
-    case 3: return true; // Siempre puede ver resultados
-  }
+const defaultSimulatorState: SimulatorData = {
+  interior: paperbackData.interior || 'BN',
+  size: paperbackData.size || 'SMALL',
+  pvp: paperbackData.pvp || 9.99,
+  pages: paperbackData.pages || 100,
+  cpc: globalData.cpc || 0.35,
+  margenObjetivo: globalData.margenObjetivoPct || 30,
 };
 ```
 
-### Componente WizardProgress
-
-Barra visual con:
-- Circulos numerados para cada paso
-- Linea conectora entre pasos
-- Estado activo/completado/pendiente
-- Colores Publify (naranja para activo/completado)
-
-### Integracion de Logos
-
-```tsx
-// En el header
-import publifyLogo from '@/assets/publify-logo.png';
-import publifyIcon from '@/assets/publify-icon.png';
-
-// Desktop
-<img src={publifyLogo} alt="Publify" className="h-8" />
-
-// Mobile
-<img src={publifyIcon} alt="Publify" className="h-8 w-8" />
-```
-
-### Reutilizacion de Hooks Existentes
-
-El wizard seguira usando los mismos hooks sin modificaciones:
-- `useKdpCalculator` - Calculos de regalias
-- `useScoring` - Score de viabilidad
-- `useNicheComparator` - Gestion de nichos guardados
-
-### Simulador
-
-El simulador de optimizacion (PaperbackSimulator) se movera fuera del flujo principal:
-- Accesible desde un boton en Step 4
-- Se abrira en un Dialog modal
-- Solo visible cuando hay resultados de formato impreso
-
 ---
 
-## Beneficios del Rediseno
+## Beneficios
 
-1. **Branding Publify** - Logo visible, identidad coherente
-2. **Menor saturacion visual** - Un paso a la vez
-3. **Proceso guiado** - El usuario no se pierde
-4. **Resultados enfocados** - Todo lo importante en una pantalla
-5. **Disclaimers claros** - Expectativas realistas
-6. **Simulador separado** - No distrae del analisis principal
+1. **Sin perdida de datos** - El simulador mantiene estado al expandir/contraer
+2. **Persistencia completa** - Los datos del simulador se guardan con el analisis
+3. **Restauracion fiel** - Al abrir un analisis guardado, el simulador muestra los ultimos valores usados
+4. **Aplicar cambios** - Boton para crear nueva version con los valores del simulador
+5. **UX mejorada** - Desplegable in-situ, sin ventanas emergentes que interrumpan
 
 ---
 
 ## Orden de Implementacion
 
-1. Copiar logos a `src/assets/`
-2. Crear componente `WizardProgress.tsx`
-3. Crear pasos individuales (`StepFormat`, `StepMarket`, `StepBookData`)
-4. Crear `StepResults.tsx` con layout de resultados
-5. Crear `WizardContainer.tsx` con logica de navegacion
-6. Modificar `PositioningSection.tsx` para anadir disclaimer
-7. Modificar `ScoreDisplay.tsx` para anadir disclaimer
-8. Refactorizar `Index.tsx` para usar el wizard con logo Publify
+1. Modificar `src/types/kdp.ts` - Agregar tipos
+2. Modificar `src/hooks/useNicheComparator.ts` - Agregar parametro simulatorData
+3. Modificar `src/components/kdp/PaperbackSimulator.tsx` - Modo embedded y callbacks
+4. Modificar `src/components/kdp/wizard/StepResults.tsx` - Cambiar Dialog por Collapsible
+5. Modificar `src/components/kdp/WizardContainer.tsx` - Gestionar estado
+6. Modificar `src/pages/Index.tsx` - Cargar/guardar estado simulador
