@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { SavedNiche, NicheVersion, GlobalData, EbookData, PaperbackData, EbookResults, PaperbackResults, ScoreBreakdown } from '@/types/kdp';
+import { SavedNiche, NicheVersion, GlobalData, EbookData, PaperbackData, EbookResults, PaperbackResults, ScoreBreakdown, SimulatorData } from '@/types/kdp';
 import { calculateScore } from './useScoring';
 
 const STORAGE_KEY = 'publify_saved_niches';
@@ -60,7 +60,8 @@ export interface UseNicheComparatorReturn {
     paperbackData: PaperbackData | null,
     ebookResults: EbookResults | null,
     paperbackResults: PaperbackResults | null,
-    inversionDiaria: number
+    inversionDiaria: number,
+    simulatorData?: SimulatorData
   ) => SavedNiche;
   deleteNiche: (id: string) => void;
   updateNiche: (id: string, name: string) => void;
@@ -72,7 +73,8 @@ export interface UseNicheComparatorReturn {
     ebookResults: EbookResults | null,
     paperbackResults: PaperbackResults | null,
     inversionDiaria: number,
-    note?: string
+    note?: string,
+    simulatorData?: SimulatorData
   ) => SavedNiche | null;
   loadNicheData: (id: string) => SavedNiche | null;
   restoreVersion: (nicheId: string, versionId: string) => SavedNiche | null;
@@ -90,7 +92,8 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
     paperbackData: PaperbackData | null,
     ebookResults: EbookResults | null,
     paperbackResults: PaperbackResults | null,
-    inversionDiaria: number
+    inversionDiaria: number,
+    simulatorData?: SimulatorData
   ): SavedNiche => {
     const isEbook = globalData.selectedFormat === 'EBOOK';
     const activeResults = isEbook ? ebookResults : paperbackResults;
@@ -119,6 +122,7 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
       precioMinRecomendado,
       regalias: activeResults?.regalias || 0,
       scoreBreakdown,
+      simulatorData,
     };
 
     const newNiche: SavedNiche = {
@@ -138,6 +142,7 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
       scoreBreakdown,
       versions: [initialVersion],
       activeVersionId: initialVersion.id,
+      simulatorData,
     };
 
     const updated = [...niches, newNiche];
@@ -154,7 +159,8 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
     ebookResults: EbookResults | null,
     paperbackResults: PaperbackResults | null,
     inversionDiaria: number,
-    note?: string
+    note?: string,
+    simulatorData?: SimulatorData
   ): SavedNiche | null => {
     const nicheIndex = niches.findIndex(n => n.id === id);
     if (nicheIndex === -1) return null;
@@ -187,6 +193,7 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
       precioMinRecomendado,
       regalias: activeResults?.regalias || 0,
       scoreBreakdown,
+      simulatorData,
     };
 
     const existingNiche = niches[nicheIndex];
@@ -205,6 +212,7 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
       scoreBreakdown,
       versions: [...(existingNiche.versions || []), newVersion],
       activeVersionId: newVersion.id,
+      simulatorData,
     };
 
     const updated = [...niches];
@@ -241,6 +249,7 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
       precioMinRecomendado: version.precioMinRecomendado,
       regalias: version.regalias,
       scoreBreakdown: version.scoreBreakdown,
+      simulatorData: version.simulatorData,
       // Keep the same versions array - don't add a new entry
       versions: niche.versions || [],
       // Mark this version as the active one

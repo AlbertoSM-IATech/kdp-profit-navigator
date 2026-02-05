@@ -16,6 +16,15 @@ export type RiskLevel = 'low' | 'medium' | 'high';
 
 export type ViabilityStatus = 'viable' | 'adjustable' | 'not-viable';
 
+export interface SimulatorData {
+  interior: InteriorType;
+  size: BookSize;
+  pvp: number;
+  pages: number;
+  cpc: number;
+  margenObjetivo: number;
+}
+
 export interface GlobalData {
   marketplace: Marketplace | null;
   margenObjetivoPct: number | null;
@@ -139,6 +148,8 @@ export interface NicheVersion {
   regalias: number;
   // Score
   scoreBreakdown: ScoreBreakdown;
+  // Simulator data
+  simulatorData?: SimulatorData;
 }
 
 export interface SavedNiche {
@@ -163,6 +174,8 @@ export interface SavedNiche {
   versions: NicheVersion[];
   // Active version ID (which version is currently loaded)
   activeVersionId?: string;
+  // Simulator data
+  simulatorData?: SimulatorData;
 }
 
 // Helper types for currency and market-specific settings
