@@ -1,20 +1,12 @@
 import { useState, useCallback } from 'react';
-import { GlobalData, EbookData, PaperbackData, EbookResults, PaperbackResults, PositioningResults, ScoreBreakdown, TableRow, FormatType } from '@/types/kdp';
+import { GlobalData, EbookData, PaperbackData, EbookResults, PaperbackResults, PositioningResults, ScoreBreakdown, TableRow, FormatType, SimulatorData } from '@/types/kdp';
 import { Button } from '@/components/ui/button';
 import { WizardProgress } from './wizard/WizardProgress';
 import { StepFormat } from './wizard/StepFormat';
 import { StepMarket } from './wizard/StepMarket';
 import { StepBookData } from './wizard/StepBookData';
 import { StepResults } from './wizard/StepResults';
-import { PaperbackSimulator } from './PaperbackSimulator';
-import { ChevronLeft, ChevronRight, RotateCcw, SlidersHorizontal } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
 
 interface WizardContainerProps {
   // Data
@@ -34,8 +26,12 @@ interface WizardContainerProps {
   // Niche management
   loadedNicheId: string | null;
   onQuickSave: (() => void) | undefined;
-  onSaveNiche: (name: string) => void;
+  onSaveNiche: (name: string, simulatorData?: SimulatorData) => void;
   onStartNew: () => void;
+  // Simulator state
+  simulatorState?: SimulatorData;
+  onSimulatorStateChange?: (state: SimulatorData) => void;
+  onApplySimulatorAsVersion?: () => void;
 }
 
 const STEPS = ['Formato', 'Mercado', 'Libro', 'Resultados'];
@@ -56,6 +52,9 @@ export const WizardContainer = ({
   onQuickSave,
   onSaveNiche,
   onStartNew,
+  simulatorState,
+  onSimulatorStateChange,
+  onApplySimulatorAsVersion,
 }: WizardContainerProps) => {
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -153,6 +152,9 @@ export const WizardContainer = ({
             onQuickSave={onQuickSave}
             onSaveNiche={onSaveNiche}
             paperbackData={paperbackData}
+            initialSimulatorState={simulatorState}
+            onSimulatorStateChange={onSimulatorStateChange}
+            onApplySimulatorAsVersion={onApplySimulatorAsVersion}
           />
         );
       default:
