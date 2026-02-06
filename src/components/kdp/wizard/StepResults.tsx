@@ -1,15 +1,16 @@
- import { useState } from 'react';
- import { GlobalData, EbookResults, PaperbackResults, PositioningResults, ScoreBreakdown, TableRow, PaperbackData, SimulatorData } from '@/types/kdp';
- import { ScoreDisplay } from '@/components/kdp/ScoreDisplay';
- import { ResultsTable } from '@/components/kdp/ResultsTable';
- import { PositioningSection } from '@/components/kdp/PositioningSection';
- import { PaperbackSimulator } from '@/components/kdp/PaperbackSimulator';
- import { Button } from '@/components/ui/button';
- import { Input } from '@/components/ui/input';
- import { SlidersHorizontal, Save, Plus, ChevronDown, ChevronUp } from 'lucide-react';
- import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
- import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
- import { toast } from 'sonner';
+import { useState } from 'react';
+import { GlobalData, EbookResults, PaperbackResults, PositioningResults, ScoreBreakdown, TableRow, PaperbackData, SimulatorData } from '@/types/kdp';
+import { ScoreDisplay } from '@/components/kdp/ScoreDisplay';
+import { ResultsTable } from '@/components/kdp/ResultsTable';
+import { PositioningSection } from '@/components/kdp/PositioningSection';
+import { PaperbackSimulator } from '@/components/kdp/PaperbackSimulator';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { SlidersHorizontal, Save, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
+import { Collapsible, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
  
  interface StepResultsProps {
    globalData: GlobalData;
@@ -151,19 +152,29 @@
                </Button>
              </div>
            </CollapsibleTrigger>
-           <CollapsibleContent>
-             <div className="p-6 pt-4 bg-muted/10">
-               <PaperbackSimulator 
-                 data={paperbackData} 
-                 globalData={globalData}
-                 initialSimState={initialSimulatorState}
-                 onStateChange={handleSimStateChange}
-                 onApplyAsVersion={onApplySimulatorAsVersion}
-                 showApplyButton={!!loadedNicheId}
-                 embedded
-               />
-             </div>
-           </CollapsibleContent>
+            <AnimatePresence initial={false}>
+              {isSimulatorExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-6 pt-4 bg-muted/10">
+                    <PaperbackSimulator 
+                      data={paperbackData} 
+                      globalData={globalData}
+                      initialSimState={initialSimulatorState}
+                      onStateChange={handleSimStateChange}
+                      onApplyAsVersion={onApplySimulatorAsVersion}
+                      showApplyButton={!!loadedNicheId}
+                      embedded
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
          </Collapsible>
        )}
  
