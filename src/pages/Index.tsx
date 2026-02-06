@@ -48,19 +48,9 @@ const Index = () => {
     getBestNiche
   } = useNicheComparator();
   const handleSaveNiche = useCallback((name: string, simData?: SimulatorData) => {
-    const saved = saveCurrentAsNiche(
-      name, 
-      globalData, 
-      globalData.selectedFormat === 'EBOOK' ? ebookData : null, 
-      globalData.selectedFormat === 'PAPERBACK' ? paperbackData : null, 
-      ebookResults, 
-      paperbackResults, 
-      inversionDiaria,
-      simData || simulatorState
-    );
+    const saved = saveCurrentAsNiche(name, globalData, globalData.selectedFormat === 'EBOOK' ? ebookData : null, globalData.selectedFormat === 'PAPERBACK' ? paperbackData : null, ebookResults, paperbackResults, inversionDiaria, simData || simulatorState);
     setLoadedNicheId(saved.id);
   }, [globalData, ebookData, paperbackData, ebookResults, paperbackResults, inversionDiaria, saveCurrentAsNiche, simulatorState]);
-
   const handleLoadNiche = useCallback((niche: SavedNiche) => {
     setGlobalData(niche.globalData);
     if (niche.ebookData) {
@@ -78,35 +68,21 @@ const Index = () => {
     }
     toast.success(`Nicho "${niche.name}" cargado para editar`);
   }, [setGlobalData, setEbookData, setPaperbackData]);
-
   const handleUpdateNicheVersion = useCallback((nicheId: string, note?: string) => {
-    updateNicheWithNewVersion(
-      nicheId, 
-      globalData, 
-      globalData.selectedFormat === 'EBOOK' ? ebookData : null, 
-      globalData.selectedFormat === 'PAPERBACK' ? paperbackData : null, 
-      ebookResults, 
-      paperbackResults, 
-      inversionDiaria, 
-      note,
-      simulatorState
-    );
+    updateNicheWithNewVersion(nicheId, globalData, globalData.selectedFormat === 'EBOOK' ? ebookData : null, globalData.selectedFormat === 'PAPERBACK' ? paperbackData : null, ebookResults, paperbackResults, inversionDiaria, note, simulatorState);
   }, [globalData, ebookData, paperbackData, ebookResults, paperbackResults, inversionDiaria, updateNicheWithNewVersion, simulatorState]);
-
   const handleRestoreVersion = useCallback((nicheId: string, versionId: string) => {
     const restored = restoreVersion(nicheId, versionId);
     if (restored) {
       handleLoadNiche(restored);
     }
   }, [restoreVersion, handleLoadNiche]);
-
   const handleApplySimulatorAsVersion = useCallback(() => {
     if (loadedNicheId && simulatorState) {
       handleUpdateNicheVersion(loadedNicheId, 'Aplicado desde simulador');
       toast.success('Nueva versión creada con datos del simulador');
     }
   }, [loadedNicheId, simulatorState, handleUpdateNicheVersion]);
-
   const handleStartNew = useCallback(() => {
     setGlobalData({
       marketplace: null,
@@ -145,7 +121,7 @@ const Index = () => {
               <img src={publifyIcon} alt="Publify" className="h-8 w-8 md:hidden" />
               <div className="hidden sm:block">
                 <h1 className="text-lg font-heading font-bold text-foreground">
-                  Calculadora de Viabilidad de nicho y Optimización de libro
+                  Calculadora de Viabilidad y Optimización de libro
                 </h1>
                 <p className="text-xs text-muted-foreground">
                   Análisis profesional para publishers
@@ -223,26 +199,7 @@ const Index = () => {
 
       {/* Main Content - Wizard */}
       <main className="w-full max-w-[1400px] mx-auto px-4 md:px-8 py-8">
-        <WizardContainer 
-          globalData={globalData} 
-          ebookData={ebookData} 
-          paperbackData={paperbackData} 
-          ebookResults={ebookResults} 
-          paperbackResults={paperbackResults} 
-          positioningResults={positioningResults} 
-          scoreBreakdown={scoreBreakdown} 
-          tableData={tableData} 
-          setGlobalData={setGlobalData} 
-          setEbookData={setEbookData} 
-          setPaperbackData={setPaperbackData} 
-          loadedNicheId={loadedNicheId} 
-          onQuickSave={loadedNicheId ? () => handleUpdateNicheVersion(loadedNicheId) : undefined} 
-          onSaveNiche={handleSaveNiche} 
-          onStartNew={handleStartNew}
-          simulatorState={simulatorState}
-          onSimulatorStateChange={setSimulatorState}
-          onApplySimulatorAsVersion={handleApplySimulatorAsVersion}
-        />
+        <WizardContainer globalData={globalData} ebookData={ebookData} paperbackData={paperbackData} ebookResults={ebookResults} paperbackResults={paperbackResults} positioningResults={positioningResults} scoreBreakdown={scoreBreakdown} tableData={tableData} setGlobalData={setGlobalData} setEbookData={setEbookData} setPaperbackData={setPaperbackData} loadedNicheId={loadedNicheId} onQuickSave={loadedNicheId ? () => handleUpdateNicheVersion(loadedNicheId) : undefined} onSaveNiche={handleSaveNiche} onStartNew={handleStartNew} simulatorState={simulatorState} onSimulatorStateChange={setSimulatorState} onApplySimulatorAsVersion={handleApplySimulatorAsVersion} />
 
         {/* Save Niche Button when no niches exist */}
         {niches.length === 0 && hasCurrentData && <div className="mt-8">
