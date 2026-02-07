@@ -83,6 +83,26 @@ const Index = () => {
       toast.success('Nueva versión creada con datos del simulador');
     }
   }, [loadedNicheId, simulatorState, handleUpdateNicheVersion]);
+
+  const handleApplySimulatorToBase = useCallback((simData: SimulatorData) => {
+    // Update globalData with simulator CPC and margin
+    setGlobalData({
+      ...globalData,
+      cpc: simData.cpc,
+      margenObjetivoPct: simData.margenObjetivo,
+    });
+    // Update paperbackData with simulator format values
+    setPaperbackData({
+      ...paperbackData,
+      interior: simData.interior,
+      size: simData.size,
+      pvp: simData.pvp,
+      pages: simData.pages,
+    });
+    // Reset simulator state so it syncs from updated base
+    setSimulatorState(undefined);
+    toast.success('Datos base actualizados con los valores del simulador');
+  }, [globalData, paperbackData, setGlobalData, setPaperbackData]);
   const handleStartNew = useCallback(() => {
     setGlobalData({
       marketplace: null,
@@ -199,7 +219,7 @@ const Index = () => {
 
       {/* Main Content - Wizard */}
       <main className="w-full max-w-[1400px] mx-auto px-4 md:px-8 py-8">
-        <WizardContainer globalData={globalData} ebookData={ebookData} paperbackData={paperbackData} ebookResults={ebookResults} paperbackResults={paperbackResults} positioningResults={positioningResults} scoreBreakdown={scoreBreakdown} tableData={tableData} setGlobalData={setGlobalData} setEbookData={setEbookData} setPaperbackData={setPaperbackData} loadedNicheId={loadedNicheId} onQuickSave={loadedNicheId ? () => handleUpdateNicheVersion(loadedNicheId) : undefined} onSaveNiche={handleSaveNiche} onStartNew={handleStartNew} simulatorState={simulatorState} onSimulatorStateChange={setSimulatorState} onApplySimulatorAsVersion={handleApplySimulatorAsVersion} />
+        <WizardContainer globalData={globalData} ebookData={ebookData} paperbackData={paperbackData} ebookResults={ebookResults} paperbackResults={paperbackResults} positioningResults={positioningResults} scoreBreakdown={scoreBreakdown} tableData={tableData} setGlobalData={setGlobalData} setEbookData={setEbookData} setPaperbackData={setPaperbackData} loadedNicheId={loadedNicheId} onQuickSave={loadedNicheId ? () => handleUpdateNicheVersion(loadedNicheId) : undefined} onSaveNiche={handleSaveNiche} onStartNew={handleStartNew} simulatorState={simulatorState} onSimulatorStateChange={setSimulatorState} onApplySimulatorAsVersion={handleApplySimulatorAsVersion} onApplySimulatorToBase={handleApplySimulatorToBase} />
 
         {/* Save Niche Button when no niches exist */}
         {niches.length === 0 && hasCurrentData && <div className="mt-8">

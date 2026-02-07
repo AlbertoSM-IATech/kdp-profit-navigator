@@ -103,6 +103,9 @@ export const StepMarket = ({ globalData, onChange }: StepMarketProps) => {
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
             </div>
+            <p className="text-xs text-muted-foreground">
+              Coste medio por clic en el nicho. Investígalo con herramientas de keywords.
+            </p>
           </div>
 
           {/* Ventas Diarias Competencia */}
@@ -134,6 +137,9 @@ export const StepMarket = ({ globalData, onChange }: StepMarketProps) => {
               onChange={(e) => handleNumberChange('ventasDiariasCompetencia', e.target.value)}
               className="input-focus h-12 text-base"
             />
+            <p className="text-xs text-muted-foreground">
+              Ventas diarias estimadas de los libros mejor posicionados en tu nicho.
+            </p>
           </div>
         </div>
 
@@ -170,6 +176,9 @@ export const StepMarket = ({ globalData, onChange }: StepMarketProps) => {
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">%</span>
           </div>
+          <p className="text-xs text-muted-foreground">
+            Margen mínimo que quieres asegurar por venta para reinvertir en Ads. Recomendado: ≥ 30%.
+          </p>
           {showMarginWarning && (
             <div className="flex items-center gap-1.5 text-warning text-sm mt-2 p-2 bg-warning/10 rounded-lg">
               <AlertTriangle className="h-4 w-4" />
