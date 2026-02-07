@@ -71,8 +71,26 @@ export const ResultsTable = ({ data, globalData, embedded = false }: ResultsTabl
                 <TableHead className="font-heading font-semibold">Tipo</TableHead>
                 <TableHead className="font-heading font-semibold text-right">PVP</TableHead>
                 <TableHead className="font-heading font-semibold text-right">Regalías</TableHead>
-                <TableHead className="font-heading font-semibold text-right">Margen real (BACOS)</TableHead>
-                <TableHead className="font-heading font-semibold text-right">Clics máx./Venta</TableHead>
+                <TableHead className="font-heading font-semibold text-right">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="cursor-help border-b border-dashed border-muted-foreground/40">Margen real (BACOS)</span>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs"><p className="text-xs">Margen publicitario asumible sobre ventas para seguir siendo rentable.</p></TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </TableHead>
+                <TableHead className="font-heading font-semibold text-right">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="cursor-help border-b border-dashed border-muted-foreground/40">Clics máx./Venta</span>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs"><p className="text-xs">Cuántos clics puedes pagar como máximo por cada venta.</p></TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </TableHead>
                 <TableHead className="font-heading font-semibold text-center">Estado</TableHead>
                 <TableHead className="font-heading font-semibold">Recomendación</TableHead>
               </TRow>

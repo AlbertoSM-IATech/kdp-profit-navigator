@@ -7,6 +7,7 @@ import { StepMarket } from './wizard/StepMarket';
 import { StepBookData } from './wizard/StepBookData';
 import { StepResults } from './wizard/StepResults';
 import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
+import { WizardIntro } from './WizardIntro';
 
 interface WizardContainerProps {
   // Data
@@ -164,6 +165,9 @@ export const WizardContainer = ({
 
   return (
     <div className="space-y-8">
+      {/* Intro Card */}
+      {currentStep === 0 && <WizardIntro />}
+
       {/* Progress Indicator */}
       <div className="bg-card border border-border rounded-xl p-6">
         <WizardProgress
