@@ -33,6 +33,7 @@ interface WizardContainerProps {
   simulatorState?: SimulatorData;
   onSimulatorStateChange?: (state: SimulatorData) => void;
   onApplySimulatorAsVersion?: () => void;
+  onApplySimulatorToBase?: (simData: SimulatorData) => void;
 }
 
 const STEPS = ['Formato', 'Mercado', 'Libro', 'Resultados'];
@@ -56,6 +57,7 @@ export const WizardContainer = ({
   simulatorState,
   onSimulatorStateChange,
   onApplySimulatorAsVersion,
+  onApplySimulatorToBase,
 }: WizardContainerProps) => {
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -156,6 +158,7 @@ export const WizardContainer = ({
             initialSimulatorState={simulatorState}
             onSimulatorStateChange={onSimulatorStateChange}
             onApplySimulatorAsVersion={onApplySimulatorAsVersion}
+            onApplySimulatorToBase={onApplySimulatorToBase}
           />
         );
       default:

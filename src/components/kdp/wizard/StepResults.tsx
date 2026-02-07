@@ -6,7 +6,7 @@ import { PositioningSection } from '@/components/kdp/PositioningSection';
 import { PaperbackSimulator } from '@/components/kdp/PaperbackSimulator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { SlidersHorizontal, Save, Plus, ChevronDown, ChevronUp, Check } from 'lucide-react';
+import { SlidersHorizontal, Save, Plus, ChevronDown, ChevronUp, Check, ArrowUpFromLine } from 'lucide-react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { toast } from 'sonner';
@@ -25,6 +25,7 @@ import { motion, AnimatePresence } from 'framer-motion';
    initialSimulatorState?: SimulatorData;
    onSimulatorStateChange?: (state: SimulatorData) => void;
    onApplySimulatorAsVersion?: () => void;
+   onApplySimulatorToBase?: (simData: SimulatorData) => void;
  }
  
  export const StepResults = ({
@@ -37,10 +38,11 @@ import { motion, AnimatePresence } from 'framer-motion';
    onQuickSave,
    onSaveNiche,
    paperbackData,
-   initialSimulatorState,
-   onSimulatorStateChange,
-   onApplySimulatorAsVersion,
- }: StepResultsProps) => {
+    initialSimulatorState,
+    onSimulatorStateChange,
+    onApplySimulatorAsVersion,
+    onApplySimulatorToBase,
+  }: StepResultsProps) => {
    const currencySymbol = globalData.marketplace === 'COM' ? '$' : '€';
    const [isSimulatorExpanded, setIsSimulatorExpanded] = useState(false);
    const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
@@ -235,27 +237,45 @@ import { motion, AnimatePresence } from 'framer-motion';
           </Collapsible>
         )}
 
-        {/* Fixed Apply Button - Shows when simulator has changes */}
+        {/* Fixed Apply Buttons - Shows when simulator has changes */}
         <AnimatePresence>
-          {isSimulatorExpanded && hasSimulatorChanges && onApplySimulatorAsVersion && (
+          {isSimulatorExpanded && hasSimulatorChanges && localSimState && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.2 }}
-              className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50"
+              className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3"
             >
-              <Button 
-                onClick={() => {
-                  onApplySimulatorAsVersion();
-                  toast.success('Cambios del simulador aplicados al análisis');
-                }}
-                className="shadow-lg gap-2 px-6 py-3 h-auto"
-                size="lg"
-              >
-                <Check className="h-5 w-5" />
-                Aplicar cambios del simulador
-              </Button>
+              {/* Apply to base data */}
+              {onApplySimulatorToBase && (
+                <Button 
+                  onClick={() => {
+                    onApplySimulatorToBase(localSimState);
+                    toast.success('Datos base actualizados con los valores del simulador');
+                  }}
+                  className="shadow-lg gap-2 px-6 py-3 h-auto"
+                  size="lg"
+                >
+                  <ArrowUpFromLine className="h-5 w-5" />
+                  Aplicar al análisis
+                </Button>
+              )}
+              {/* Apply as new version */}
+              {onApplySimulatorAsVersion && loadedNicheId && (
+                <Button 
+                  onClick={() => {
+                    onApplySimulatorAsVersion();
+                    toast.success('Nueva versión guardada con datos del simulador');
+                  }}
+                  variant="secondary"
+                  className="shadow-lg gap-2 px-5 py-3 h-auto"
+                  size="lg"
+                >
+                  <Save className="h-4 w-4" />
+                  Guardar versión
+                </Button>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
