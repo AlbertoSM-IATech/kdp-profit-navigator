@@ -44,82 +44,70 @@ export const PositioningSection = ({
       <div className="space-y-4">
         {/* 2-column layout: Metrics 25% left, Advice 75% right */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* Left Column (25%): Conversion, Clicks, Investment - stacked vertically */}
+          {/* Left Column (25%): Metrics — neutral */}
           <div className="space-y-3 md:col-span-1">
-            {/* Tasa de Conversión Referencia */}
-            <div className="rounded-xl p-3 border border-secondary/20 bg-inherit">
+            <div className="rounded-xl p-3 border border-border bg-card">
               <div className="flex items-center gap-2 mb-1">
-                <div className="p-1.5 bg-secondary/20 rounded-lg">
-                  <TrendingUp className="h-4 w-4 text-secondary" />
-                </div>
-                <span className="text-sm font-bold text-foreground">Conversión Ref.</span>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-foreground">Conversión referencia</span>
               </div>
-              <p className="text-secondary text-2xl font-extrabold">10%</p>
+              <p className="text-foreground text-2xl font-bold">10%</p>
               <p className="text-xs text-muted-foreground">1 venta cada 10 clics</p>
             </div>
 
-            {/* Clics Diarios Necesarios */}
-            <div className="bg-primary/10 rounded-xl p-3 border border-primary/20">
+            <div className="rounded-xl p-3 border border-border bg-card">
               <div className="flex items-center gap-2 mb-1">
-                <div className="p-1.5 bg-primary/20 rounded-lg">
-                  <MousePointer className="h-4 w-4 text-primary" />
-                </div>
-                <span className="font-bold text-sm text-foreground">Clics Diarios</span>
+                <MousePointer className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-foreground">Clics diarios</span>
               </div>
-              <p className="text-primary text-2xl font-extrabold">{Math.ceil(results.clicsDiarios)}</p>
-              <p className="text-xs text-muted-foreground">Para {ventasDiarias} ventas/día</p>
+              <p className="text-foreground text-2xl font-bold">{Math.ceil(results.clicsDiarios)}</p>
+              <p className="text-xs text-muted-foreground">Para {ventasDiarias} ventas al día</p>
             </div>
 
-            {/* Inversión Diaria */}
-            <div className="bg-muted rounded-xl p-3 border border-border">
+            <div className="rounded-xl p-3 border border-border bg-card">
               <div className="flex items-center gap-2 mb-1">
-                <div className="p-1.5 bg-foreground/10 rounded-lg">
-                  <Euro className="h-4 w-4 text-foreground" />
-                </div>
-                <span className="text-sm font-bold text-foreground">Inversión Diaria</span>
+                <Euro className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-foreground">Inversión diaria</span>
               </div>
-              <p className="text-foreground text-2xl font-extrabold">{results.inversionDiaria.toFixed(2)}{currencySymbol}</p>
-              <p className="text-xs text-muted-foreground">A {cpc.toFixed(2)}{currencySymbol}/clic</p>
+              <p className="text-foreground text-2xl font-bold">{results.inversionDiaria.toFixed(2)}{currencySymbol}</p>
+              <p className="text-xs text-muted-foreground">A {cpc.toFixed(2)}{currencySymbol} por clic</p>
             </div>
           </div>
 
-          {/* Right Column (75%): Strategic advice + Breakeven reference */}
+          {/* Right Column (75%): Strategic advice */}
           <div className="md:col-span-3">
-            {/* Bloque de recomendación estratégica */}
-            <div className="bg-gradient-to-br from-secondary/10 to-primary/10 rounded-xl p-5 border border-secondary/20 h-full">
+            <div className="rounded-xl p-5 border border-border bg-card h-full">
               <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2 text-base">
                 <Target className="h-5 w-5 text-secondary shrink-0" />
                 Consejo estratégico
               </h4>
-              
+
               <div className="space-y-4 text-sm leading-relaxed">
                 <p className="text-muted-foreground">
-                  Para competir con los libros mejor posicionados de tu nicho, necesitarás conseguir aproximadamente <span className="text-primary font-extrabold">{ventasDiarias} copias vendidas al día</span>. Este es el umbral mínimo para entrar en el radar del algoritmo de Amazon y empezar a ganar visibilidad orgánica.
+                  Para competir con los libros mejor posicionados de tu nicho, necesitarás conseguir aproximadamente <span className="text-foreground font-semibold">{ventasDiarias} copias vendidas al día</span>. Este es el umbral mínimo para entrar en el radar del algoritmo de Amazon y empezar a ganar visibilidad orgánica.
                 </p>
-                
+
                 <p className="text-muted-foreground">
-                  Asumiendo una tasa de conversión del 10% (1 venta por cada 10 clics de usuarios interesados), necesitarás generar <span className="text-primary font-extrabold">{clicsDiarios} clics diarios</span> hacia tu página de producto. Esto se traduce en una inversión publicitaria estimada de <span className="text-primary font-extrabold">{inversionDiaria.toFixed(2)}{currencySymbol} al día</span> si utilizas Amazon Ads como canal principal.
+                  Asumiendo una tasa de conversión del 10% (1 venta por cada 10 clics de usuarios interesados), necesitarás generar <span className="text-foreground font-semibold">{clicsDiarios} clics diarios</span> hacia tu página de producto. Esto se traduce en una inversión publicitaria estimada de <span className="text-foreground font-semibold">{inversionDiaria.toFixed(2)}{currencySymbol} al día</span> si utilizas Amazon Ads como canal principal.
                 </p>
-                
+
                 <p className="font-medium text-foreground pt-3 border-t border-border/50">
                   Este dato te permite decidir si el nicho es viable para tu presupuesto antes de producir el libro. Si la inversión diaria supera tu capacidad, considera nichos menos competidos o estrategias de posicionamiento orgánico a largo plazo.
                 </p>
               </div>
 
-              {/* Referencia de breakeven publicitario - inline */}
               {activeResults && clicsMaxBase > 0 && (
                 <div className="mt-4 pt-4 border-t border-border/50">
                   <div className="flex items-center gap-2 mb-2">
-                    <BarChart3 className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-semibold text-foreground">Breakeven Publicitario</span>
+                    <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-semibold text-foreground">Punto de equilibrio publicitario</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Con tu configuración actual de márgenes y CPC, necesitas conseguir al menos <span className="font-bold text-primary">1 pedido por cada {clicsMaxBase} clics</span> para que la campaña no genere pérdidas. Si tu conversión real está por debajo de este umbral, estarás pagando más en publicidad de lo que ganas por venta.
+                    Con tu configuración actual de márgenes y coste por clic, necesitas conseguir al menos <span className="font-semibold text-foreground">1 pedido por cada {clicsMaxBase} clics</span> para que la campaña no genere pérdidas.
                   </p>
                 </div>
               )}
 
-              {/* Disclaimer */}
               <div className="mt-4 pt-4 border-t border-border/50">
                 <div className="flex items-start gap-2">
                   <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
@@ -131,6 +119,7 @@ export const PositioningSection = ({
             </div>
           </div>
         </div>
+
 
         {/* Advertencias - Solo condicionales */}
         {results.advertencias.length > 0 && (
