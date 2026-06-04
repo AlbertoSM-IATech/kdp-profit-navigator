@@ -528,130 +528,88 @@ export const ScoreDisplay = ({
         </CardContent>
       </Card>;
   }
-  const scoreColor = score.status === 'excellent' ? 'text-foreground' : score.status === 'viable' ? 'text-muted-foreground' : 'text-destructive';
-  const scoreBg = score.status === 'excellent' ? 'bg-muted/40 border-border' : score.status === 'viable' ? 'bg-muted/30 border-border' : 'bg-destructive/5 border-destructive/20';
+  const statusDot =
+    score.status === 'excellent' ? 'bg-success' : score.status === 'viable' ? 'bg-warning' : 'bg-destructive';
 
   // Compact view for quick mode
   if (compact) {
-    return <div className={`flex items-center justify-between p-4 rounded-xl border-2 ${scoreBg}`}>
-        <div className="flex items-center gap-4">
-          <span className="text-4xl font-extrabold" style={{
-          color: score.statusColor
-        }}>
-            {score.totalScore}
-          </span>
+    return (
+      <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-card">
+        <div className="flex items-baseline gap-2">
+          <span className="text-4xl font-extrabold text-foreground">{score.totalScore}</span>
           <span className="text-lg text-muted-foreground">/100</span>
         </div>
-        <div className="text-right">
-          <span className={`text-base font-bold ${scoreColor}`}>{score.statusLabel}</span>
+        <div className="flex items-center gap-2">
+          <span className={`w-2 h-2 rounded-full ${statusDot}`} />
+          <span className="text-base font-semibold text-foreground">{score.statusLabel}</span>
         </div>
-      </div>;
+      </div>
+    );
   }
-  const content = <div className="space-y-5">
-      
-      {/* 2-column layout for compact Score */}
+
+  const content = (
+    <div className="space-y-5">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Column 1: Main Score + Interpretation + Legend */}
+        {/* Column 1 — Score number + interpretation */}
         <div className="space-y-4">
-          {/* Main Score Display */}
-          <div className={`flex items-center justify-between p-5 rounded-xl border-2 ${scoreBg}`}>
-            <div className="text-center">
-              <span className="text-5xl font-extrabold" style={{
-              color: score.statusColor
-            }}>
-                {score.totalScore}
-              </span>
+          <div className="flex items-center justify-between p-5 rounded-xl border border-border bg-card">
+            <div className="flex items-baseline gap-1">
+              <span className="text-5xl font-extrabold text-foreground">{score.totalScore}</span>
               <span className="text-xl text-muted-foreground">/100</span>
             </div>
-            <div className="text-right">
-              <span className={`text-base font-bold ${scoreColor}`}>{score.statusLabel}</span>
-            </div>
-          </div>
-          
-          <div className={`p-3 rounded-lg border ${scoreBg}`}>
-            <p className="text-sm text-foreground">
-              {score.status === 'excellent' && 'Excelente configuración para escalar campañas de Ads. Margen de maniobra amplio.'}
-              {score.status === 'viable' && 'Configuración viable pero requiere ajustes. Optimiza precio, CPC o busca keywords menos competidas.'}
-              {score.status === 'not-recommended' && 'No recomendable para Ads en las condiciones actuales. Reformula antes de invertir.'}
-            </p>
-          </div>
-
-          {/* Score Legend */}
-          <div className="grid grid-cols-1 gap-2 text-xs">
-            <div className="flex items-center gap-1 p-2 rounded-lg bg-success/10">
-              <span className="w-2 h-2 rounded-full bg-success"></span>
-              <span className="text-muted-foreground">80-100 Excelente</span>
-            </div>
-            <div className="flex items-center gap-1 p-2 rounded-lg bg-warning/10">
-              <span className="w-2 h-2 rounded-full bg-warning"></span>
-              <span className="text-muted-foreground">50-79 Aceptable</span>
-            </div>
-            <div className="flex items-center gap-1 p-2 rounded-lg bg-destructive/10">
-              <span className="w-2 h-2 rounded-full bg-destructive"></span>
-              <span className="text-muted-foreground">&lt;50 En riesgo</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Column 2: Score Breakdown + Action Guide */}
-        <div className="space-y-4">
-          {/* Score Breakdown */}
-          <div>
-            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-              Desglose del Score
-            </h4>
-            
-            <div className="space-y-3">
-              <ScoreItem label="Clics máx./Venta (CRÍTICO)" value={score.clicsScore} max={50} icon={<MousePointer className="h-4 w-4 text-primary" />} tooltip="Cuántos clics puedes pagar como máximo por cada venta. ≥14 = 50pts, 13 = 35pts, 12 = 25pts, 11 = 15pts, ≤10 = 0pts" />
-              
-              <ScoreItem label="BACOS" value={score.bacosScore} max={40} icon={<TrendingUp className="h-4 w-4 text-success" />} tooltip="Margen publicitario asumible sobre ventas para seguir siendo rentable. ≥40% = 40pts, ≥35% = 25pts, ≥30% = 15pts, <30% = 0pts" />
-              
-              <ScoreItem label="PVP vs Mínimo" value={score.pvpVsMinScore} max={10} icon={<Tag className="h-4 w-4 text-secondary" />} tooltip="Precio mínimo para cubrir costes y mantener margen básico. PVP > rec. = 10pts, PVP = rec. = 5pts, PVP < rec. = 0pts" />
+            <div className="flex items-center gap-2">
+              <span className={`w-2.5 h-2.5 rounded-full ${statusDot}`} />
+              <span className="text-base font-semibold text-foreground">{score.statusLabel}</span>
             </div>
           </div>
 
-          {/* Action Guide - Compact */}
-          <div className="p-4 rounded-lg border bg-muted/20 border-border">
-            <h5 className="text-sm font-semibold text-foreground mb-2">Guía de acción</h5>
-            <ul className="text-xs text-muted-foreground space-y-1.5">
-              <li className="flex items-start gap-2">
-                <span className="text-success mt-0.5">●</span>
-                <span><strong className="text-foreground">80-100:</strong> Lanza campaña y escala</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-warning mt-0.5">●</span>
-                <span><strong className="text-foreground">50-79:</strong> Ajusta PVP o CPC</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-destructive mt-0.5">●</span>
-                <span><strong className="text-foreground">&lt;50:</strong> Reformula o descarta</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
+          <p className="text-sm text-muted-foreground leading-relaxed px-1">
+            {score.status === 'excellent' && 'Excelente configuración para escalar campañas de Amazon Ads. Margen de maniobra amplio.'}
+            {score.status === 'viable' && 'Configuración viable pero requiere ajustes. Optimiza precio, coste por clic o busca palabras clave menos competidas.'}
+            {score.status === 'not-recommended' && 'No recomendable para Amazon Ads en las condiciones actuales. Reformula antes de invertir.'}
+          </p>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
-        <div className="flex items-center gap-2">
-          {globalData && activeResults && <Button onClick={handleExportPDF} className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground">
-              <Download className="h-4 w-4 mr-2" />
+          {globalData && activeResults && (
+            <Button onClick={handleExportPDF} variant="outline" size="sm" className="gap-2">
+              <Download className="h-4 w-4" />
               Exportar PDF
-            </Button>}
-          {loadedNicheId && onQuickSave && <Button onClick={() => {
-          onQuickSave();
-          toast.success('Nueva versión guardada', {
-            description: 'El historial de versiones se ha actualizado'
-          });
-        }} variant="outline" className="shrink-0">
-              <Save className="h-4 w-4 mr-2" />
-              Guardar versión
-            </Button>}
+            </Button>
+          )}
         </div>
-        <p className="text-xs text-muted-foreground/70 italic">
-          Puntuaciones orientativas. No sustituyen el análisis profundo de cada nicho.
-        </p>
+
+        {/* Column 2 — Score breakdown */}
+        <div className="space-y-3">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            Desglose del Score
+          </h4>
+          <div className="space-y-3">
+            <ScoreItem
+              label="Clics máximos por venta (crítico)"
+              value={score.clicsScore}
+              max={50}
+              icon={<MousePointer className="h-4 w-4 text-foreground" />}
+              tooltip="Cuántos clics puedes pagar como máximo por cada venta. ≥14 = 50pts, 13 = 35pts, 12 = 25pts, 11 = 15pts, ≤10 = 0pts"
+            />
+            <ScoreItem
+              label="Margen publicitario (BACOS)"
+              value={score.bacosScore}
+              max={40}
+              icon={<TrendingUp className="h-4 w-4 text-foreground" />}
+              tooltip="Porcentaje del precio que puedes destinar a publicidad manteniendo rentabilidad. ≥40% = 40pts, ≥35% = 25pts, ≥30% = 15pts, <30% = 0pts"
+            />
+            <ScoreItem
+              label="Precio vs Mínimo viable"
+              value={score.pvpVsMinScore}
+              max={10}
+              icon={<Tag className="h-4 w-4 text-foreground" />}
+              tooltip="Posición de tu precio frente al mínimo necesario para cubrir costes y margen objetivo."
+            />
+          </div>
+        </div>
       </div>
-    </div>;
+    </div>
+  );
+
   if (embedded) {
     return content;
   }
