@@ -6,68 +6,73 @@ import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { SlidersHorizontal, Euro, FileText, Percent, HelpCircle, Palette, Ruler, Save } from 'lucide-react';
+import { SlidersHorizontal, Euro, FileText, Percent, HelpCircle, Palette, Ruler, Save, ArrowUpFromLine } from 'lucide-react';
 import { calculatePrintingCost, getMinPages } from '@/data/printingCosts';
+
 interface PaperbackSimulatorProps {
   data: PaperbackData;
   globalData: GlobalData;
   initialSimState?: SimulatorData;
   onStateChange?: (state: SimulatorData) => void;
   onApplyAsVersion?: () => void;
-  showApplyButton?: boolean;
+  onApplyToBase?: (simData: SimulatorData) => void;
+  loadedNicheId?: string | null;
+  showStickyBar?: boolean;
   embedded?: boolean;
 }
+
 const interiorLabels: Record<InteriorType, string> = {
   BN: 'Blanco y Negro',
   COLOR_PREMIUM: 'Color Premium',
-  COLOR_STANDARD: 'Color Estándar'
+  COLOR_STANDARD: 'Color Estándar',
 };
 const sizeLabels: Record<BookSize, string> = {
   SMALL: '≤ 6" x 9"',
-  LARGE: '> 6" x 9"'
+  LARGE: '> 6" x 9"',
 };
-const getClicksColor = (clicks: number) => {
-  if (clicks >= 13) return 'text-foreground';
-  if (clicks >= 11) return 'text-muted-foreground';
-  return 'text-destructive';
-};
-const getClicksBg = (clicks: number) => {
-  if (clicks >= 13) return 'bg-muted/40';
-  if (clicks >= 11) return 'bg-muted/30';
-  return 'bg-destructive/10';
-};
+
+// Tooltip helper
+const Help = ({ text }: { text: string }) => (
+  <TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-xs">
+        <p className="text-xs">{text}</p>
+      </TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
+);
+
 export const PaperbackSimulator = ({
   data,
   globalData,
   initialSimState,
   onStateChange,
   onApplyAsVersion,
-  showApplyButton = false,
-  embedded = false
+  onApplyToBase,
+  loadedNicheId,
+  showStickyBar = false,
+  embedded = false,
 }: PaperbackSimulatorProps) => {
   const currencySymbol = globalData.marketplace === 'COM' ? '$' : '€';
   const [simState, setSimState] = useState<SimulatorData>(() => {
-    if (initialSimState) {
-      return initialSimState;
-    }
+    if (initialSimState) return initialSimState;
     return {
       interior: data.interior || 'BN',
       size: data.size || 'SMALL',
       pvp: data.pvp || 9.99,
       pages: data.pages || 100,
       cpc: globalData.cpc || 0.35,
-      margenObjetivo: globalData.margenObjetivoPct || 30
+      margenObjetivo: globalData.margenObjetivoPct || 30,
     };
   });
 
-  // Notify parent of state changes
   useEffect(() => {
-    if (onStateChange) {
-      onStateChange(simState);
-    }
+    onStateChange?.(simState);
   }, [simState, onStateChange]);
 
-  // Sync initial values from base config when they change (only if no external state)
   useEffect(() => {
     if (data.interior && data.size && !initialSimState) {
       setSimState(prev => ({
@@ -75,55 +80,50 @@ export const PaperbackSimulator = ({
         interior: data.interior!,
         size: data.size!,
         pvp: data.pvp || prev.pvp,
-        pages: data.pages || prev.pages
+        pages: data.pages || prev.pages,
       }));
     }
   }, [data.interior, data.size, data.pvp, data.pages, initialSimState]);
+
   useEffect(() => {
     if (globalData.cpc !== null && !initialSimState) {
-      setSimState(prev => ({
-        ...prev,
-        cpc: globalData.cpc!
-      }));
+      setSimState(prev => ({ ...prev, cpc: globalData.cpc! }));
     }
     if (globalData.margenObjetivoPct !== null && !initialSimState) {
-      setSimState(prev => ({
-        ...prev,
-        margenObjetivo: globalData.margenObjetivoPct!
-      }));
+      setSimState(prev => ({ ...prev, margenObjetivo: globalData.margenObjetivoPct! }));
     }
   }, [globalData.cpc, globalData.margenObjetivoPct, initialSimState]);
+
   if (!data.interior || !data.size) {
-    if (embedded) {
-      return <div className="text-center py-8">
-           <p className="text-muted-foreground">
-             Selecciona tipo de interior y tamaño para activar el simulador
-           </p>
-         </div>;
-    }
-    return <Card className="border-border/50">
-         <CardHeader className="pb-4">
-           <CardTitle className="section-header">
-             <SlidersHorizontal className="h-5 w-5 text-secondary" />
-             Simulador
-           </CardTitle>
-           <p className="text-sm text-muted-foreground">Juega con ajustes; no altera tus datos.</p>
-         </CardHeader>
-         <CardContent>
-           <p className="text-muted-foreground text-center py-8">
-             Selecciona tipo de interior y tamaño para activar el simulador
-           </p>
-         </CardContent>
-       </Card>;
+    const empty = (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">
+          Selecciona tipo de impresión y tamaño en el paso "Libro" para activar el simulador.
+        </p>
+      </div>
+    );
+    if (embedded) return empty;
+    return (
+      <Card className="border-border/50">
+        <CardHeader className="pb-4">
+          <CardTitle className="section-header">
+            <SlidersHorizontal className="h-5 w-5 text-secondary" />
+            Simulador de optimización
+          </CardTitle>
+        </CardHeader>
+        <CardContent>{empty}</CardContent>
+      </Card>
+    );
   }
+
   const minPages = getMinPages(simState.interior);
   const printingResult = calculatePrintingCost(simState.interior, simState.size, simState.pages);
   const gastosImpresion = printingResult.totalCost;
-  const royaltyRate = simState.pvp < 9.99 ? 0.50 : 0.60;
+  const royaltyRate = simState.pvp < 9.99 ? 0.5 : 0.6;
   const ivaPct = globalData.marketplace === 'ES' ? 4 : 0;
   const precioSinIva = simState.pvp / (1 + ivaPct / 100);
   const regalias = precioSinIva * royaltyRate - gastosImpresion;
-  const margenBacos = simState.pvp > 0 ? regalias / simState.pvp * 100 : 0;
+  const margenBacos = simState.pvp > 0 ? (regalias / simState.pvp) * 100 : 0;
   const cpcMaxRentable = regalias > 0 ? regalias / 10 : 0;
   const clicsMaxPorVenta = simState.cpc > 0 && regalias > 0 ? Math.floor(regalias / simState.cpc) : 0;
   const margenObj = simState.margenObjetivo / 100;
@@ -131,293 +131,296 @@ export const PaperbackSimulator = ({
   let precioMinSimulado: number | null = null;
   if (denominator > 0) {
     const basePrice = gastosImpresion / denominator;
-    const priceWithIva = basePrice * (1 + ivaPct / 100);
-    precioMinSimulado = Math.ceil(priceWithIva * 100) / 100;
+    precioMinSimulado = Math.ceil(basePrice * (1 + ivaPct / 100) * 100) / 100;
   }
-  const getRiskLevel = () => {
-    if (regalias <= 0) return {
-      level: 'high',
-      text: 'Alto',
-      color: 'destructive'
-    };
-    if (clicsMaxPorVenta < 10 || margenBacos < 30) return {
-      level: 'high',
-      text: 'Alto',
-      color: 'destructive'
-    };
-    if (clicsMaxPorVenta < 13 || margenBacos <= 40) return {
-      level: 'medium',
-      text: 'Medio',
-      color: 'warning'
-    };
-    return {
-      level: 'low',
-      text: 'Bajo',
-      color: 'success'
-    };
-  };
-  const risk = getRiskLevel();
-  const getDiagnosticMessage = () => {
-    if (regalias < 0) return {
-      text: 'Con este PVP pierdes dinero incluso antes de invertir en Ads.',
-      color: 'text-destructive'
-    };
-    if (margenBacos < 30) return {
-      text: 'En riesgo — Este precio te deja poco margen para Ads. Ajusta precio o costes.',
-      color: 'text-destructive'
-    };
-    if (clicsMaxPorVenta < 10) return {
-      text: 'En riesgo — Margen muy ajustado para campañas de Ads. Sube PVP o reduce CPC.',
-      color: 'text-destructive'
-    };
-    if (clicsMaxPorVenta < 13) return {
-      text: 'Aceptable — Funciona, pero hay riesgo si el CPC sube. Optimiza si es posible.',
-      color: 'text-warning'
-    };
-    return {
-      text: 'Excelente — Campaña sana, buen margen de maniobra para escalar.',
-      color: 'text-success'
-    };
-  };
-  const diagnostic = getDiagnosticMessage();
-  const getMarginColor = () => {
-    if (margenBacos < 30) return 'text-destructive';
-    return 'text-foreground';
-  };
-  const content = <div className="space-y-6">
-       {/* Controls */}
-       <div className="space-y-6">
-         {/* Selectors for Color and Size */}
-         <div className="grid grid-cols-2 gap-4">
-           <div className="space-y-2">
-             <Label className="flex items-center gap-2 text-sm font-medium">
-               <Palette className="h-4 w-4 text-muted-foreground" />
-               Tipo impresión
-             </Label>
-             <Select value={simState.interior} onValueChange={v => setSimState(prev => ({
-            ...prev,
-            interior: v as InteriorType,
-            pages: Math.max(prev.pages, getMinPages(v as InteriorType))
-          }))}>
-               <SelectTrigger className="input-focus">
-                 <SelectValue />
-               </SelectTrigger>
-               <SelectContent className="bg-popover border border-border">
-                 <SelectItem value="BN">{interiorLabels.BN}</SelectItem>
-                 <SelectItem value="COLOR_STANDARD">{interiorLabels.COLOR_STANDARD}</SelectItem>
-                 <SelectItem value="COLOR_PREMIUM">{interiorLabels.COLOR_PREMIUM}</SelectItem>
-               </SelectContent>
-             </Select>
-           </div>
-           <div className="space-y-2">
-             <Label className="flex items-center gap-2 text-sm font-medium">
-               <Ruler className="h-4 w-4 text-muted-foreground" />
-               Tamaño
-             </Label>
-             <Select value={simState.size} onValueChange={v => setSimState(prev => ({
-            ...prev,
-            size: v as BookSize
-          }))}>
-               <SelectTrigger className="input-focus">
-                 <SelectValue />
-               </SelectTrigger>
-               <SelectContent className="bg-popover border border-border">
-                 <SelectItem value="SMALL">{sizeLabels.SMALL}</SelectItem>
-                 <SelectItem value="LARGE">{sizeLabels.LARGE}</SelectItem>
-               </SelectContent>
-             </Select>
-           </div>
-         </div>
- 
-         {/* PVP Slider */}
-         <div className="space-y-3">
-           <div className="flex justify-between items-center">
-             <Label className="flex items-center gap-2 text-sm font-medium">
-               <Euro className="h-4 w-4 text-muted-foreground" />
-               PVP
-             </Label>
-             <span className="font-mono font-semibold text-lg">{simState.pvp.toFixed(2)}{currencySymbol}</span>
-           </div>
-           <Slider value={[simState.pvp]} min={4.99} max={29.99} step={0.50} onValueChange={([v]) => setSimState(prev => ({
-          ...prev,
-          pvp: v
-        }))} className="w-full" />
-           <div className="flex justify-between text-xs text-muted-foreground">
-             <span>4.99{currencySymbol}</span>
-             <span className="text-primary font-medium">Regalía: {(royaltyRate * 100).toFixed(0)}%</span>
-             <span>29.99{currencySymbol}</span>
-           </div>
-         </div>
- 
-         {/* Pages Slider */}
-         <div className="space-y-3">
-           <div className="flex justify-between items-center">
-             <Label className="flex items-center gap-2 text-sm font-medium">
-               <FileText className="h-4 w-4 text-muted-foreground" />
-               Nº Páginas
-             </Label>
-             <span className="font-mono font-semibold text-lg">{simState.pages}</span>
-           </div>
-           <Slider value={[simState.pages]} min={minPages} max={400} step={1} onValueChange={([v]) => setSimState(prev => ({
-          ...prev,
-          pages: v
-        }))} className="w-full" />
-           <div className="flex justify-between text-xs text-muted-foreground">
-             <span>{minPages}</span>
-             <span className="text-primary font-medium">Impresión: {gastosImpresion.toFixed(2)}{currencySymbol}</span>
-             <span>400</span>
-           </div>
-         </div>
- 
-         {/* CPC Slider */}
-         <div className="space-y-3">
-           <div className="flex justify-between items-center">
-             <Label className="flex items-center gap-2 text-sm font-medium">
-               <Euro className="h-4 w-4 text-muted-foreground" />
-               CPC
-             </Label>
-             <span className="font-mono font-semibold text-lg">{simState.cpc.toFixed(2)}{currencySymbol}</span>
-           </div>
-           <Slider value={[simState.cpc]} min={0.05} max={1.50} step={0.01} onValueChange={([v]) => setSimState(prev => ({
-          ...prev,
-          cpc: v
-        }))} className="w-full" />
-           <div className="flex justify-between text-xs text-muted-foreground">
-             <span>0.05{currencySymbol}</span>
-             <span className="text-primary font-medium">CPC máx. rentable: {cpcMaxRentable.toFixed(2)}{currencySymbol}</span>
-             <span>1.50{currencySymbol}</span>
-           </div>
-         </div>
- 
-         {/* Margen Objetivo Slider */}
-         <div className="space-y-3">
-           <div className="flex justify-between items-center">
-             <Label className="flex items-center gap-2 text-sm font-medium">
-               <Percent className="h-4 w-4 text-muted-foreground" />
-               Margen Objetivo
-             </Label>
-             <span className="font-mono font-semibold text-lg">{simState.margenObjetivo}%</span>
-           </div>
-           <Slider value={[simState.margenObjetivo]} min={10} max={60} step={5} onValueChange={([v]) => setSimState(prev => ({
-          ...prev,
-          margenObjetivo: v
-        }))} className="w-full" />
-           <div className="flex justify-between text-xs text-muted-foreground">
-             <span>10%</span>
-             <span>60%</span>
-           </div>
-         </div>
-       </div>
- 
-       {/* Live Results */}
-       <div className="space-y-4 pt-4 border-t border-border/50">
-         <div className="bg-muted/30 rounded-xl p-5 space-y-4">
-           <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Resultados simulados</h4>
-           
-           <div className="grid grid-cols-4 gap-4">
-             <div className="text-center p-3 bg-background rounded-lg">
-               <span className="text-xs text-muted-foreground block mb-1">Regalías (sim.)</span>
-               <span className={`text-xl font-bold ${regalias > 0 ? 'text-foreground' : 'text-destructive'}`}>
-                 {regalias.toFixed(2)}{currencySymbol}
-               </span>
-             </div>
-             <div className="text-center p-3 bg-background rounded-lg">
-               <span className="text-xs text-muted-foreground block mb-1 flex items-center justify-center gap-1">
-                 BACOS (sim.)
-                 <TooltipProvider>
-                   <Tooltip>
-                     <TooltipTrigger>
-                       <HelpCircle className="h-3 w-3" />
-                     </TooltipTrigger>
-                     <TooltipContent className="max-w-xs p-3">
-                       <p className="text-sm">BACOS = (Regalía neta) / (PVP)</p>
-                     </TooltipContent>
-                   </Tooltip>
-                 </TooltipProvider>
-               </span>
-               <span className={`text-xl font-bold ${getMarginColor()}`}>
-                 {margenBacos.toFixed(1)}%
-               </span>
-             </div>
-             <div className={`text-center p-3 rounded-lg ${getClicksBg(clicsMaxPorVenta)}`}>
-               <span className="text-xs text-muted-foreground block mb-1 flex items-center justify-center gap-1">
-                 Clics máx. (sim.)
-                 <TooltipProvider>
-                   <Tooltip>
-                     <TooltipTrigger>
-                       <HelpCircle className="h-3 w-3" />
-                     </TooltipTrigger>
-                     <TooltipContent className="max-w-xs p-3">
-                       <p className="text-sm">
-                         <span className="text-success">●</span> ≥13: Excelente<br />
-                         <span className="text-warning">●</span> 10-12: Aceptable<br />
-                         <span className="text-destructive">●</span> &lt;10: En riesgo
-                       </p>
-                     </TooltipContent>
-                   </Tooltip>
-                 </TooltipProvider>
-               </span>
-               <span className={`text-xl font-bold ${getClicksColor(clicsMaxPorVenta)}`}>
-                 {clicsMaxPorVenta > 0 ? clicsMaxPorVenta : '∞'}
-               </span>
-             </div>
-             <div className="text-center p-3 bg-background rounded-lg">
-               <span className="text-xs text-muted-foreground block mb-1">PVP Mín. (sim.)</span>
-               <span className="text-xl font-bold text-foreground">
-                 {precioMinSimulado ? `${precioMinSimulado.toFixed(2)}${currencySymbol}` : '-'}
-               </span>
-             </div>
-           </div>
- 
-           {/* CPC Max Rentable */}
-           <div className="text-center p-3 bg-background rounded-lg">
-             <span className="text-xs text-muted-foreground block mb-1">CPC Máximo Rentable</span>
-             <span className={`text-xl font-bold ${simState.cpc <= cpcMaxRentable ? 'text-foreground' : 'text-destructive'}`}>
-               {cpcMaxRentable.toFixed(2)}{currencySymbol}
-             </span>
-           </div>
-         </div>
- 
-         {/* Risk Level */}
-         <div className={`p-4 rounded-lg border ${risk.color === 'success' ? 'bg-muted/40 border-border' : risk.color === 'warning' ? 'bg-muted/30 border-border' : 'bg-destructive/5 border-destructive/20'}`}>
-           <div className="flex items-center justify-between mb-2">
-             <span className="text-sm font-medium text-muted-foreground">Riesgo:</span>
-             <span className={`text-base font-semibold ${risk.color === 'destructive' ? 'text-destructive' : 'text-foreground'}`}>{risk.text}</span>
-           </div>
-           <p className={`text-sm ${risk.color === 'destructive' ? 'text-destructive' : 'text-muted-foreground'}`}>
-             {diagnostic.text}
-           </p>
-         </div>
- 
-         {/* Apply as Version Button */}
-         {showApplyButton && onApplyAsVersion && <div className="pt-2">
-             <Button onClick={onApplyAsVersion} className="w-full" variant="secondary">
-               <Save className="h-4 w-4 mr-2" />
-               Aplicar como nueva versión
-             </Button>
-           </div>}
- 
-         {/* Disclaimer */}
-         <p className="text-xs text-muted-foreground text-center italic">
-           Estos valores proceden del simulador y no modifican los datos base.
-         </p>
-       </div>
-     </div>;
-  if (embedded) {
-    return content;
-  }
-  return <Card className="animate-fade-in border-secondary/30">
-       <CardHeader className="pb-4">
-         <CardTitle className="section-header">
-           <SlidersHorizontal className="h-5 w-5 text-secondary" />
-           Simulador de optimización
-         </CardTitle>
-         <p className="text-sm text-muted-foreground">
-           Usa este simulador para probar ajustes de precio, CPC o margen sin modificar tus datos reales.
-         </p>
-       </CardHeader>
-       <CardContent>
-         {content}
-       </CardContent>
-     </Card>;
+
+  // Risk level by traffic light dot
+  const riskDot =
+    regalias <= 0 || clicsMaxPorVenta < 10 || margenBacos < 30
+      ? 'bg-destructive'
+      : clicsMaxPorVenta < 13 || margenBacos <= 40
+      ? 'bg-warning'
+      : 'bg-success';
+  const riskLabel =
+    riskDot === 'bg-destructive' ? 'Riesgo alto' : riskDot === 'bg-warning' ? 'Riesgo medio' : 'Riesgo bajo';
+  const diagnosticText =
+    regalias < 0
+      ? 'Con este precio pierdes dinero incluso antes de invertir en publicidad.'
+      : margenBacos < 30
+      ? 'Este precio te deja poco margen para publicidad. Ajusta precio o costes.'
+      : clicsMaxPorVenta < 10
+      ? 'Margen muy ajustado para campañas. Sube el precio o reduce el coste por clic.'
+      : clicsMaxPorVenta < 13
+      ? 'Funciona, pero hay riesgo si sube el coste por clic. Optimiza si es posible.'
+      : 'Campaña sana, buen margen de maniobra para escalar.';
+
+  // Detect changes vs initial state for sticky bar
+  const hasChanges =
+    initialSimState &&
+    (initialSimState.interior !== simState.interior ||
+      initialSimState.size !== simState.size ||
+      initialSimState.pvp !== simState.pvp ||
+      initialSimState.pages !== simState.pages ||
+      initialSimState.cpc !== simState.cpc ||
+      initialSimState.margenObjetivo !== simState.margenObjetivo);
+
+  const Metric = ({
+    label,
+    tooltip,
+    value,
+    accent,
+  }: {
+    label: string;
+    tooltip: string;
+    value: string;
+    accent?: 'success' | 'warning' | 'destructive';
+  }) => (
+    <div className="rounded-lg border border-border bg-card p-3">
+      <div className="flex items-center gap-1.5 mb-1">
+        <span className="text-xs text-muted-foreground">{label}</span>
+        <Help text={tooltip} />
+      </div>
+      <div className="flex items-baseline gap-2">
+        <span className="text-xl font-bold text-foreground">{value}</span>
+        {accent && <span className={`w-2 h-2 rounded-full bg-${accent}`} />}
+      </div>
+    </div>
+  );
+
+  const content = (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* Controls - 2/5 */}
+        <div className="lg:col-span-2 space-y-5">
+          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Controles
+          </h4>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5 text-sm font-medium">
+                <Palette className="h-4 w-4 text-muted-foreground" />
+                Tipo de impresión
+              </Label>
+              <Select
+                value={simState.interior}
+                onValueChange={v =>
+                  setSimState(prev => ({
+                    ...prev,
+                    interior: v as InteriorType,
+                    pages: Math.max(prev.pages, getMinPages(v as InteriorType)),
+                  }))
+                }
+              >
+                <SelectTrigger className="input-focus"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-popover border border-border">
+                  <SelectItem value="BN">{interiorLabels.BN}</SelectItem>
+                  <SelectItem value="COLOR_STANDARD">{interiorLabels.COLOR_STANDARD}</SelectItem>
+                  <SelectItem value="COLOR_PREMIUM">{interiorLabels.COLOR_PREMIUM}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5 text-sm font-medium">
+                <Ruler className="h-4 w-4 text-muted-foreground" />
+                Tamaño
+              </Label>
+              <Select
+                value={simState.size}
+                onValueChange={v => setSimState(prev => ({ ...prev, size: v as BookSize }))}
+              >
+                <SelectTrigger className="input-focus"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-popover border border-border">
+                  <SelectItem value="SMALL">{sizeLabels.SMALL}</SelectItem>
+                  <SelectItem value="LARGE">{sizeLabels.LARGE}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Precio de venta */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <Label className="flex items-center gap-1.5 text-sm font-medium">
+                <Euro className="h-4 w-4 text-muted-foreground" />
+                Precio de venta
+                <Help text="Precio final con IVA al que se vende el libro en Amazon. Cambia la regalía y el margen." />
+              </Label>
+              <span className="font-mono font-semibold">{simState.pvp.toFixed(2)}{currencySymbol}</span>
+            </div>
+            <Slider value={[simState.pvp]} min={4.99} max={29.99} step={0.5}
+              onValueChange={([v]) => setSimState(prev => ({ ...prev, pvp: v }))} />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>4.99{currencySymbol}</span>
+              <span>Regalía: {(royaltyRate * 100).toFixed(0)}%</span>
+              <span>29.99{currencySymbol}</span>
+            </div>
+          </div>
+
+          {/* Páginas */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <Label className="flex items-center gap-1.5 text-sm font-medium">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                Número de páginas
+                <Help text="Páginas interiores. Afecta directamente al coste de impresión por unidad." />
+              </Label>
+              <span className="font-mono font-semibold">{simState.pages}</span>
+            </div>
+            <Slider value={[simState.pages]} min={minPages} max={400} step={1}
+              onValueChange={([v]) => setSimState(prev => ({ ...prev, pages: v }))} />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{minPages}</span>
+              <span>Impresión: {gastosImpresion.toFixed(2)}{currencySymbol}</span>
+              <span>400</span>
+            </div>
+          </div>
+
+          {/* Coste por clic */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <Label className="flex items-center gap-1.5 text-sm font-medium">
+                <Euro className="h-4 w-4 text-muted-foreground" />
+                Coste por clic
+                <Help text="Lo que pagas en Amazon Ads por cada clic. Determina cuántos clics puedes permitirte por venta." />
+              </Label>
+              <span className="font-mono font-semibold">{simState.cpc.toFixed(2)}{currencySymbol}</span>
+            </div>
+            <Slider value={[simState.cpc]} min={0.05} max={1.5} step={0.01}
+              onValueChange={([v]) => setSimState(prev => ({ ...prev, cpc: v }))} />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>0.05{currencySymbol}</span>
+              <span>Máximo rentable: {cpcMaxRentable.toFixed(2)}{currencySymbol}</span>
+              <span>1.50{currencySymbol}</span>
+            </div>
+          </div>
+
+          {/* Margen objetivo */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <Label className="flex items-center gap-1.5 text-sm font-medium">
+                <Percent className="h-4 w-4 text-muted-foreground" />
+                Margen objetivo
+                <Help text="Margen neto mínimo que quieres asegurar por venta. Recomendado: 30% o superior." />
+              </Label>
+              <span className="font-mono font-semibold">{simState.margenObjetivo}%</span>
+            </div>
+            <Slider value={[simState.margenObjetivo]} min={10} max={60} step={5}
+              onValueChange={([v]) => setSimState(prev => ({ ...prev, margenObjetivo: v }))} />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>10%</span>
+              <span>60%</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Results - 3/5 */}
+        <div className="lg:col-span-3 space-y-4">
+          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Resultados simulados
+          </h4>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <Metric
+              label="Regalías"
+              tooltip="Beneficio neto que recibes por cada venta tras descontar coste de impresión y comisión de Amazon."
+              value={`${regalias.toFixed(2)}${currencySymbol}`}
+              accent={regalias > 0 ? undefined : 'destructive'}
+            />
+            <Metric
+              label="Margen publicitario (BACOS)"
+              tooltip="Porcentaje del precio que puedes destinar a publicidad manteniendo rentabilidad."
+              value={`${margenBacos.toFixed(1)}%`}
+              accent={margenBacos < 30 ? 'destructive' : margenBacos <= 40 ? 'warning' : 'success'}
+            />
+            <Metric
+              label="Clics máximos por venta"
+              tooltip="Cuántos clics de Amazon Ads puedes permitirte pagar por cada venta sin perder dinero."
+              value={clicsMaxPorVenta > 0 ? String(clicsMaxPorVenta) : '∞'}
+              accent={clicsMaxPorVenta < 10 ? 'destructive' : clicsMaxPorVenta < 13 ? 'warning' : 'success'}
+            />
+            <Metric
+              label="Precio mínimo viable"
+              tooltip="Precio mínimo necesario para cubrir costes y alcanzar tu margen objetivo."
+              value={precioMinSimulado ? `${precioMinSimulado.toFixed(2)}${currencySymbol}` : '—'}
+            />
+            <Metric
+              label="Coste por clic máximo rentable"
+              tooltip="Puja máxima que puedes pagar en Amazon Ads sin romper la rentabilidad."
+              value={`${cpcMaxRentable.toFixed(2)}${currencySymbol}`}
+              accent={simState.cpc <= cpcMaxRentable ? undefined : 'destructive'}
+            />
+            <Metric
+              label="Coste de impresión"
+              tooltip="Coste por unidad que Amazon descuenta antes de calcular tus regalías."
+              value={`${gastosImpresion.toFixed(2)}${currencySymbol}`}
+            />
+          </div>
+
+          {/* Diagnostic */}
+          <div className="rounded-lg border border-border bg-muted/30 p-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className={`w-2 h-2 rounded-full ${riskDot}`} />
+              <span className="text-sm font-semibold text-foreground">{riskLabel}</span>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">{diagnosticText}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Sticky action bar */}
+      {showStickyBar && hasChanges && (onApplyToBase || onApplyAsVersion) && (
+        <div className="sticky bottom-0 -mx-6 -mb-6 px-6 py-3 bg-card/95 backdrop-blur border-t border-border flex flex-wrap items-center justify-between gap-3 z-10">
+          <p className="text-xs text-muted-foreground">
+            Tienes cambios sin aplicar en el simulador.
+          </p>
+          <div className="flex items-center gap-2">
+            {onApplyToBase && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button onClick={() => onApplyToBase(simState)} className="gap-2">
+                      <ArrowUpFromLine className="h-4 w-4" />
+                      Aplicar al análisis
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent><p className="text-xs">Sustituye los datos base del análisis actual con los valores del simulador.</p></TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+            {onApplyAsVersion && loadedNicheId && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button onClick={onApplyAsVersion} variant="secondary" className="gap-2">
+                      <Save className="h-4 w-4" />
+                      Guardar como nueva versión
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent><p className="text-xs">Añade el estado actual como nueva versión del análisis cargado.</p></TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  if (embedded) return content;
+
+  return (
+    <Card className="animate-fade-in border-secondary/30">
+      <CardHeader className="pb-4">
+        <CardTitle className="section-header">
+          <SlidersHorizontal className="h-5 w-5 text-secondary" />
+          Simulador de optimización
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Optimiza tu libro probando variaciones de precio, páginas, coste por clic y margen objetivo.
+        </p>
+      </CardHeader>
+      <CardContent>{content}</CardContent>
+    </Card>
+  );
 };
