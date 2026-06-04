@@ -42,20 +42,23 @@ export const ResultsTable = ({ data, globalData, embedded = false }: ResultsTabl
     switch (diagnostico) {
       case 'good':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-success/15 text-success border border-success/30">
-            🟢 Excelente
+          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-muted text-foreground border border-border">
+            <span className="w-1.5 h-1.5 rounded-full bg-success" />
+            Excelente
           </span>
         );
       case 'warning':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-warning/15 text-warning border border-warning/30">
-            🟠 Aceptable
+          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-muted text-foreground border border-border">
+            <span className="w-1.5 h-1.5 rounded-full bg-warning" />
+            Aceptable
           </span>
         );
       case 'bad':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-destructive/15 text-destructive border border-destructive/30">
-            🔴 En riesgo
+          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-muted text-foreground border border-border">
+            <span className="w-1.5 h-1.5 rounded-full bg-destructive" />
+            En riesgo
           </span>
         );
     }
@@ -75,9 +78,9 @@ export const ResultsTable = ({ data, globalData, embedded = false }: ResultsTabl
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="cursor-help border-b border-dashed border-muted-foreground/40">Margen real (BACOS)</span>
+                        <span className="cursor-help border-b border-dashed border-muted-foreground/40">Margen publicitario (BACOS)</span>
                       </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-xs"><p className="text-xs">Margen publicitario asumible sobre ventas para seguir siendo rentable.</p></TooltipContent>
+                      <TooltipContent side="top" className="max-w-xs"><p className="text-xs">Porcentaje del precio de venta que puedes destinar a publicidad manteniendo rentabilidad.</p></TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 </TableHead>
@@ -85,9 +88,9 @@ export const ResultsTable = ({ data, globalData, embedded = false }: ResultsTabl
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="cursor-help border-b border-dashed border-muted-foreground/40">Clics máx./Venta</span>
+                        <span className="cursor-help border-b border-dashed border-muted-foreground/40">Clics máximos por venta</span>
                       </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-xs"><p className="text-xs">Cuántos clics puedes pagar como máximo por cada venta.</p></TooltipContent>
+                      <TooltipContent side="top" className="max-w-xs"><p className="text-xs">Cuántos clics de Amazon Ads puedes pagar como máximo por cada venta para no perder dinero.</p></TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 </TableHead>

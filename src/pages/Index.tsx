@@ -164,30 +164,34 @@ const Index = () => {
                   </Button>
                 </div>}
 
-              {/* Saved Analyses Button */}
-              {niches.length > 0 && <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <Save className="h-4 w-4 mr-2" />
-                      <span className="hidden sm:inline">Guardados</span>
-                      <span className="ml-1 inline-flex items-center justify-center h-5 min-w-5 px-1.5 text-xs font-semibold rounded-full bg-primary/10 text-primary">
+              {/* Saved Analyses Button - always visible */}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Save className="h-4 w-4 mr-2" />
+                    <span className="hidden sm:inline">Análisis guardados</span>
+                    <span className="sm:hidden">Guardados</span>
+                    {niches.length > 0 && (
+                      <span className="ml-2 inline-flex items-center justify-center h-5 min-w-5 px-1.5 text-xs font-semibold rounded-full bg-primary/10 text-primary">
                         {niches.length}
                       </span>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-6xl max-h-[85vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle className="flex items-center gap-2">
-                        <Save className="h-5 w-5 text-primary" />
-                        Análisis guardados
-                      </DialogTitle>
-                      <p className="text-sm text-muted-foreground">
-                        Carga, compara o gestiona tus análisis guardados.
-                      </p>
-                    </DialogHeader>
-                    <NicheComparator niches={niches} onSaveNiche={handleSaveNiche} onDeleteNiche={deleteNiche} onClearAll={clearAllNiches} onLoadNiche={handleLoadNiche} onUpdateNicheVersion={handleUpdateNicheVersion} onRestoreVersion={handleRestoreVersion} onStartNew={handleStartNew} bestNiche={getBestNiche()} hasCurrentData={hasCurrentData} loadedNicheId={loadedNicheId} embedded />
-                  </DialogContent>
-                </Dialog>}
+                    )}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-6xl max-h-[85vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <Save className="h-5 w-5 text-primary" />
+                      Análisis guardados
+                    </DialogTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Carga, compara o gestiona tus análisis guardados.
+                    </p>
+                  </DialogHeader>
+                  <NicheComparator niches={niches} onSaveNiche={handleSaveNiche} onDeleteNiche={deleteNiche} onClearAll={clearAllNiches} onLoadNiche={handleLoadNiche} onUpdateNicheVersion={handleUpdateNicheVersion} onRestoreVersion={handleRestoreVersion} onStartNew={handleStartNew} bestNiche={getBestNiche()} hasCurrentData={hasCurrentData} loadedNicheId={loadedNicheId} embedded />
+                </DialogContent>
+              </Dialog>
+
               
               {/* Printing Costs Table Button */}
               <Dialog>
@@ -221,10 +225,8 @@ const Index = () => {
       <main className="w-full max-w-[1400px] mx-auto px-4 md:px-8 py-8">
         <WizardContainer globalData={globalData} ebookData={ebookData} paperbackData={paperbackData} ebookResults={ebookResults} paperbackResults={paperbackResults} positioningResults={positioningResults} scoreBreakdown={scoreBreakdown} tableData={tableData} setGlobalData={setGlobalData} setEbookData={setEbookData} setPaperbackData={setPaperbackData} loadedNicheId={loadedNicheId} onQuickSave={loadedNicheId ? () => handleUpdateNicheVersion(loadedNicheId) : undefined} onSaveNiche={handleSaveNiche} onStartNew={handleStartNew} simulatorState={simulatorState} onSimulatorStateChange={setSimulatorState} onApplySimulatorAsVersion={handleApplySimulatorAsVersion} onApplySimulatorToBase={handleApplySimulatorToBase} />
 
-        {/* Save Niche Button when no niches exist */}
-        {niches.length === 0 && hasCurrentData && <div className="mt-8">
-            <NicheComparator niches={niches} onSaveNiche={handleSaveNiche} onDeleteNiche={deleteNiche} onClearAll={clearAllNiches} onLoadNiche={handleLoadNiche} onUpdateNicheVersion={handleUpdateNicheVersion} onRestoreVersion={handleRestoreVersion} onStartNew={handleStartNew} bestNiche={getBestNiche()} hasCurrentData={hasCurrentData} loadedNicheId={loadedNicheId} />
-          </div>}
+        {/* Niches now accessible only from header — duplicated render removed */}
+
       </main>
 
       {/* Footer */}

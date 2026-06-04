@@ -1,232 +1,180 @@
 
-# Plan: Simulador Desplegable con Persistencia de Datos
+# Plan: Rediseño de "Resultados del Análisis"
 
-## Resumen
-
-Transformar el simulador de optimizacion de ventana emergente (Dialog) a componente desplegable in-situ (Collapsible), con persistencia de datos del simulador en los analisis guardados.
+Objetivo: vista limpia, jerárquica y minimalista. El Simulador pasa a ser la pieza central (no un acordeón al final), los consejos se vuelven contenido secundario, las acciones de Guardar son visibles, el panel de Versiones se rehace para que sea inteligible, y el acceso a Análisis guardados está siempre disponible en el header.
 
 ---
 
-## Cambios Requeridos
+## 1. Jerarquía y orden visual de la pantalla
 
-### 1. Nuevos Tipos para Estado del Simulador
-
-**Archivo: `src/types/kdp.ts`**
-
-Agregar una nueva interfaz para el estado del simulador:
-
-```typescript
-export interface SimulatorData {
-  interior: InteriorType;
-  size: BookSize;
-  pvp: number;
-  pages: number;
-  cpc: number;
-  margenObjetivo: number;
-}
-```
-
-Modificar `NicheVersion` y `SavedNiche` para incluir:
-
-```typescript
-// En NicheVersion
-simulatorData?: SimulatorData;
-
-// En SavedNiche
-simulatorData?: SimulatorData;
-```
-
----
-
-### 2. Refactorizar PaperbackSimulator
-
-**Archivo: `src/components/kdp/PaperbackSimulator.tsx`**
-
-Cambios principales:
-- Recibir estado inicial opcional via props (`initialSimState`)
-- Emitir cambios de estado via callback (`onStateChange`)
-- El Card wrapper se elimina para que el componente pueda integrarse dentro de un Collapsible
-- Agregar boton "Aplicar como nueva version" cuando hay un nicho cargado
-
-Nueva interfaz de props:
-
-```typescript
-interface PaperbackSimulatorProps {
-  data: PaperbackData;
-  globalData: GlobalData;
-  initialSimState?: SimulatorData;
-  onStateChange?: (state: SimulatorData) => void;
-  onApplyAsVersion?: () => void;
-  showApplyButton?: boolean;
-  embedded?: boolean; // Para quitar el Card wrapper
-}
-```
-
----
-
-### 3. Modificar StepResults para Collapsible
-
-**Archivo: `src/components/kdp/wizard/StepResults.tsx`**
-
-Cambios:
-- Reemplazar Dialog por Collapsible de Radix UI
-- Mantener el estado del simulador localmente (`simulatorState`)
-- Pasar el estado al componente `PaperbackSimulator`
-- Incluir el estado del simulador al guardar analisis/version
-- Agregar boton "Aplicar como nueva version" dentro del simulador
-
-Estructura visual:
+Nuevo orden vertical en `StepResults.tsx`:
 
 ```text
-[Simulador de optimizacion]  [Expandir/Contraer]
-+------------------------------------------------------------+
-| (Cuando expandido)                                          |
-|                                                             |
-|  [Controles del simulador: sliders, selects, etc.]          |
-|                                                             |
-|  [Resultados simulados]                                     |
-|                                                             |
-|  [Aplicar como nueva version] (si hay nicho cargado)        |
-+------------------------------------------------------------+
+┌───────────────────────────────────────────────────────────┐
+│ A. Cabecera de Resultados                                 │
+│    Título + estado del análisis + Acciones primarias      │
+│    [Guardar análisis]  [Guardar nueva versión]            │
+├───────────────────────────────────────────────────────────┤
+│ B. Score Global (compacto, sin gradientes)                │
+│    Número grande + 3 barras de desglose + 1 línea resumen │
+├───────────────────────────────────────────────────────────┤
+│ C. SIMULADOR DE OPTIMIZACIÓN  ← protagonista, abierto     │
+│    Controles a la izquierda · Resultados a la derecha     │
+│    Cinta inferior sticky: [Aplicar al análisis]           │
+│                           [Guardar como nueva versión]    │
+├───────────────────────────────────────────────────────────┤
+│ D. Información complementaria (acordeón colapsado)        │
+│    · Tabla de resultados                                  │
+│    · Consejo estratégico y posicionamiento                │
+└───────────────────────────────────────────────────────────┘
 ```
 
----
-
-### 4. Actualizar Hook useNicheComparator
-
-**Archivo: `src/hooks/useNicheComparator.ts`**
-
-Modificar funciones para incluir `simulatorData`:
-
-- `saveCurrentAsNiche`: Recibir `simulatorData` como parametro opcional
-- `updateNicheWithNewVersion`: Recibir `simulatorData` como parametro opcional
-- Al restaurar version: Cargar tambien el `simulatorData` si existe
-
-Nueva firma de funciones:
-
-```typescript
-saveCurrentAsNiche: (
-  name: string,
-  globalData: GlobalData,
-  ebookData: EbookData | null,
-  paperbackData: PaperbackData | null,
-  ebookResults: EbookResults | null,
-  paperbackResults: PaperbackResults | null,
-  inversionDiaria: number,
-  simulatorData?: SimulatorData  // NUEVO
-) => SavedNiche;
-
-updateNicheWithNewVersion: (
-  id: string,
-  ...
-  simulatorData?: SimulatorData  // NUEVO
-) => SavedNiche | null;
-```
+Cambios clave:
+- El Simulador deja de ser un `Collapsible` cerrado al final. Pasa a ser una sección abierta por defecto, con su propio título y descripción ("Optimiza tu libro probando variaciones de precio, páginas, coste por clic y margen objetivo").
+- Tabla de resultados y Consejo estratégico se agrupan bajo un único bloque "Información complementaria" con un `Accordion` (cerrado por defecto).
+- Score Global se mantiene arriba pero en versión más sobria.
 
 ---
 
-### 5. Actualizar WizardContainer
+## 2. Sistema visual: minimalismo y colores
 
-**Archivo: `src/components/kdp/WizardContainer.tsx`**
+Reglas que se aplican en todos los componentes de la pantalla:
 
-- Mantener estado del simulador a nivel del wizard (`simulatorState`)
-- Pasar el estado al `StepResults`
-- Recibir actualizaciones del simulador via callback
-- Pasar `simulatorData` a las funciones de guardado
-
----
-
-### 6. Actualizar Index.tsx
-
-**Archivo: `src/pages/Index.tsx`**
-
-- Mantener estado del simulador
-- Al cargar un nicho guardado, tambien cargar su `simulatorData`
-- Pasar el estado y callbacks al `WizardContainer`
+- Sólo se usan los tokens semánticos del design system: `background`, `foreground`, `muted`, `border`, `primary` (coral Publify) y `secondary` (azul Publify).
+- Los semáforos `success` / `warning` / `destructive` se reservan exclusivamente para:
+  - Estado del análisis en el Score (1 punto de color).
+  - Indicador de riesgo del Simulador (1 punto de color).
+  - Celdas de margen y clics en la tabla cuando esté expandida.
+- Se eliminan gradientes, fondos coloreados decorativos (`bg-primary/10`, `bg-secondary/10`, etc.) y emojis 🟢🟠🔴 (sustituidos por puntos de color).
+- Tipografía: Poppins/Inter del design system, sin tamaños mayores a `text-3xl` salvo el número del Score.
 
 ---
 
-## Flujo de Datos
+## 3. Cabecera + Score Global (rediseño)
+
+`ScoreDisplay` en modo `embedded`:
+
+- Layout en dos columnas:
+  - Izquierda: número del score (`text-5xl`), etiqueta de estado con punto de color, frase de interpretación.
+  - Derecha: 3 barras de desglose (Clics máximos por venta, BACOS, Precio vs Mínimo) con tooltip `?` en cada label.
+- Sin fondos coloreados según estado: `bg-card` + `border` + 1 punto de color para el estado.
+
+Acciones primarias inmediatamente debajo del score:
+- `[Guardar análisis]` — botón `default` (coral), icono `Save`.
+- `[Guardar nueva versión]` — botón `secondary`, icono `History`. Sólo si hay nicho cargado.
+
+Se elimina el bloque actual de "Save Actions" suelto a mitad de página y los botones flotantes inferiores del simulador (sustituidos por la cinta sticky del punto 4).
+
+---
+
+## 4. Simulador como protagonista
+
+`PaperbackSimulator` se renderiza siempre abierto dentro de una `Card` destacada (`border-secondary/30`, `shadow-sm`).
+
+Layout interno responsive (2 columnas en desktop):
+- Izquierda: controles (Tipo de impresión, Tamaño, Precio de venta, Páginas, Coste por clic, Margen objetivo).
+- Derecha: métricas clave en grid (Regalías, Margen BACOS, Clics máximos por venta, Precio mínimo viable, CPC máximo rentable) + diagnóstico en 1 línea.
+
+Cinta sticky inferior dentro de la Card (no `fixed` global) cuando hay cambios respecto al estado inicial:
+- `[Aplicar al análisis]` (primario).
+- `[Guardar como nueva versión]` (secundario, sólo con nicho cargado).
+
+Copy sin abreviaturas en labels visibles:
+- "PVP" → "Precio de venta"
+- "CPC" → "Coste por clic"
+- "Min." / "Mín." → "Mínimo"
+- "Máx." → "Máximo"
+- "Ref." → "Referencia"
+- BACOS se conserva como término técnico con tooltip permanente.
+
+Tooltips (icono `HelpCircle`) en: Precio de venta, Páginas, Coste por clic, Margen objetivo, Regalías, Margen BACOS, Clics máximos por venta, Precio mínimo viable, CPC máximo rentable.
+
+---
+
+## 5. Acciones de guardado: claridad y protagonismo
+
+Los CTAs se consolidan en dos lugares:
+
+1. **Bajo el Score (acciones del análisis completo):**
+   - `Guardar análisis` (coral, primario).
+   - `Guardar nueva versión` (secundario, sólo si hay nicho cargado).
+
+2. **Cinta sticky del Simulador (acciones derivadas del simulador):**
+   - `Aplicar al análisis` (primario).
+   - `Guardar como nueva versión` (secundario).
+   - Sólo aparece cuando hay cambios respecto al estado inicial.
+
+Microcopy en hover (tooltip):
+- "Guardar análisis": "Crea una nueva entrada en tus análisis guardados."
+- "Guardar nueva versión": "Añade el estado actual como nueva versión del análisis cargado."
+- "Aplicar al análisis": "Sustituye los datos base del análisis actual con los valores del simulador."
+
+---
+
+## 6. Acceso a análisis guardados desde el header (siempre visible)
+
+`src/pages/Index.tsx`:
+
+- El botón **"Guardados"** del header pasa a estar **siempre visible**, no sólo cuando `niches.length > 0`.
+- Cuando no hay análisis guardados aún:
+  - El badge numérico no se muestra.
+  - Al pulsarlo, el Dialog se abre igualmente y muestra el estado vacío del `NicheComparator` ("Aún no has guardado ningún análisis…") con un CTA `Guardar análisis actual` deshabilitado si no hay datos completos.
+- Cuando hay análisis guardados, el badge muestra el contador (comportamiento actual).
+- Se eliminan los renderizados duplicados del `NicheComparator` que hoy aparecen sueltos en la página cuando `niches.length === 0` — el acceso único pasa por el botón del header.
+
+Resultado: el usuario puede consultar/gestionar sus análisis guardados desde cualquier paso del wizard sin perder estado.
+
+---
+
+## 7. Panel de Versiones rediseñado
+
+Hoy mezcla tabla principal + sub-filas expandibles + diálogo paralelo de historial. Se simplifica con Tabs dentro del mismo Dialog:
 
 ```text
-Index.tsx
-  |
-  |-- simulatorState (useState)
-  |-- Carga simulatorData al cargar nicho
-  |
-  v
-WizardContainer
-  |
-  |-- Recibe simulatorState
-  |-- Pasa a StepResults
-  |
-  v
-StepResults
-  |
-  |-- Collapsible expandible
-  |-- PaperbackSimulator (embedded)
-  |     |-- Emite cambios via onStateChange
-  |     |-- Muestra boton "Aplicar como nueva version"
-  |
-  |-- Al guardar analisis: incluye simulatorData
-  v
-useNicheComparator
-  |
-  |-- Persiste simulatorData en localStorage
+┌────────────────────────────────────────────────────────┐
+│ Tabs: [ Análisis ]  [ Versiones del análisis ]         │
+├────────────────────────────────────────────────────────┤
+│ TAB 1 — Análisis                                       │
+│  Tabla limpia, una fila por análisis (último estado):  │
+│   Nombre · Marketplace · Formato · Precio · Clics      │
+│   máximos · BACOS · Score · Estado · Acciones          │
+│  Acciones por fila: [Cargar] [Ver versiones] [Borrar]  │
+│                                                        │
+│ TAB 2 — Versiones (al pulsar "Ver versiones")          │
+│  Cabecera con nombre del análisis + botón "Volver".    │
+│  Listado vertical de tarjetas (no tabla anidada):      │
+│   ┌──────────────────────────────────────────────┐    │
+│   │ Versión 3 · 4 jun 2026 · Actual              │    │
+│   │ "Probado con PVP más alto"                   │    │
+│   │ Score 78 · Clics 12 · BACOS 34%              │    │
+│   │              [Cargar] [Restaurar]            │    │
+│   └──────────────────────────────────────────────┘    │
+└────────────────────────────────────────────────────────┘
 ```
 
----
-
-## Seccion Tecnica
-
-### Archivos a Modificar
-
-| Archivo | Cambios |
-|---------|---------|
-| `src/types/kdp.ts` | Agregar `SimulatorData`, modificar `NicheVersion` y `SavedNiche` |
-| `src/components/kdp/PaperbackSimulator.tsx` | Agregar props para estado externo, modo embedded, boton aplicar |
-| `src/components/kdp/wizard/StepResults.tsx` | Cambiar Dialog por Collapsible, gestionar estado simulador |
-| `src/hooks/useNicheComparator.ts` | Agregar simulatorData a funciones de guardado |
-| `src/components/kdp/WizardContainer.tsx` | Gestionar estado simulador a nivel wizard |
-| `src/pages/Index.tsx` | Mantener estado simulador, cargar al abrir nicho |
-
-### Dependencias a Usar
-
-- `@radix-ui/react-collapsible` (ya instalado: `src/components/ui/collapsible.tsx`)
-- Lucide icons: `ChevronDown`, `ChevronUp`
-
-### Estado del Simulador por Defecto
-
-Cuando no hay datos previos:
-
-```typescript
-const defaultSimulatorState: SimulatorData = {
-  interior: paperbackData.interior || 'BN',
-  size: paperbackData.size || 'SMALL',
-  pvp: paperbackData.pvp || 9.99,
-  pages: paperbackData.pages || 100,
-  cpc: globalData.cpc || 0.35,
-  margenObjetivo: globalData.margenObjetivoPct || 30,
-};
-```
+Cambios concretos:
+- Eliminadas las filas expandibles dentro de la tabla principal y el `isHistoryDialogOpen` paralelo.
+- Versión actual marcada con badge `Actual` neutro.
+- Cada tarjeta muestra: número, fecha, nota, Score, Clics máximos, BACOS, y 2 acciones de texto claro (`Cargar`, `Restaurar`).
+- Iconos redundantes (`Eye`, `RotateCcw`, `History`) sustituidos por labels.
+- Filtros y orden sólo en Tab 1.
 
 ---
 
-## Beneficios
+## 8. Archivos a modificar
 
-1. **Sin perdida de datos** - El simulador mantiene estado al expandir/contraer
-2. **Persistencia completa** - Los datos del simulador se guardan con el analisis
-3. **Restauracion fiel** - Al abrir un analisis guardado, el simulador muestra los ultimos valores usados
-4. **Aplicar cambios** - Boton para crear nueva version con los valores del simulador
-5. **UX mejorada** - Desplegable in-situ, sin ventanas emergentes que interrumpan
+- `src/components/kdp/wizard/StepResults.tsx` — reordenar secciones, sacar simulador del Collapsible, consolidar botones, envolver Tabla + Consejo en un Accordion "Información complementaria".
+- `src/components/kdp/ScoreDisplay.tsx` (modo embedded) — quitar gradientes, layout 2 columnas, acciones primarias al pie del score.
+- `src/components/kdp/PaperbackSimulator.tsx` — layout 2 columnas, copy sin abreviaturas, tooltips en labels, sin fondos coloreados decorativos.
+- `src/components/kdp/PositioningSection.tsx` — eliminar gradientes y fondos `bg-primary/10` decorativos.
+- `src/components/kdp/ResultsTable.tsx` — emojis → puntos de color, copy expandido, leyenda sutil.
+- `src/components/kdp/NicheComparator.tsx` — rehacer modo embedded con Tabs (Análisis / Versiones), eliminar expansión de filas y diálogo de historial separado.
+- `src/pages/Index.tsx` — botón "Guardados" siempre visible en header; eliminar renderizado duplicado de `NicheComparator` cuando no hay nichos.
 
 ---
 
-## Orden de Implementacion
+## Notas técnicas
 
-1. Modificar `src/types/kdp.ts` - Agregar tipos
-2. Modificar `src/hooks/useNicheComparator.ts` - Agregar parametro simulatorData
-3. Modificar `src/components/kdp/PaperbackSimulator.tsx` - Modo embedded y callbacks
-4. Modificar `src/components/kdp/wizard/StepResults.tsx` - Cambiar Dialog por Collapsible
-5. Modificar `src/components/kdp/WizardContainer.tsx` - Gestionar estado
-6. Modificar `src/pages/Index.tsx` - Cargar/guardar estado simulador
+- Reutiliza componentes existentes (`Accordion`, `Tabs`, `Tooltip`, `Card`, `Button`). Sin dependencias nuevas.
+- La cinta sticky del simulador es `sticky bottom-0` dentro de su Card, no `fixed` global.
+- Toda la lógica de cálculo (`useKdpCalculator`, `useScoring`, `useNicheComparator`) permanece intacta. Cambio puramente de presentación, copy y reorganización de CTAs.
