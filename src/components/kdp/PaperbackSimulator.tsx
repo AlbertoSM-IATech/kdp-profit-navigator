@@ -305,7 +305,7 @@ export const PaperbackSimulator = ({
               </Label>
               <span className="font-mono font-semibold">{simState.margenObjetivo}%</span>
             </div>
-            <Slider value={[simState.margenObjetivo]} min={10} max={60} step={5}
+            <Slider className="[&>span:first-child]:bg-muted" value={[simState.margenObjetivo]} min={10} max={60} step={5}
               onValueChange={([v]) => setSimState(prev => ({ ...prev, margenObjetivo: v }))} />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>10%</span>
