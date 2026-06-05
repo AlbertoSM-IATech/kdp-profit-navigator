@@ -630,30 +630,36 @@ export const ScoreDisplay = ({
             value={score.clicsScore}
             max={50}
             icon={<MousePointer className="h-4 w-4 text-foreground" />}
-            tooltip="Cuántos clics puedes pagar como máximo por cada venta. ≥14 = 50pts · 13 = 35pts · 12 = 25pts · 11 = 15pts · ≤10 = 0pts"
+            definition="Indica cuántos clics de anuncio puedes pagar como máximo antes de que cada venta deje de ser rentable."
+            origin="Regalía neta / Coste por clic (CPC). Se calcula dividiendo lo que realmente ganas por cada libro vendido entre el coste promedio de cada clic en tu nicho."
             tier={clicsInfo.tier}
             tierLabel={clicsInfo.tierLabel}
             explanation={clicsInfo.explanation}
+            realValue={activeResults ? `${activeResults.clicsMaxPorVenta} clics reales` : undefined}
           />
           <ScoreCard
             label="Margen publicitario (BACOS)"
             value={score.bacosScore}
             max={40}
             icon={<TrendingUp className="h-4 w-4 text-foreground" />}
-            tooltip="Porcentaje del precio que puedes destinar a publicidad manteniendo rentabilidad. ≥40% = 40pts · ≥35% = 25pts · ≥30% = 15pts · <30% = 0pts"
+            definition="Porcentaje del precio de venta que puedes destinar a publicidad en Amazon Ads sin perder dinero. También llamado ACoS de equilibrio."
+            origin="Regalías netas / Precio sin IVA. Expresa qué fracción del precio del libro representa tu margen real disponible para invertir en anuncios."
             tier={bacosInfo.tier}
             tierLabel={bacosInfo.tierLabel}
             explanation={bacosInfo.explanation}
+            realValue={activeResults ? `${activeResults.margenPct.toFixed(1)}% real` : undefined}
           />
           <ScoreCard
             label="Precio vs Mínimo viable"
             value={score.pvpVsMinScore}
             max={10}
             icon={<Tag className="h-4 w-4 text-foreground" />}
-            tooltip="Posición de tu precio frente al mínimo necesario para cubrir costes y alcanzar tu margen objetivo."
+            definition="Compara tu precio actual de venta contra el precio mínimo que necesitas para cubrir costes de impresión (si aplica), regalías de plataforma y tu margen objetivo."
+            origin="Precio actual - Precio mínimo recomendado. Si tu precio supera el mínimo, tienes colchón. Si está por debajo, el modelo no alcanza la rentabilidad que marcaste como objetivo."
             tier={pvpInfo.tier}
             tierLabel={pvpInfo.tierLabel}
             explanation={pvpInfo.explanation}
+            realValue={activeResults && activeResults.precioMinObjetivo ? `Mínimo: ${activeResults.precioMinObjetivo.toFixed(2)}${currencySymbol}` : undefined}
           />
         </div>
       </div>
