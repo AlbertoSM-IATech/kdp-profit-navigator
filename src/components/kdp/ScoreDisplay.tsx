@@ -24,10 +24,12 @@ interface ScoreCardProps {
   value: number;
   max: number;
   icon: React.ReactNode;
-  tooltip: string;
+  definition: string;
+  origin: string;
   tier: Tier;
   tierLabel: string;
   explanation: string;
+  realValue?: string;
 }
 
 const tierDotClass: Record<Tier, string> = {
@@ -36,12 +38,12 @@ const tierDotClass: Record<Tier, string> = {
   destructive: 'bg-destructive',
 };
 
-const ScoreCard = ({ label, value, max, icon, tooltip, tier, tierLabel, explanation }: ScoreCardProps) => (
+const ScoreCard = ({ label, value, max, icon, definition, origin, tier, tierLabel, explanation, realValue }: ScoreCardProps) => (
   <div className="rounded-xl border border-border bg-card p-4 space-y-3 h-full flex flex-col">
     <div className="flex items-start justify-between gap-3">
       <div className="flex items-center gap-2 min-w-0">
         <div className="p-1.5 bg-muted rounded-md shrink-0">{icon}</div>
-        <TooltipProvider>
+        <TooltipProvider delayDuration={200}>
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="text-sm font-medium text-foreground flex items-center gap-1 cursor-help">
@@ -49,8 +51,11 @@ const ScoreCard = ({ label, value, max, icon, tooltip, tier, tierLabel, explanat
                 <HelpCircle className="h-3 w-3 text-muted-foreground shrink-0" />
               </span>
             </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-xs">
-              <p className="text-xs">{tooltip}</p>
+            <TooltipContent side="top" className="max-w-xs space-y-2">
+              <p className="text-xs font-medium text-foreground">Definición</p>
+              <p className="text-xs text-muted-foreground">{definition}</p>
+              <p className="text-xs font-medium text-foreground pt-1">Origen</p>
+              <p className="text-xs text-muted-foreground">{origin}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -63,6 +68,9 @@ const ScoreCard = ({ label, value, max, icon, tooltip, tier, tierLabel, explanat
     <div className="flex items-center gap-1.5">
       <span className={`w-2 h-2 rounded-full ${tierDotClass[tier]}`} />
       <span className="text-xs font-semibold text-foreground">{tierLabel}</span>
+      {realValue && (
+        <span className="text-xs text-muted-foreground ml-auto">{realValue}</span>
+      )}
     </div>
     <p className="text-xs text-muted-foreground leading-relaxed">{explanation}</p>
   </div>
@@ -622,30 +630,36 @@ export const ScoreDisplay = ({
             value={score.clicsScore}
             max={50}
             icon={<MousePointer className="h-4 w-4 text-foreground" />}
-            tooltip="Cuántos clics puedes pagar como máximo por cada venta. ≥14 = 50pts · 13 = 35pts · 12 = 25pts · 11 = 15pts · ≤10 = 0pts"
+            definition="Indica cuántos clics de anuncio puedes pagar como máximo antes de que cada venta deje de ser rentable."
+            origin="Regalía neta / Coste por clic (CPC). Se calcula dividiendo lo que realmente ganas por cada libro vendido entre el coste promedio de cada clic en tu nicho."
             tier={clicsInfo.tier}
             tierLabel={clicsInfo.tierLabel}
             explanation={clicsInfo.explanation}
+            realValue={activeResults ? `${activeResults.clicsMaxPorVenta} clics reales` : undefined}
           />
           <ScoreCard
             label="Margen publicitario (BACOS)"
             value={score.bacosScore}
             max={40}
             icon={<TrendingUp className="h-4 w-4 text-foreground" />}
-            tooltip="Porcentaje del precio que puedes destinar a publicidad manteniendo rentabilidad. ≥40% = 40pts · ≥35% = 25pts · ≥30% = 15pts · <30% = 0pts"
+            definition="Porcentaje del precio de venta que puedes destinar a publicidad en Amazon Ads sin perder dinero. También llamado ACoS de equilibrio."
+            origin="Regalías netas / Precio sin IVA. Expresa qué fracción del precio del libro representa tu margen real disponible para invertir en anuncios."
             tier={bacosInfo.tier}
             tierLabel={bacosInfo.tierLabel}
             explanation={bacosInfo.explanation}
+            realValue={activeResults ? `${activeResults.margenPct.toFixed(1)}% real` : undefined}
           />
           <ScoreCard
             label="Precio vs Mínimo viable"
             value={score.pvpVsMinScore}
             max={10}
             icon={<Tag className="h-4 w-4 text-foreground" />}
-            tooltip="Posición de tu precio frente al mínimo necesario para cubrir costes y alcanzar tu margen objetivo."
+            definition="Compara tu precio actual de venta contra el precio mínimo que necesitas para cubrir costes de impresión (si aplica), regalías de plataforma y tu margen objetivo."
+            origin="Precio actual - Precio mínimo recomendado. Si tu precio supera el mínimo, tienes colchón. Si está por debajo, el modelo no alcanza la rentabilidad que marcaste como objetivo."
             tier={pvpInfo.tier}
             tierLabel={pvpInfo.tierLabel}
             explanation={pvpInfo.explanation}
+            realValue={activeResults && activeResults.precioMinObjetivo ? `Mínimo: ${activeResults.precioMinObjetivo.toFixed(2)}${currencySymbol}` : undefined}
           />
         </div>
       </div>
