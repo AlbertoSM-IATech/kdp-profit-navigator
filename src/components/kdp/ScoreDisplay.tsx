@@ -24,10 +24,12 @@ interface ScoreCardProps {
   value: number;
   max: number;
   icon: React.ReactNode;
-  tooltip: string;
+  definition: string;
+  origin: string;
   tier: Tier;
   tierLabel: string;
   explanation: string;
+  realValue?: string;
 }
 
 const tierDotClass: Record<Tier, string> = {
@@ -36,12 +38,12 @@ const tierDotClass: Record<Tier, string> = {
   destructive: 'bg-destructive',
 };
 
-const ScoreCard = ({ label, value, max, icon, tooltip, tier, tierLabel, explanation }: ScoreCardProps) => (
+const ScoreCard = ({ label, value, max, icon, definition, origin, tier, tierLabel, explanation, realValue }: ScoreCardProps) => (
   <div className="rounded-xl border border-border bg-card p-4 space-y-3 h-full flex flex-col">
     <div className="flex items-start justify-between gap-3">
       <div className="flex items-center gap-2 min-w-0">
         <div className="p-1.5 bg-muted rounded-md shrink-0">{icon}</div>
-        <TooltipProvider>
+        <TooltipProvider delayDuration={200}>
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="text-sm font-medium text-foreground flex items-center gap-1 cursor-help">
@@ -49,8 +51,11 @@ const ScoreCard = ({ label, value, max, icon, tooltip, tier, tierLabel, explanat
                 <HelpCircle className="h-3 w-3 text-muted-foreground shrink-0" />
               </span>
             </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-xs">
-              <p className="text-xs">{tooltip}</p>
+            <TooltipContent side="top" className="max-w-xs space-y-2">
+              <p className="text-xs font-medium text-foreground">Definición</p>
+              <p className="text-xs text-muted-foreground">{definition}</p>
+              <p className="text-xs font-medium text-foreground pt-1">Origen</p>
+              <p className="text-xs text-muted-foreground">{origin}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -63,6 +68,9 @@ const ScoreCard = ({ label, value, max, icon, tooltip, tier, tierLabel, explanat
     <div className="flex items-center gap-1.5">
       <span className={`w-2 h-2 rounded-full ${tierDotClass[tier]}`} />
       <span className="text-xs font-semibold text-foreground">{tierLabel}</span>
+      {realValue && (
+        <span className="text-xs text-muted-foreground ml-auto">{realValue}</span>
+      )}
     </div>
     <p className="text-xs text-muted-foreground leading-relaxed">{explanation}</p>
   </div>
