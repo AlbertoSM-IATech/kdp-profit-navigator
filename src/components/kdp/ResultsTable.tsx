@@ -133,12 +133,14 @@ export const ResultsTable = ({ data, globalData, embedded = false }: ResultsTabl
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    <span className={`px-2 py-1 rounded ${getMarginClass(row.margen)}`}>
+                    <span className={`inline-flex items-center gap-1.5 font-mono font-semibold ${tierText[getMarginTier(row.margen)]}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${tierDot[getMarginTier(row.margen)]}`} />
                       {row.margen.toFixed(1)}%
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    <span className={`px-2 py-1 rounded ${getClicksClass(row.clicsMaxPorVenta)}`}>
+                    <span className={`inline-flex items-center gap-1.5 font-mono font-semibold ${tierText[getClicksTier(row.clicsMaxPorVenta)]}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${tierDot[getClicksTier(row.clicsMaxPorVenta)]}`} />
                       {row.clicsMaxPorVenta}
                     </span>
                   </TableCell>
