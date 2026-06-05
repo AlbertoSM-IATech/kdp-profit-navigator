@@ -267,7 +267,7 @@ export const PaperbackSimulator = ({
               </Label>
               <span className="font-mono font-semibold">{simState.pages}</span>
             </div>
-            <Slider value={[simState.pages]} min={minPages} max={400} step={1}
+            <Slider className="[&>span:first-child]:bg-muted" value={[simState.pages]} min={minPages} max={400} step={1}
               onValueChange={([v]) => setSimState(prev => ({ ...prev, pages: v }))} />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>{minPages}</span>
