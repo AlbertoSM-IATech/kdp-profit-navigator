@@ -1,8 +1,7 @@
 import { ScoreBreakdown, GlobalData, EbookResults, PaperbackResults, PositioningResults } from '@/types/kdp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Gauge, MousePointer, TrendingUp, Tag, HelpCircle, Download, Save } from 'lucide-react';
+import { Gauge, MousePointer, TrendingUp, Tag, HelpCircle, Download } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 interface ScoreDisplayProps {
@@ -17,45 +16,77 @@ interface ScoreDisplayProps {
   loadedNicheId?: string | null;
   onQuickSave?: () => void;
 }
-interface ScoreItemProps {
+
+type Tier = 'success' | 'warning' | 'destructive';
+
+interface ScoreCardProps {
   label: string;
   value: number;
   max: number;
   icon: React.ReactNode;
   tooltip: string;
+  tier: Tier;
+  tierLabel: string;
+  explanation: string;
 }
-const ScoreItem = ({
-  label,
-  value,
-  max,
-  icon,
-  tooltip
-}: ScoreItemProps) => {
-  const percentage = value / max * 100;
-  return <div className="flex items-center gap-3">
-      <div className="p-2 bg-muted rounded-lg shrink-0">
-        {icon}
+
+const tierDotClass: Record<Tier, string> = {
+  success: 'bg-success',
+  warning: 'bg-warning',
+  destructive: 'bg-destructive',
+};
+
+const ScoreCard = ({ label, value, max, icon, tooltip, tier, tierLabel, explanation }: ScoreCardProps) => (
+  <div className="rounded-xl border border-border bg-card p-4 space-y-3 h-full flex flex-col">
+    <div className="flex items-start justify-between gap-3">
+      <div className="flex items-center gap-2 min-w-0">
+        <div className="p-1.5 bg-muted rounded-md shrink-0">{icon}</div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-sm font-medium text-foreground flex items-center gap-1 cursor-help">
+                {label}
+                <HelpCircle className="h-3 w-3 text-muted-foreground shrink-0" />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-xs">
+              <p className="text-xs">{tooltip}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-1">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="text-xs text-muted-foreground flex items-center gap-1 cursor-help">
-                  {label}
-                  <HelpCircle className="h-3 w-3" />
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-xs">
-                <p className="text-xs">{tooltip}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <span className="text-sm font-semibold text-foreground">{value}/{max}</span>
-        </div>
-        <Progress value={percentage} className="h-1.5" />
+      <div className="flex items-baseline gap-0.5 shrink-0">
+        <span className="text-2xl font-bold text-foreground leading-none">{value}</span>
+        <span className="text-xs text-muted-foreground">/{max}</span>
       </div>
-    </div>;
+    </div>
+    <div className="flex items-center gap-1.5">
+      <span className={`w-2 h-2 rounded-full ${tierDotClass[tier]}`} />
+      <span className="text-xs font-semibold text-foreground">{tierLabel}</span>
+    </div>
+    <p className="text-xs text-muted-foreground leading-relaxed">{explanation}</p>
+  </div>
+);
+
+const getClicsInfo = (v: number): { tier: Tier; tierLabel: string; explanation: string } => {
+  if (v >= 50) return { tier: 'success', tierLabel: 'Excelente', explanation: 'Puedes pagar 14 o más clics por cada venta. Tienes colchón suficiente para subidas del coste por clic sin perder rentabilidad.' };
+  if (v >= 35) return { tier: 'success', tierLabel: 'Bueno', explanation: 'Puedes pagar hasta 13 clics por venta. Margen suficiente para una campaña sana, aunque sin mucha holgura.' };
+  if (v >= 25) return { tier: 'warning', tierLabel: 'Aceptable', explanation: 'Solo 12 clics por venta. Funciona, pero cualquier subida del coste por clic empieza a comprometer el margen.' };
+  if (v >= 15) return { tier: 'warning', tierLabel: 'Ajustado', explanation: 'Únicamente 11 clics por venta. Estás al límite: optimiza precio o palabras clave antes de escalar.' };
+  return { tier: 'destructive', tierLabel: 'En riesgo', explanation: 'Menos de 10 clics por venta. Cualquier subida del coste por clic convierte la campaña en pérdida directa.' };
+};
+
+const getBacosInfo = (v: number): { tier: Tier; tierLabel: string; explanation: string } => {
+  if (v >= 40) return { tier: 'success', tierLabel: 'Excelente', explanation: 'Puedes destinar más del 40% del precio a publicidad manteniendo rentabilidad. Margen amplio para escalar.' };
+  if (v >= 25) return { tier: 'success', tierLabel: 'Bueno', explanation: 'Entre 35% y 40% disponible para publicidad. Margen razonable, pero vigila el coste por clic.' };
+  if (v >= 15) return { tier: 'warning', tierLabel: 'Ajustado', explanation: 'Entre 30% y 35%. Margen estrecho: prioriza palabras clave eficientes y campañas exactas.' };
+  return { tier: 'destructive', tierLabel: 'En riesgo', explanation: 'Menos del 30% disponible para publicidad. Apenas queda margen para invertir en Amazon Ads.' };
+};
+
+const getPvpInfo = (v: number): { tier: Tier; tierLabel: string; explanation: string } => {
+  if (v >= 8) return { tier: 'success', tierLabel: 'Por encima del mínimo', explanation: 'Tu precio supera con holgura el precio mínimo viable. Tienes margen para promociones puntuales sin comprometer la rentabilidad.' };
+  if (v >= 4) return { tier: 'warning', tierLabel: 'Cerca del mínimo', explanation: 'Tu precio está próximo al mínimo necesario para alcanzar tu margen objetivo. Poco colchón para bajadas o descuentos.' };
+  return { tier: 'destructive', tierLabel: 'Por debajo del mínimo', explanation: 'Tu precio actual no cubre el margen objetivo definido. Sube el precio o reduce costes antes de lanzar campañas.' };
 };
 export const ScoreDisplay = ({
   score,
@@ -547,28 +578,37 @@ export const ScoreDisplay = ({
     );
   }
 
+  const clicsInfo = getClicsInfo(score.clicsScore);
+  const bacosInfo = getBacosInfo(score.bacosScore);
+  const pvpInfo = getPvpInfo(score.pvpVsMinScore);
+
   const content = (
-    <div className="space-y-5">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Column 1 — Score number + interpretation */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-5 rounded-xl border border-border bg-card">
-            <div className="flex items-baseline gap-1">
-              <span className="text-5xl font-extrabold text-foreground">{score.totalScore}</span>
-              <span className="text-xl text-muted-foreground">/100</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className={`w-2.5 h-2.5 rounded-full ${statusDot}`} />
-              <span className="text-base font-semibold text-foreground">{score.statusLabel}</span>
-            </div>
+    <div className="space-y-6">
+      {/* Score number + interpretation */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-5 rounded-xl border border-border bg-card">
+        <div className="flex items-center gap-5">
+          <div className="flex items-baseline gap-1">
+            <span className="text-5xl font-extrabold text-foreground">{score.totalScore}</span>
+            <span className="text-xl text-muted-foreground">/100</span>
           </div>
+          <div className="flex items-center gap-2">
+            <span className={`w-2.5 h-2.5 rounded-full ${statusDot}`} />
+            <span className="text-base font-semibold text-foreground">{score.statusLabel}</span>
+          </div>
+        </div>
+        <p className="text-sm text-muted-foreground leading-relaxed md:max-w-md md:text-right">
+          {score.status === 'excellent' && 'Excelente configuración para escalar campañas de Amazon Ads. Margen de maniobra amplio.'}
+          {score.status === 'viable' && 'Configuración viable pero requiere ajustes. Optimiza precio, coste por clic o busca palabras clave menos competidas.'}
+          {score.status === 'not-recommended' && 'No recomendable para Amazon Ads en las condiciones actuales. Reformula antes de invertir.'}
+        </p>
+      </div>
 
-          <p className="text-sm text-muted-foreground leading-relaxed px-1">
-            {score.status === 'excellent' && 'Excelente configuración para escalar campañas de Amazon Ads. Margen de maniobra amplio.'}
-            {score.status === 'viable' && 'Configuración viable pero requiere ajustes. Optimiza precio, coste por clic o busca palabras clave menos competidas.'}
-            {score.status === 'not-recommended' && 'No recomendable para Amazon Ads en las condiciones actuales. Reformula antes de invertir.'}
-          </p>
-
+      {/* Breakdown — 3 explanatory cards */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            Desglose del Score
+          </h4>
           {globalData && activeResults && (
             <Button onClick={handleExportPDF} variant="outline" size="sm" className="gap-2">
               <Download className="h-4 w-4" />
@@ -576,35 +616,37 @@ export const ScoreDisplay = ({
             </Button>
           )}
         </div>
-
-        {/* Column 2 — Score breakdown */}
-        <div className="space-y-3">
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-            Desglose del Score
-          </h4>
-          <div className="space-y-3">
-            <ScoreItem
-              label="Clics máximos por venta (crítico)"
-              value={score.clicsScore}
-              max={50}
-              icon={<MousePointer className="h-4 w-4 text-foreground" />}
-              tooltip="Cuántos clics puedes pagar como máximo por cada venta. ≥14 = 50pts, 13 = 35pts, 12 = 25pts, 11 = 15pts, ≤10 = 0pts"
-            />
-            <ScoreItem
-              label="Margen publicitario (BACOS)"
-              value={score.bacosScore}
-              max={40}
-              icon={<TrendingUp className="h-4 w-4 text-foreground" />}
-              tooltip="Porcentaje del precio que puedes destinar a publicidad manteniendo rentabilidad. ≥40% = 40pts, ≥35% = 25pts, ≥30% = 15pts, <30% = 0pts"
-            />
-            <ScoreItem
-              label="Precio vs Mínimo viable"
-              value={score.pvpVsMinScore}
-              max={10}
-              icon={<Tag className="h-4 w-4 text-foreground" />}
-              tooltip="Posición de tu precio frente al mínimo necesario para cubrir costes y margen objetivo."
-            />
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <ScoreCard
+            label="Clics máximos por venta"
+            value={score.clicsScore}
+            max={50}
+            icon={<MousePointer className="h-4 w-4 text-foreground" />}
+            tooltip="Cuántos clics puedes pagar como máximo por cada venta. ≥14 = 50pts · 13 = 35pts · 12 = 25pts · 11 = 15pts · ≤10 = 0pts"
+            tier={clicsInfo.tier}
+            tierLabel={clicsInfo.tierLabel}
+            explanation={clicsInfo.explanation}
+          />
+          <ScoreCard
+            label="Margen publicitario (BACOS)"
+            value={score.bacosScore}
+            max={40}
+            icon={<TrendingUp className="h-4 w-4 text-foreground" />}
+            tooltip="Porcentaje del precio que puedes destinar a publicidad manteniendo rentabilidad. ≥40% = 40pts · ≥35% = 25pts · ≥30% = 15pts · <30% = 0pts"
+            tier={bacosInfo.tier}
+            tierLabel={bacosInfo.tierLabel}
+            explanation={bacosInfo.explanation}
+          />
+          <ScoreCard
+            label="Precio vs Mínimo viable"
+            value={score.pvpVsMinScore}
+            max={10}
+            icon={<Tag className="h-4 w-4 text-foreground" />}
+            tooltip="Posición de tu precio frente al mínimo necesario para cubrir costes y alcanzar tu margen objetivo."
+            tier={pvpInfo.tier}
+            tierLabel={pvpInfo.tierLabel}
+            explanation={pvpInfo.explanation}
+          />
         </div>
       </div>
     </div>

@@ -248,7 +248,7 @@ export const PaperbackSimulator = ({
               </Label>
               <span className="font-mono font-semibold">{simState.pvp.toFixed(2)}{currencySymbol}</span>
             </div>
-            <Slider value={[simState.pvp]} min={4.99} max={29.99} step={0.5}
+            <Slider className="[&>span:first-child]:bg-muted" value={[simState.pvp]} min={4.99} max={29.99} step={0.5}
               onValueChange={([v]) => setSimState(prev => ({ ...prev, pvp: v }))} />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>4.99{currencySymbol}</span>
@@ -267,7 +267,7 @@ export const PaperbackSimulator = ({
               </Label>
               <span className="font-mono font-semibold">{simState.pages}</span>
             </div>
-            <Slider value={[simState.pages]} min={minPages} max={400} step={1}
+            <Slider className="[&>span:first-child]:bg-muted" value={[simState.pages]} min={minPages} max={400} step={1}
               onValueChange={([v]) => setSimState(prev => ({ ...prev, pages: v }))} />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>{minPages}</span>
@@ -286,7 +286,7 @@ export const PaperbackSimulator = ({
               </Label>
               <span className="font-mono font-semibold">{simState.cpc.toFixed(2)}{currencySymbol}</span>
             </div>
-            <Slider value={[simState.cpc]} min={0.05} max={1.5} step={0.01}
+            <Slider className="[&>span:first-child]:bg-muted" value={[simState.cpc]} min={0.05} max={1.5} step={0.01}
               onValueChange={([v]) => setSimState(prev => ({ ...prev, cpc: v }))} />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>0.05{currencySymbol}</span>
@@ -305,7 +305,7 @@ export const PaperbackSimulator = ({
               </Label>
               <span className="font-mono font-semibold">{simState.margenObjetivo}%</span>
             </div>
-            <Slider value={[simState.margenObjetivo]} min={10} max={60} step={5}
+            <Slider className="[&>span:first-child]:bg-muted" value={[simState.margenObjetivo]} min={10} max={60} step={5}
               onValueChange={([v]) => setSimState(prev => ({ ...prev, margenObjetivo: v }))} />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>10%</span>

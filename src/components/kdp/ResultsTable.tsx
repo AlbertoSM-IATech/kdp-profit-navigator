@@ -25,17 +25,27 @@ interface ResultsTableProps {
 export const ResultsTable = ({ data, globalData, embedded = false }: ResultsTableProps) => {
   const currencySymbol = globalData.marketplace === 'COM' ? '$' : '€';
 
-  const getMarginClass = (margin: number) => {
-    if (margin < 30) return 'bg-destructive/20 text-destructive font-semibold';
-    if (margin <= 40) return 'bg-warning/20 text-warning font-semibold';
-    return 'bg-success/20 text-success font-semibold';
+  const getMarginTier = (margin: number) => {
+    if (margin < 30) return 'destructive';
+    if (margin <= 40) return 'warning';
+    return 'success';
   };
 
-  // Updated clicks thresholds: ≥13 green, 10-12 yellow, <10 red
-  const getClicksClass = (clicks: number) => {
-    if (clicks >= 13) return 'bg-success/20 text-success font-semibold';
-    if (clicks >= 11) return 'bg-warning/20 text-warning font-semibold';
-    return 'bg-destructive/20 text-destructive font-semibold';
+  const getClicksTier = (clicks: number) => {
+    if (clicks >= 13) return 'success';
+    if (clicks >= 11) return 'warning';
+    return 'destructive';
+  };
+
+  const tierDot: Record<string, string> = {
+    success: 'bg-success',
+    warning: 'bg-warning',
+    destructive: 'bg-destructive',
+  };
+  const tierText: Record<string, string> = {
+    success: 'text-success',
+    warning: 'text-warning',
+    destructive: 'text-destructive',
   };
 
   const getDiagnosticBadge = (diagnostico: string) => {
@@ -123,12 +133,14 @@ export const ResultsTable = ({ data, globalData, embedded = false }: ResultsTabl
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    <span className={`px-2 py-1 rounded ${getMarginClass(row.margen)}`}>
+                    <span className={`inline-flex items-center gap-1.5 font-mono font-semibold ${tierText[getMarginTier(row.margen)]}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${tierDot[getMarginTier(row.margen)]}`} />
                       {row.margen.toFixed(1)}%
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    <span className={`px-2 py-1 rounded ${getClicksClass(row.clicsMaxPorVenta)}`}>
+                    <span className={`inline-flex items-center gap-1.5 font-mono font-semibold ${tierText[getClicksTier(row.clicsMaxPorVenta)]}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${tierDot[getClicksTier(row.clicsMaxPorVenta)]}`} />
                       {row.clicsMaxPorVenta}
                     </span>
                   </TableCell>
