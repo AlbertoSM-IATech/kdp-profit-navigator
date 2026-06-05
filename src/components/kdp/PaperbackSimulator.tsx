@@ -248,7 +248,7 @@ export const PaperbackSimulator = ({
               </Label>
               <span className="font-mono font-semibold">{simState.pvp.toFixed(2)}{currencySymbol}</span>
             </div>
-            <Slider value={[simState.pvp]} min={4.99} max={29.99} step={0.5}
+            <Slider className="[&>span:first-child]:bg-muted" value={[simState.pvp]} min={4.99} max={29.99} step={0.5}
               onValueChange={([v]) => setSimState(prev => ({ ...prev, pvp: v }))} />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>4.99{currencySymbol}</span>
