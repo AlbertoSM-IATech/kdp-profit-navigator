@@ -578,28 +578,37 @@ export const ScoreDisplay = ({
     );
   }
 
+  const clicsInfo = getClicsInfo(score.clicsScore);
+  const bacosInfo = getBacosInfo(score.bacosScore);
+  const pvpInfo = getPvpInfo(score.pvpVsMinScore);
+
   const content = (
-    <div className="space-y-5">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Column 1 — Score number + interpretation */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-5 rounded-xl border border-border bg-card">
-            <div className="flex items-baseline gap-1">
-              <span className="text-5xl font-extrabold text-foreground">{score.totalScore}</span>
-              <span className="text-xl text-muted-foreground">/100</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className={`w-2.5 h-2.5 rounded-full ${statusDot}`} />
-              <span className="text-base font-semibold text-foreground">{score.statusLabel}</span>
-            </div>
+    <div className="space-y-6">
+      {/* Score number + interpretation */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-5 rounded-xl border border-border bg-card">
+        <div className="flex items-center gap-5">
+          <div className="flex items-baseline gap-1">
+            <span className="text-5xl font-extrabold text-foreground">{score.totalScore}</span>
+            <span className="text-xl text-muted-foreground">/100</span>
           </div>
+          <div className="flex items-center gap-2">
+            <span className={`w-2.5 h-2.5 rounded-full ${statusDot}`} />
+            <span className="text-base font-semibold text-foreground">{score.statusLabel}</span>
+          </div>
+        </div>
+        <p className="text-sm text-muted-foreground leading-relaxed md:max-w-md md:text-right">
+          {score.status === 'excellent' && 'Excelente configuración para escalar campañas de Amazon Ads. Margen de maniobra amplio.'}
+          {score.status === 'viable' && 'Configuración viable pero requiere ajustes. Optimiza precio, coste por clic o busca palabras clave menos competidas.'}
+          {score.status === 'not-recommended' && 'No recomendable para Amazon Ads en las condiciones actuales. Reformula antes de invertir.'}
+        </p>
+      </div>
 
-          <p className="text-sm text-muted-foreground leading-relaxed px-1">
-            {score.status === 'excellent' && 'Excelente configuración para escalar campañas de Amazon Ads. Margen de maniobra amplio.'}
-            {score.status === 'viable' && 'Configuración viable pero requiere ajustes. Optimiza precio, coste por clic o busca palabras clave menos competidas.'}
-            {score.status === 'not-recommended' && 'No recomendable para Amazon Ads en las condiciones actuales. Reformula antes de invertir.'}
-          </p>
-
+      {/* Breakdown — 3 explanatory cards */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            Desglose del Score
+          </h4>
           {globalData && activeResults && (
             <Button onClick={handleExportPDF} variant="outline" size="sm" className="gap-2">
               <Download className="h-4 w-4" />
@@ -607,35 +616,37 @@ export const ScoreDisplay = ({
             </Button>
           )}
         </div>
-
-        {/* Column 2 — Score breakdown */}
-        <div className="space-y-3">
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-            Desglose del Score
-          </h4>
-          <div className="space-y-3">
-            <ScoreItem
-              label="Clics máximos por venta (crítico)"
-              value={score.clicsScore}
-              max={50}
-              icon={<MousePointer className="h-4 w-4 text-foreground" />}
-              tooltip="Cuántos clics puedes pagar como máximo por cada venta. ≥14 = 50pts, 13 = 35pts, 12 = 25pts, 11 = 15pts, ≤10 = 0pts"
-            />
-            <ScoreItem
-              label="Margen publicitario (BACOS)"
-              value={score.bacosScore}
-              max={40}
-              icon={<TrendingUp className="h-4 w-4 text-foreground" />}
-              tooltip="Porcentaje del precio que puedes destinar a publicidad manteniendo rentabilidad. ≥40% = 40pts, ≥35% = 25pts, ≥30% = 15pts, <30% = 0pts"
-            />
-            <ScoreItem
-              label="Precio vs Mínimo viable"
-              value={score.pvpVsMinScore}
-              max={10}
-              icon={<Tag className="h-4 w-4 text-foreground" />}
-              tooltip="Posición de tu precio frente al mínimo necesario para cubrir costes y margen objetivo."
-            />
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <ScoreCard
+            label="Clics máximos por venta"
+            value={score.clicsScore}
+            max={50}
+            icon={<MousePointer className="h-4 w-4 text-foreground" />}
+            tooltip="Cuántos clics puedes pagar como máximo por cada venta. ≥14 = 50pts · 13 = 35pts · 12 = 25pts · 11 = 15pts · ≤10 = 0pts"
+            tier={clicsInfo.tier}
+            tierLabel={clicsInfo.tierLabel}
+            explanation={clicsInfo.explanation}
+          />
+          <ScoreCard
+            label="Margen publicitario (BACOS)"
+            value={score.bacosScore}
+            max={40}
+            icon={<TrendingUp className="h-4 w-4 text-foreground" />}
+            tooltip="Porcentaje del precio que puedes destinar a publicidad manteniendo rentabilidad. ≥40% = 40pts · ≥35% = 25pts · ≥30% = 15pts · <30% = 0pts"
+            tier={bacosInfo.tier}
+            tierLabel={bacosInfo.tierLabel}
+            explanation={bacosInfo.explanation}
+          />
+          <ScoreCard
+            label="Precio vs Mínimo viable"
+            value={score.pvpVsMinScore}
+            max={10}
+            icon={<Tag className="h-4 w-4 text-foreground" />}
+            tooltip="Posición de tu precio frente al mínimo necesario para cubrir costes y alcanzar tu margen objetivo."
+            tier={pvpInfo.tier}
+            tierLabel={pvpInfo.tierLabel}
+            explanation={pvpInfo.explanation}
+          />
         </div>
       </div>
     </div>
