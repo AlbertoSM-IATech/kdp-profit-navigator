@@ -1,12 +1,15 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { GlobalData, EbookData, PaperbackData, EbookResults, PaperbackResults, PositioningResults, ScoreBreakdown, TableRow, FormatType, SimulatorData } from '@/types/kdp';
 import { Button } from '@/components/ui/button';
 import { StepFormat } from './wizard/StepFormat';
 import { StepMarket } from './wizard/StepMarket';
 import { StepBookData } from './wizard/StepBookData';
+import { StepSummary } from './wizard/StepSummary';
 import { StepResults } from './wizard/StepResults';
 import { ChevronLeft, ChevronRight, RotateCcw, Check, Lightbulb } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const STEP_STORAGE_KEY = 'publify-wizard-current-step';
 
 interface WizardContainerProps {
   globalData: GlobalData;
