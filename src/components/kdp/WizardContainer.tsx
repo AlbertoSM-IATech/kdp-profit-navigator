@@ -56,6 +56,11 @@ const STEPS: StepDef[] = [
     tip: 'El PVP determina el tramo de regalías y el margen mínimo viable de tu libro.',
   },
   {
+    title: 'Resumen',
+    subtitle: 'Confirma los datos',
+    tip: 'Revisa los inputs antes de calcular. Puedes editar cualquier sección con un clic.',
+  },
+  {
     title: 'Resultados',
     subtitle: 'Análisis y optimización',
     tip: 'Usa el simulador para probar variaciones de precio y coste antes de publicar.',
