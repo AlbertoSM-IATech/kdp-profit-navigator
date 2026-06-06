@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useKdpCalculator } from '@/hooks/useKdpCalculator';
 import { useScoring } from '@/hooks/useScoring';
 import { useNicheComparator } from '@/hooks/useNicheComparator';
@@ -15,6 +15,8 @@ import { toast } from 'sonner';
 // Import Publify logos
 import publifyLogo from '@/assets/publify-logo.png';
 import publifyIcon from '@/assets/publify-icon.png';
+
+const WIZARD_STATE_KEY = 'publify-wizard-state-v1';
 const Index = () => {
   const {
     globalData,
@@ -30,8 +32,41 @@ const Index = () => {
   } = useKdpCalculator();
   const [loadedNicheId, setLoadedNicheId] = useState<string | null>(null);
   const [simulatorState, setSimulatorState] = useState<SimulatorData | undefined>(undefined);
+  const [hydrated, setHydrated] = useState(false);
   const activeResults = globalData.selectedFormat === 'EBOOK' ? ebookResults : paperbackResults;
   const inversionDiaria = positioningResults?.inversionDiaria || 0;
+
+  // Restore wizard state from localStorage on mount
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(WIZARD_STATE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed.globalData) setGlobalData(parsed.globalData);
+        if (parsed.ebookData) setEbookData(parsed.ebookData);
+        if (parsed.paperbackData) setPaperbackData(parsed.paperbackData);
+        if (parsed.loadedNicheId) setLoadedNicheId(parsed.loadedNicheId);
+        if (parsed.simulatorState) setSimulatorState(parsed.simulatorState);
+      }
+    } catch {
+      /* ignore corrupted state */
+    }
+    setHydrated(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist wizard state whenever it changes (after initial hydration)
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      window.localStorage.setItem(
+        WIZARD_STATE_KEY,
+        JSON.stringify({ globalData, ebookData, paperbackData, loadedNicheId, simulatorState }),
+      );
+    } catch {
+      /* ignore quota errors */
+    }
+  }, [hydrated, globalData, ebookData, paperbackData, loadedNicheId, simulatorState]);
 
   // Calculate global score (v4)
   const scoreBreakdown = useScoring(globalData, ebookResults, paperbackResults, ebookData.pvp, paperbackData.pvp);

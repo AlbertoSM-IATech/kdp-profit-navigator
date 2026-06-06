@@ -77,105 +77,100 @@ export const StepResults = ({
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-foreground mb-2">
-          Resultados del análisis
-        </h2>
-        <p className="text-muted-foreground">
-          Viabilidad de tu {globalData.selectedFormat === 'EBOOK' ? 'eBook' : 'libro impreso'} para Amazon Ads
-        </p>
-      </div>
+    <div className="space-y-5">
+      {/* Score + acciones primarias en una sola fila */}
+      <section className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="grid lg:grid-cols-[1fr_auto] gap-0">
+          <div className="p-5">
+            <ScoreDisplay
+              score={scoreBreakdown}
+              currencySymbol={globalData.marketplace === 'COM' ? '$' : '€'}
+              embedded
+              globalData={globalData}
+              activeResults={activeResults}
+              positioningResults={positioningResults}
+              loadedNicheId={loadedNicheId}
+              onQuickSave={onQuickSave}
+            />
+          </div>
+          <div className="border-t lg:border-t-0 lg:border-l border-border bg-muted/20 p-5 flex flex-col gap-2 justify-center lg:min-w-[220px]">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Acciones
+            </p>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" className="w-full gap-2">
+                        <Plus className="h-4 w-4" />
+                        Guardar análisis
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Guardar análisis</DialogTitle>
+                        <DialogDescription>
+                          Crea una nueva entrada en tus análisis guardados para compararla con otros escenarios.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <Input
+                        placeholder="Nombre del análisis (ej: 'Cuadernos yoga ES')"
+                        value={newNicheName}
+                        onChange={e => setNewNicheName(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && handleSaveNiche()}
+                      />
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsSaveDialogOpen(false)}>Cancelar</Button>
+                        <Button onClick={handleSaveNiche}>Guardar</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </TooltipTrigger>
+                <TooltipContent><p className="text-xs">Crea una nueva entrada en tus análisis guardados.</p></TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
 
-      {/* Score Global */}
-      <ScoreDisplay
-        score={scoreBreakdown}
-        currencySymbol={globalData.marketplace === 'COM' ? '$' : '€'}
-        embedded
-        globalData={globalData}
-        activeResults={activeResults}
-        positioningResults={positioningResults}
-        loadedNicheId={loadedNicheId}
-        onQuickSave={onQuickSave}
-      />
+            {loadedNicheId && onQuickSave && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="w-full gap-2"
+                      onClick={() => {
+                        onQuickSave();
+                        toast.success('Nueva versión guardada');
+                      }}
+                    >
+                      <Save className="h-4 w-4" />
+                      Nueva versión
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent><p className="text-xs">Añade el estado actual como nueva versión del análisis cargado.</p></TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
+        </div>
+      </section>
 
-      {/* Primary save actions — always visible directly under Score */}
-      <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button size="lg" className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    Guardar análisis
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Guardar análisis</DialogTitle>
-                    <DialogDescription>
-                      Crea una nueva entrada en tus análisis guardados para compararla con otros escenarios.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <Input
-                    placeholder="Nombre del análisis (ej: 'Cuadernos yoga ES')"
-                    value={newNicheName}
-                    onChange={e => setNewNicheName(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleSaveNiche()}
-                  />
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsSaveDialogOpen(false)}>Cancelar</Button>
-                    <Button onClick={handleSaveNiche}>Guardar</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </TooltipTrigger>
-            <TooltipContent><p className="text-xs">Crea una nueva entrada en tus análisis guardados.</p></TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        {loadedNicheId && onQuickSave && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  className="gap-2"
-                  onClick={() => {
-                    onQuickSave();
-                    toast.success('Nueva versión guardada');
-                  }}
-                >
-                  <Save className="h-4 w-4" />
-                  Guardar nueva versión
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent><p className="text-xs">Añade el estado actual como nueva versión del análisis cargado.</p></TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
-      </div>
-
-      {/* SIMULATOR — main attraction */}
+      {/* SIMULATOR — pieza central */}
       {canShowSimulator && (
         <section className="rounded-xl border-2 border-secondary/30 bg-card shadow-sm overflow-hidden">
-          <header className="px-6 py-4 border-b border-border bg-muted/20">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-secondary/10">
-                <SlidersHorizontal className="h-5 w-5 text-secondary" />
-              </div>
-              <div>
-                <h3 className="text-base font-semibold text-foreground">Simulador de optimización</h3>
-                <p className="text-xs text-muted-foreground">
-                  Optimiza tu libro probando variaciones de precio, páginas, coste por clic y margen objetivo.
-                </p>
-              </div>
+          <header className="px-5 py-3 border-b border-border bg-muted/20 flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-secondary/10">
+              <SlidersHorizontal className="h-4 w-4 text-secondary" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-sm font-semibold text-foreground">Simulador de optimización</h3>
+              <p className="text-xs text-muted-foreground truncate">
+                Prueba variaciones de precio, páginas, coste por clic y margen objetivo.
+              </p>
             </div>
           </header>
-          <div className="p-6">
+          <div className="p-5">
             <PaperbackSimulator
               data={paperbackData}
               globalData={globalData}
@@ -191,16 +186,16 @@ export const StepResults = ({
         </section>
       )}
 
-      {/* Complementary info (collapsed by default) */}
+      {/* Información complementaria (colapsada) */}
       <Accordion type="single" collapsible className="border border-border rounded-xl bg-card">
         <AccordionItem value="complementary" className="border-none">
-          <AccordionTrigger className="px-5 py-4 hover:no-underline">
+          <AccordionTrigger className="px-5 py-3 hover:no-underline">
             <span className="text-sm font-semibold text-foreground">
               Información complementaria
             </span>
           </AccordionTrigger>
           <AccordionContent className="px-5 pb-5">
-            <div className="space-y-8 pt-2">
+            <div className="space-y-6 pt-2">
               {tableData.length > 0 && (
                 <div className="space-y-3">
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">

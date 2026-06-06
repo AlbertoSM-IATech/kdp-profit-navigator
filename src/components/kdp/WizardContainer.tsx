@@ -1,12 +1,15 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { GlobalData, EbookData, PaperbackData, EbookResults, PaperbackResults, PositioningResults, ScoreBreakdown, TableRow, FormatType, SimulatorData } from '@/types/kdp';
 import { Button } from '@/components/ui/button';
 import { StepFormat } from './wizard/StepFormat';
 import { StepMarket } from './wizard/StepMarket';
 import { StepBookData } from './wizard/StepBookData';
+import { StepSummary } from './wizard/StepSummary';
 import { StepResults } from './wizard/StepResults';
 import { ChevronLeft, ChevronRight, RotateCcw, Check, Lightbulb } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const STEP_STORAGE_KEY = 'publify-wizard-current-step';
 
 interface WizardContainerProps {
   globalData: GlobalData;
@@ -53,6 +56,11 @@ const STEPS: StepDef[] = [
     tip: 'El PVP determina el tramo de regalías y el margen mínimo viable de tu libro.',
   },
   {
+    title: 'Resumen',
+    subtitle: 'Confirma los datos',
+    tip: 'Revisa los inputs antes de calcular. Puedes editar cualquier sección con un clic.',
+  },
+  {
     title: 'Resultados',
     subtitle: 'Análisis y optimización',
     tip: 'Usa el simulador para probar variaciones de precio y coste antes de publicar.',
@@ -80,7 +88,20 @@ export const WizardContainer = ({
   onApplySimulatorAsVersion,
   onApplySimulatorToBase,
 }: WizardContainerProps) => {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState<number>(() => {
+    if (typeof window === 'undefined') return 0;
+    const raw = window.localStorage.getItem(STEP_STORAGE_KEY);
+    const parsed = raw ? parseInt(raw, 10) : 0;
+    return Number.isFinite(parsed) && parsed >= 0 && parsed < 5 ? parsed : 0;
+  });
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(STEP_STORAGE_KEY, String(currentStep));
+    } catch {
+      /* ignore quota errors */
+    }
+  }, [currentStep]);
 
   const activeResults = globalData.selectedFormat === 'EBOOK' ? ebookResults : paperbackResults;
 
@@ -107,10 +128,14 @@ export const WizardContainer = ({
           );
         }
       case 3:
+        // Resumen — válido si los pasos previos están completos
+        return canProceedFromStep(0) && canProceedFromStep(1) && canProceedFromStep(2);
+      case 4:
         return true;
       default:
         return false;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [globalData, ebookData, paperbackData]);
 
   const completedSteps = STEPS.map((_, index) => canProceedFromStep(index));
@@ -158,6 +183,15 @@ export const WizardContainer = ({
           />
         );
       case 3:
+        return (
+          <StepSummary
+            globalData={globalData}
+            ebookData={ebookData}
+            paperbackData={paperbackData}
+            onEditStep={(step) => setCurrentStep(step)}
+          />
+        );
+      case 4:
         return (
           <StepResults
             globalData={globalData}
