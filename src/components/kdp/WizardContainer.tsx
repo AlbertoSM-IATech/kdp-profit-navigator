@@ -184,6 +184,15 @@ export const WizardContainer = ({
         );
       case 3:
         return (
+          <StepSummary
+            globalData={globalData}
+            ebookData={ebookData}
+            paperbackData={paperbackData}
+            onEditStep={(step) => setCurrentStep(step)}
+          />
+        );
+      case 4:
+        return (
           <StepResults
             globalData={globalData}
             activeResults={activeResults}
