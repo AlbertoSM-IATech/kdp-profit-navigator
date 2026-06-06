@@ -199,7 +199,7 @@ export const WizardContainer = ({
           <nav className="flex-1 space-y-1" aria-label="Pasos del análisis">
             {STEPS.map((step, index) => {
               const isCurrent = index === currentStep;
-              const isCompleted = completedSteps[index] && index !== currentStep;
+              const isCompleted = completedSteps[index] && index < currentStep;
               const isReachable =
                 index <= currentStep ||
                 completedSteps[index] ||
