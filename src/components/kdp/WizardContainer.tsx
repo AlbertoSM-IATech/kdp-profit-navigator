@@ -88,7 +88,20 @@ export const WizardContainer = ({
   onApplySimulatorAsVersion,
   onApplySimulatorToBase,
 }: WizardContainerProps) => {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState<number>(() => {
+    if (typeof window === 'undefined') return 0;
+    const raw = window.localStorage.getItem(STEP_STORAGE_KEY);
+    const parsed = raw ? parseInt(raw, 10) : 0;
+    return Number.isFinite(parsed) && parsed >= 0 && parsed < 5 ? parsed : 0;
+  });
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(STEP_STORAGE_KEY, String(currentStep));
+    } catch {
+      /* ignore quota errors */
+    }
+  }, [currentStep]);
 
   const activeResults = globalData.selectedFormat === 'EBOOK' ? ebookResults : paperbackResults;
 
@@ -115,10 +128,14 @@ export const WizardContainer = ({
           );
         }
       case 3:
+        // Resumen — válido si los pasos previos están completos
+        return canProceedFromStep(0) && canProceedFromStep(1) && canProceedFromStep(2);
+      case 4:
         return true;
       default:
         return false;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [globalData, ebookData, paperbackData]);
 
   const completedSteps = STEPS.map((_, index) => canProceedFromStep(index));
