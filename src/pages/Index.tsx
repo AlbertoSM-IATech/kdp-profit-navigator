@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useKdpCalculator } from '@/hooks/useKdpCalculator';
 import { useScoring } from '@/hooks/useScoring';
 import { useNicheComparator } from '@/hooks/useNicheComparator';
@@ -15,6 +15,8 @@ import { toast } from 'sonner';
 // Import Publify logos
 import publifyLogo from '@/assets/publify-logo.png';
 import publifyIcon from '@/assets/publify-icon.png';
+
+const WIZARD_STATE_KEY = 'publify-wizard-state-v1';
 const Index = () => {
   const {
     globalData,
