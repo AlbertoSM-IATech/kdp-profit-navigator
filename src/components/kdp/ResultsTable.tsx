@@ -78,13 +78,13 @@ export const ResultsTable = ({ data, globalData, embedded = false }: ResultsTabl
     data.length > 0 ? (
       <>
         <div className="overflow-x-auto rounded-lg border border-border">
-          <Table>
+          <Table className="min-w-[960px]">
             <TableHeader>
               <TRow className="bg-muted/50">
-                <TableHead className="font-heading font-semibold">Tipo</TableHead>
-                <TableHead className="font-heading font-semibold text-right">PVP</TableHead>
-                <TableHead className="font-heading font-semibold text-right">Regalías</TableHead>
-                <TableHead className="font-heading font-semibold text-right">
+                <TableHead className="font-heading font-semibold w-[140px] py-3">Tipo</TableHead>
+                <TableHead className="font-heading font-semibold text-right w-[90px] py-3">PVP</TableHead>
+                <TableHead className="font-heading font-semibold text-right w-[110px] py-3">Regalías</TableHead>
+                <TableHead className="font-heading font-semibold text-right w-[180px] py-3">
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -94,27 +94,27 @@ export const ResultsTable = ({ data, globalData, embedded = false }: ResultsTabl
                     </Tooltip>
                   </TooltipProvider>
                 </TableHead>
-                <TableHead className="font-heading font-semibold text-right">
+                <TableHead className="font-heading font-semibold text-right w-[160px] py-3">
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="cursor-help border-b border-dashed border-muted-foreground/40">Clics máximos por venta</span>
+                        <span className="cursor-help border-b border-dashed border-muted-foreground/40">Clics máx./venta</span>
                       </TooltipTrigger>
                       <TooltipContent side="top" className="max-w-xs"><p className="text-xs">Cuántos clics de Amazon Ads puedes pagar como máximo por cada venta para no perder dinero.</p></TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 </TableHead>
-                <TableHead className="font-heading font-semibold text-center">Estado</TableHead>
-                <TableHead className="font-heading font-semibold">Recomendación</TableHead>
+                <TableHead className="font-heading font-semibold text-center w-[120px] py-3">Estado</TableHead>
+                <TableHead className="font-heading font-semibold py-3">Recomendación</TableHead>
               </TRow>
             </TableHeader>
             <TableBody>
               {data.map((row, idx) => (
-                <TRow 
-                  key={idx} 
-                  className="hover:bg-muted/30 transition-colors"
+                <TRow
+                  key={idx}
+                  className="hover:bg-muted/30 transition-colors align-top"
                 >
-                  <TableCell>
+                  <TableCell className="py-3">
                     <div className="flex items-center gap-2">
                       {row.tipo === 'eBook' ? (
                         <BookOpen className="h-4 w-4 text-secondary" />
@@ -124,42 +124,33 @@ export const ResultsTable = ({ data, globalData, embedded = false }: ResultsTabl
                       <span className="font-medium">{row.tipo}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-right font-mono">
+                  <TableCell className="text-right font-mono py-3">
                     {row.pvp.toFixed(2)}{currencySymbol}
                   </TableCell>
-                  <TableCell className="text-right font-mono">
+                  <TableCell className="text-right font-mono py-3">
                     <span className={row.regalias > 0 ? 'text-success' : 'text-destructive'}>
                       {row.regalias.toFixed(2)}{currencySymbol}
                     </span>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right py-3">
                     <span className={`inline-flex items-center gap-1.5 font-mono font-semibold ${tierText[getMarginTier(row.margen)]}`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${tierDot[getMarginTier(row.margen)]}`} />
                       {row.margen.toFixed(1)}%
                     </span>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right py-3">
                     <span className={`inline-flex items-center gap-1.5 font-mono font-semibold ${tierText[getClicksTier(row.clicsMaxPorVenta)]}`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${tierDot[getClicksTier(row.clicsMaxPorVenta)]}`} />
                       {row.clicsMaxPorVenta}
                     </span>
                   </TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="text-center py-3">
                     {getDiagnosticBadge(row.diagnostico)}
                   </TableCell>
-                  <TableCell className="max-w-xs">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <p className="text-sm text-muted-foreground truncate cursor-help" title={row.recomendacion}>
-                            {row.recomendacion}
-                          </p>
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-sm p-3">
-                          <p className="text-sm">{row.recomendacion}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                  <TableCell className="py-3">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {row.recomendacion}
+                    </p>
                   </TableCell>
                 </TRow>
               ))}
