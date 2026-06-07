@@ -79,84 +79,103 @@ export const StepResults = ({
     );
   }
 
+  const handleCopyShareLink = async () => {
+    const url = buildShareUrl({
+      g: globalData,
+      e: ebookData,
+      p: paperbackData,
+      s: localSimState,
+    });
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success('Enlace copiado al portapapeles');
+    } catch {
+      // Fallback: show URL in a prompt-style toast
+      window.prompt('Copia el enlace de configuración:', url);
+    }
+  };
+
+  const headerActions = (
+    <TooltipProvider delayDuration={200}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button size="sm" variant="outline" className="gap-2" onClick={handleCopyShareLink}>
+            <Link2 className="h-4 w-4" />
+            <span className="hidden sm:inline">Copiar enlace</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent><p className="text-xs">Genera un enlace con esta configuración para compartirla o reabrirla.</p></TooltipContent>
+      </Tooltip>
+
+      <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DialogTrigger asChild>
+              <Button size="sm" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Guardar análisis
+              </Button>
+            </DialogTrigger>
+          </TooltipTrigger>
+          <TooltipContent><p className="text-xs">Crea una nueva entrada en tus análisis guardados.</p></TooltipContent>
+        </Tooltip>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Guardar análisis</DialogTitle>
+            <DialogDescription>
+              Crea una nueva entrada en tus análisis guardados para compararla con otros escenarios.
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            placeholder="Nombre del análisis (ej: 'Cuadernos yoga ES')"
+            value={newNicheName}
+            onChange={e => setNewNicheName(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSaveNiche()}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsSaveDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={handleSaveNiche}>Guardar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {loadedNicheId && onQuickSave && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="gap-2"
+              onClick={() => {
+                onQuickSave();
+                toast.success('Nueva versión guardada');
+              }}
+            >
+              <Save className="h-4 w-4" />
+              <span className="hidden sm:inline">Nueva versión</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent><p className="text-xs">Añade el estado actual como nueva versión del análisis cargado.</p></TooltipContent>
+        </Tooltip>
+      )}
+    </TooltipProvider>
+  );
+
   return (
     <div className="space-y-5">
-      {/* Score + acciones primarias en una sola fila */}
-      <section className="rounded-xl border border-border bg-card overflow-hidden">
-        <div className="grid lg:grid-cols-[1fr_auto] gap-0">
-          <div className="p-5">
-            <ScoreDisplay
-              score={scoreBreakdown}
-              currencySymbol={globalData.marketplace === 'COM' ? '$' : '€'}
-              embedded
-              globalData={globalData}
-              activeResults={activeResults}
-              positioningResults={positioningResults}
-              loadedNicheId={loadedNicheId}
-              onQuickSave={onQuickSave}
-            />
-          </div>
-          <div className="border-t lg:border-t-0 lg:border-l border-border bg-muted/20 p-5 flex flex-col gap-2 justify-center lg:min-w-[220px]">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Acciones
-            </p>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button size="sm" className="w-full gap-2">
-                        <Plus className="h-4 w-4" />
-                        Guardar análisis
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Guardar análisis</DialogTitle>
-                        <DialogDescription>
-                          Crea una nueva entrada en tus análisis guardados para compararla con otros escenarios.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <Input
-                        placeholder="Nombre del análisis (ej: 'Cuadernos yoga ES')"
-                        value={newNicheName}
-                        onChange={e => setNewNicheName(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && handleSaveNiche()}
-                      />
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsSaveDialogOpen(false)}>Cancelar</Button>
-                        <Button onClick={handleSaveNiche}>Guardar</Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </TooltipTrigger>
-                <TooltipContent><p className="text-xs">Crea una nueva entrada en tus análisis guardados.</p></TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            {loadedNicheId && onQuickSave && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="w-full gap-2"
-                      onClick={() => {
-                        onQuickSave();
-                        toast.success('Nueva versión guardada');
-                      }}
-                    >
-                      <Save className="h-4 w-4" />
-                      Nueva versión
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p className="text-xs">Añade el estado actual como nueva versión del análisis cargado.</p></TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </div>
-        </div>
+      {/* Score: ahora ocupa la fila completa; acciones viven en la cabecera del desglose */}
+      <section className="rounded-xl border border-border bg-card p-5">
+        <ScoreDisplay
+          score={scoreBreakdown}
+          currencySymbol={globalData.marketplace === 'COM' ? '$' : '€'}
+          embedded
+          globalData={globalData}
+          activeResults={activeResults}
+          positioningResults={positioningResults}
+          loadedNicheId={loadedNicheId}
+          onQuickSave={onQuickSave}
+          headerActions={headerActions}
+        />
       </section>
 
       {/* SIMULATOR — pieza central */}
