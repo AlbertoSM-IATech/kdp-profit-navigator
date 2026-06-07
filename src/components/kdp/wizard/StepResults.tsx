@@ -23,6 +23,7 @@ interface StepResultsProps {
   onQuickSave: (() => void) | undefined;
   onSaveNiche: (name: string, simulatorData?: SimulatorData) => void;
   paperbackData: PaperbackData;
+  ebookData: EbookData;
   initialSimulatorState?: SimulatorData;
   onSimulatorStateChange?: (state: SimulatorData) => void;
   onApplySimulatorAsVersion?: () => void;
