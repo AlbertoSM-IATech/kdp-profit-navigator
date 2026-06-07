@@ -40,6 +40,7 @@ export const StepResults = ({
   onQuickSave,
   onSaveNiche,
   paperbackData,
+  ebookData,
   initialSimulatorState,
   onSimulatorStateChange,
   onApplySimulatorAsVersion,
