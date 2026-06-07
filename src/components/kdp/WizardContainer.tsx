@@ -217,12 +217,19 @@ export const WizardContainer = ({
 
   const current = STEPS[currentStep];
 
+  const isResults = currentStep === STEPS.length - 1;
+
   return (
     <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm">
       <div className="flex flex-col lg:flex-row min-h-[640px]">
-        {/* Sidebar */}
-        <aside className="lg:w-72 shrink-0 border-b lg:border-b-0 lg:border-r border-border bg-muted/30 p-6 flex flex-col">
-          <div className="mb-8">
+        {/* Sidebar — se reduce a un raíl compacto en el paso Resultados para dar más espacio al simulador */}
+        <aside
+          className={cn(
+            'shrink-0 border-b lg:border-b-0 lg:border-r border-border bg-muted/30 flex flex-col transition-[width] duration-300',
+            isResults ? 'lg:w-20 p-3' : 'lg:w-72 p-6',
+          )}
+        >
+          <div className={cn('mb-6', isResults && 'lg:hidden')}>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
               Asistente
             </p>
