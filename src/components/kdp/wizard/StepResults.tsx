@@ -1,16 +1,17 @@
 import { useState } from 'react';
-import { GlobalData, EbookResults, PaperbackResults, PositioningResults, ScoreBreakdown, TableRow, PaperbackData, SimulatorData } from '@/types/kdp';
+import { GlobalData, EbookResults, PaperbackResults, PositioningResults, ScoreBreakdown, TableRow, PaperbackData, SimulatorData, EbookData } from '@/types/kdp';
 import { ScoreDisplay } from '@/components/kdp/ScoreDisplay';
 import { ResultsTable } from '@/components/kdp/ResultsTable';
 import { PositioningSection } from '@/components/kdp/PositioningSection';
 import { PaperbackSimulator } from '@/components/kdp/PaperbackSimulator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Save, Plus, SlidersHorizontal } from 'lucide-react';
+import { Save, Plus, SlidersHorizontal, Link2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { toast } from 'sonner';
+import { buildShareUrl } from '@/lib/wizardShare';
 
 interface StepResultsProps {
   globalData: GlobalData;
