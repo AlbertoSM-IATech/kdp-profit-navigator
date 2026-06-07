@@ -15,6 +15,7 @@ interface ScoreDisplayProps {
   onExportPdf?: () => void;
   loadedNicheId?: string | null;
   onQuickSave?: () => void;
+  headerActions?: React.ReactNode;
 }
 
 type Tier = 'success' | 'warning' | 'destructive';
@@ -105,7 +106,8 @@ export const ScoreDisplay = ({
   activeResults,
   positioningResults,
   loadedNicheId,
-  onQuickSave
+  onQuickSave,
+  headerActions
 }: ScoreDisplayProps) => {
   const handleExportPDF = () => {
     if (!score || !globalData || !activeResults) {
@@ -613,16 +615,19 @@ export const ScoreDisplay = ({
 
       {/* Breakdown — 3 explanatory cards */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
             Desglose del Score
           </h4>
-          {globalData && activeResults && (
-            <Button onClick={handleExportPDF} variant="outline" size="sm" className="gap-2">
-              <Download className="h-4 w-4" />
-              Exportar PDF
-            </Button>
-          )}
+          <div className="flex items-center gap-2 flex-wrap">
+            {headerActions}
+            {globalData && activeResults && (
+              <Button onClick={handleExportPDF} variant="outline" size="sm" className="gap-2">
+                <Download className="h-4 w-4" />
+                Exportar PDF
+              </Button>
+            )}
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <ScoreCard

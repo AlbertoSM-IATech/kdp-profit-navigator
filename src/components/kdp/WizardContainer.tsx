@@ -203,6 +203,7 @@ export const WizardContainer = ({
             onQuickSave={onQuickSave}
             onSaveNiche={onSaveNiche}
             paperbackData={paperbackData}
+            ebookData={ebookData}
             initialSimulatorState={simulatorState}
             onSimulatorStateChange={onSimulatorStateChange}
             onApplySimulatorAsVersion={onApplySimulatorAsVersion}
