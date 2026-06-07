@@ -16,6 +16,8 @@ import { toast } from 'sonner';
 import publifyLogo from '@/assets/publify-logo.png';
 import publifyIcon from '@/assets/publify-icon.png';
 
+import { readSharedStateFromHash, clearSharedStateHash } from '@/lib/wizardShare';
+
 const WIZARD_STATE_KEY = 'publify-wizard-state-v1';
 const Index = () => {
   const {
