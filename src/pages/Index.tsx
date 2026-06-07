@@ -38,17 +38,28 @@ const Index = () => {
   const activeResults = globalData.selectedFormat === 'EBOOK' ? ebookResults : paperbackResults;
   const inversionDiaria = positioningResults?.inversionDiaria || 0;
 
-  // Restore wizard state from localStorage on mount
+  // Restore wizard state: shared link (hash) takes precedence over localStorage
   useEffect(() => {
     try {
-      const raw = window.localStorage.getItem(WIZARD_STATE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed.globalData) setGlobalData(parsed.globalData);
-        if (parsed.ebookData) setEbookData(parsed.ebookData);
-        if (parsed.paperbackData) setPaperbackData(parsed.paperbackData);
-        if (parsed.loadedNicheId) setLoadedNicheId(parsed.loadedNicheId);
-        if (parsed.simulatorState) setSimulatorState(parsed.simulatorState);
+      const shared = readSharedStateFromHash();
+      if (shared) {
+        if (shared.g) setGlobalData(shared.g);
+        if (shared.e) setEbookData(shared.e);
+        if (shared.p) setPaperbackData(shared.p);
+        if (shared.s) setSimulatorState(shared.s);
+        setLoadedNicheId(null);
+        clearSharedStateHash();
+        toast.success('Configuración cargada desde el enlace compartido');
+      } else {
+        const raw = window.localStorage.getItem(WIZARD_STATE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed.globalData) setGlobalData(parsed.globalData);
+          if (parsed.ebookData) setEbookData(parsed.ebookData);
+          if (parsed.paperbackData) setPaperbackData(parsed.paperbackData);
+          if (parsed.loadedNicheId) setLoadedNicheId(parsed.loadedNicheId);
+          if (parsed.simulatorState) setSimulatorState(parsed.simulatorState);
+        }
       }
     } catch {
       /* ignore corrupted state */
