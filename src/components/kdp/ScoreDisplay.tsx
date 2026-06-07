@@ -15,6 +15,7 @@ interface ScoreDisplayProps {
   onExportPdf?: () => void;
   loadedNicheId?: string | null;
   onQuickSave?: () => void;
+  headerActions?: React.ReactNode;
 }
 
 type Tier = 'success' | 'warning' | 'destructive';
