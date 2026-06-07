@@ -106,7 +106,8 @@ export const ScoreDisplay = ({
   activeResults,
   positioningResults,
   loadedNicheId,
-  onQuickSave
+  onQuickSave,
+  headerActions
 }: ScoreDisplayProps) => {
   const handleExportPDF = () => {
     if (!score || !globalData || !activeResults) {
