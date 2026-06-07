@@ -189,55 +189,62 @@ export const PaperbackSimulator = ({
 
   const content = (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Controls - 2/5 */}
-        <div className="lg:col-span-2 space-y-5">
-          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-            Controles
+      {/* CONTROLES — protagonistas, arriba a todo el ancho */}
+      <div className="rounded-xl border border-border bg-muted/20 p-5 space-y-5">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            Controles del simulador
           </h4>
+          <p className="text-xs text-muted-foreground">
+            Ajusta cualquier variable para ver el impacto en los resultados.
+          </p>
+        </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label className="flex items-center gap-1.5 text-sm font-medium">
-                <Palette className="h-4 w-4 text-muted-foreground" />
-                Tipo de impresión
-              </Label>
-              <Select
-                value={simState.interior}
-                onValueChange={v =>
-                  setSimState(prev => ({
-                    ...prev,
-                    interior: v as InteriorType,
-                    pages: Math.max(prev.pages, getMinPages(v as InteriorType)),
-                  }))
-                }
-              >
-                <SelectTrigger className="input-focus"><SelectValue /></SelectTrigger>
-                <SelectContent className="bg-popover border border-border">
-                  <SelectItem value="BN">{interiorLabels.BN}</SelectItem>
-                  <SelectItem value="COLOR_STANDARD">{interiorLabels.COLOR_STANDARD}</SelectItem>
-                  <SelectItem value="COLOR_PREMIUM">{interiorLabels.COLOR_PREMIUM}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="flex items-center gap-1.5 text-sm font-medium">
-                <Ruler className="h-4 w-4 text-muted-foreground" />
-                Tamaño
-              </Label>
-              <Select
-                value={simState.size}
-                onValueChange={v => setSimState(prev => ({ ...prev, size: v as BookSize }))}
-              >
-                <SelectTrigger className="input-focus"><SelectValue /></SelectTrigger>
-                <SelectContent className="bg-popover border border-border">
-                  <SelectItem value="SMALL">{sizeLabels.SMALL}</SelectItem>
-                  <SelectItem value="LARGE">{sizeLabels.LARGE}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        {/* Selects: formato + tamaño */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-1.5 text-sm font-medium">
+              <Palette className="h-4 w-4 text-muted-foreground" />
+              Tipo de impresión
+            </Label>
+            <Select
+              value={simState.interior}
+              onValueChange={v =>
+                setSimState(prev => ({
+                  ...prev,
+                  interior: v as InteriorType,
+                  pages: Math.max(prev.pages, getMinPages(v as InteriorType)),
+                }))
+              }
+            >
+              <SelectTrigger className="input-focus"><SelectValue /></SelectTrigger>
+              <SelectContent className="bg-popover border border-border">
+                <SelectItem value="BN">{interiorLabels.BN}</SelectItem>
+                <SelectItem value="COLOR_STANDARD">{interiorLabels.COLOR_STANDARD}</SelectItem>
+                <SelectItem value="COLOR_PREMIUM">{interiorLabels.COLOR_PREMIUM}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-1.5 text-sm font-medium">
+              <Ruler className="h-4 w-4 text-muted-foreground" />
+              Tamaño
+            </Label>
+            <Select
+              value={simState.size}
+              onValueChange={v => setSimState(prev => ({ ...prev, size: v as BookSize }))}
+            >
+              <SelectTrigger className="input-focus"><SelectValue /></SelectTrigger>
+              <SelectContent className="bg-popover border border-border">
+                <SelectItem value="SMALL">{sizeLabels.SMALL}</SelectItem>
+                <SelectItem value="LARGE">{sizeLabels.LARGE}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
+        {/* Sliders en 2 columnas en >=lg para mayor protagonismo */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-5 pt-1">
           {/* Precio de venta */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
@@ -313,58 +320,60 @@ export const PaperbackSimulator = ({
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Results - 3/5 */}
-        <div className="lg:col-span-3 space-y-4">
-          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+      {/* RESULTADOS SIMULADOS — debajo de los controles */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
             Resultados simulados
           </h4>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            <Metric
-              label="Regalías"
-              tooltip="Beneficio neto que recibes por cada venta tras descontar coste de impresión y comisión de Amazon."
-              value={`${regalias.toFixed(2)}${currencySymbol}`}
-              accent={regalias > 0 ? undefined : 'destructive'}
-            />
-            <Metric
-              label="Margen publicitario (BACOS)"
-              tooltip="Porcentaje del precio que puedes destinar a publicidad manteniendo rentabilidad."
-              value={`${margenBacos.toFixed(1)}%`}
-              accent={margenBacos < 30 ? 'destructive' : margenBacos <= 40 ? 'warning' : 'success'}
-            />
-            <Metric
-              label="Clics máximos por venta"
-              tooltip="Cuántos clics de Amazon Ads puedes permitirte pagar por cada venta sin perder dinero."
-              value={clicsMaxPorVenta > 0 ? String(clicsMaxPorVenta) : '∞'}
-              accent={clicsMaxPorVenta < 10 ? 'destructive' : clicsMaxPorVenta < 13 ? 'warning' : 'success'}
-            />
-            <Metric
-              label="Precio mínimo viable"
-              tooltip="Precio mínimo necesario para cubrir costes y alcanzar tu margen objetivo."
-              value={precioMinSimulado ? `${precioMinSimulado.toFixed(2)}${currencySymbol}` : '—'}
-            />
-            <Metric
-              label="Coste por clic máximo rentable"
-              tooltip="Puja máxima que puedes pagar en Amazon Ads sin romper la rentabilidad."
-              value={`${cpcMaxRentable.toFixed(2)}${currencySymbol}`}
-              accent={simState.cpc <= cpcMaxRentable ? undefined : 'destructive'}
-            />
-            <Metric
-              label="Coste de impresión"
-              tooltip="Coste por unidad que Amazon descuenta antes de calcular tus regalías."
-              value={`${gastosImpresion.toFixed(2)}${currencySymbol}`}
-            />
+          <div className="flex items-center gap-2">
+            <span className={`w-2 h-2 rounded-full ${riskDot}`} />
+            <span className="text-xs font-semibold text-foreground">{riskLabel}</span>
           </div>
+        </div>
 
-          {/* Diagnostic */}
-          <div className="rounded-lg border border-border bg-muted/30 p-4">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className={`w-2 h-2 rounded-full ${riskDot}`} />
-              <span className="text-sm font-semibold text-foreground">{riskLabel}</span>
-            </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">{diagnosticText}</p>
-          </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <Metric
+            label="Regalías"
+            tooltip="Beneficio neto que recibes por cada venta tras descontar coste de impresión y comisión de Amazon."
+            value={`${regalias.toFixed(2)}${currencySymbol}`}
+            accent={regalias > 0 ? undefined : 'destructive'}
+          />
+          <Metric
+            label="Margen publicitario (BACOS)"
+            tooltip="Porcentaje del precio que puedes destinar a publicidad manteniendo rentabilidad."
+            value={`${margenBacos.toFixed(1)}%`}
+            accent={margenBacos < 30 ? 'destructive' : margenBacos <= 40 ? 'warning' : 'success'}
+          />
+          <Metric
+            label="Clics máximos por venta"
+            tooltip="Cuántos clics de Amazon Ads puedes permitirte pagar por cada venta sin perder dinero."
+            value={clicsMaxPorVenta > 0 ? String(clicsMaxPorVenta) : '∞'}
+            accent={clicsMaxPorVenta < 10 ? 'destructive' : clicsMaxPorVenta < 13 ? 'warning' : 'success'}
+          />
+          <Metric
+            label="Precio mínimo viable"
+            tooltip="Precio mínimo necesario para cubrir costes y alcanzar tu margen objetivo."
+            value={precioMinSimulado ? `${precioMinSimulado.toFixed(2)}${currencySymbol}` : '—'}
+          />
+          <Metric
+            label="CPC máximo rentable"
+            tooltip="Puja máxima que puedes pagar en Amazon Ads sin romper la rentabilidad."
+            value={`${cpcMaxRentable.toFixed(2)}${currencySymbol}`}
+            accent={simState.cpc <= cpcMaxRentable ? undefined : 'destructive'}
+          />
+          <Metric
+            label="Coste de impresión"
+            tooltip="Coste por unidad que Amazon descuenta antes de calcular tus regalías."
+            value={`${gastosImpresion.toFixed(2)}${currencySymbol}`}
+          />
+        </div>
+
+        {/* Diagnóstico */}
+        <div className="rounded-lg border border-border bg-muted/30 p-4">
+          <p className="text-sm text-muted-foreground leading-relaxed">{diagnosticText}</p>
         </div>
       </div>
 

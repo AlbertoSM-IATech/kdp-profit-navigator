@@ -217,12 +217,19 @@ export const WizardContainer = ({
 
   const current = STEPS[currentStep];
 
+  const isResults = currentStep === STEPS.length - 1;
+
   return (
     <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm">
       <div className="flex flex-col lg:flex-row min-h-[640px]">
-        {/* Sidebar */}
-        <aside className="lg:w-72 shrink-0 border-b lg:border-b-0 lg:border-r border-border bg-muted/30 p-6 flex flex-col">
-          <div className="mb-8">
+        {/* Sidebar — se reduce a un raíl compacto en el paso Resultados para dar más espacio al simulador */}
+        <aside
+          className={cn(
+            'shrink-0 border-b lg:border-b-0 lg:border-r border-border bg-muted/30 flex flex-col transition-[width] duration-300',
+            isResults ? 'lg:w-20 p-3' : 'lg:w-72 p-6',
+          )}
+        >
+          <div className={cn('mb-6', isResults && 'lg:hidden')}>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
               Asistente
             </p>
@@ -247,10 +254,12 @@ export const WizardContainer = ({
                     type="button"
                     onClick={() => handleStepClick(index)}
                     disabled={!isReachable}
+                    title={isResults ? `${step.title} · ${step.subtitle}` : undefined}
                     className={cn(
                       'w-full flex items-start gap-3 rounded-lg px-2 py-2 text-left transition-colors',
                       isReachable ? 'cursor-pointer hover:bg-muted' : 'cursor-not-allowed opacity-50',
                       isCurrent && 'bg-muted',
+                      isResults && 'lg:justify-center lg:px-0',
                     )}
                   >
                     <div
@@ -263,7 +272,7 @@ export const WizardContainer = ({
                     >
                       {isCompleted ? <Check className="h-4 w-4" /> : index + 1}
                     </div>
-                    <div className="flex-1 pt-1.5">
+                    <div className={cn('flex-1 pt-1.5', isResults && 'lg:hidden')}>
                       <p
                         className={cn(
                           'text-sm font-medium leading-tight',
@@ -279,7 +288,8 @@ export const WizardContainer = ({
                     <span
                       aria-hidden
                       className={cn(
-                        'absolute left-[26px] top-11 h-6 w-px',
+                        'absolute top-11 h-6 w-px',
+                        isResults ? 'lg:left-1/2 lg:-translate-x-1/2' : 'left-[26px]',
                         isCompleted ? 'bg-primary/30' : 'bg-border',
                       )}
                     />
@@ -289,7 +299,12 @@ export const WizardContainer = ({
             })}
           </nav>
 
-          <div className="mt-8 rounded-xl border border-secondary/20 bg-secondary/5 p-4">
+          <div
+            className={cn(
+              'mt-8 rounded-xl border border-secondary/20 bg-secondary/5 p-4',
+              isResults && 'lg:hidden',
+            )}
+          >
             <div className="flex items-center gap-2 mb-2">
               <Lightbulb className="h-3.5 w-3.5 text-secondary" />
               <p className="text-[11px] font-bold uppercase tracking-wider text-secondary">

@@ -181,7 +181,7 @@ const Index = () => {
   return <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
-        <div className="w-[90%] max-w-[1400px] mx-auto py-4">
+        <div className="w-[90%] max-w-[1600px] mx-auto py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {/* Publify Logo */}
@@ -270,7 +270,7 @@ const Index = () => {
       </header>
 
       {/* Main Content - Wizard */}
-      <main className="w-full max-w-[1400px] mx-auto px-4 md:px-8 py-8">
+      <main className="w-full max-w-[1600px] mx-auto px-4 md:px-8 py-8">
         <WizardContainer globalData={globalData} ebookData={ebookData} paperbackData={paperbackData} ebookResults={ebookResults} paperbackResults={paperbackResults} positioningResults={positioningResults} scoreBreakdown={scoreBreakdown} tableData={tableData} setGlobalData={setGlobalData} setEbookData={setEbookData} setPaperbackData={setPaperbackData} loadedNicheId={loadedNicheId} onQuickSave={loadedNicheId ? () => handleUpdateNicheVersion(loadedNicheId) : undefined} onSaveNiche={handleSaveNiche} onStartNew={handleStartNew} simulatorState={simulatorState} onSimulatorStateChange={setSimulatorState} onApplySimulatorAsVersion={handleApplySimulatorAsVersion} onApplySimulatorToBase={handleApplySimulatorToBase} />
 
         {/* Niches now accessible only from header — duplicated render removed */}
