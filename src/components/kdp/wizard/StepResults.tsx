@@ -6,7 +6,7 @@ import { PositioningSection } from '@/components/kdp/PositioningSection';
 import { PaperbackSimulator } from '@/components/kdp/PaperbackSimulator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Save, Plus, SlidersHorizontal, Link2 } from 'lucide-react';
+import { Plus, SlidersHorizontal, Link2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
