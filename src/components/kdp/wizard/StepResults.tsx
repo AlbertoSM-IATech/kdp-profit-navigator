@@ -139,25 +139,7 @@ export const StepResults = ({
         </DialogContent>
       </Dialog>
 
-      {loadedNicheId && onQuickSave && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="sm"
-              variant="secondary"
-              className="gap-2"
-              onClick={() => {
-                onQuickSave();
-                toast.success('Nueva versión guardada');
-              }}
-            >
-              <Save className="h-4 w-4" />
-              <span className="hidden sm:inline">Nueva versión</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent><p className="text-xs">Añade el estado actual como nueva versión del análisis cargado.</p></TooltipContent>
-        </Tooltip>
-      )}
+      {/* "Nueva versión" vive ahora dentro del simulador */}
     </TooltipProvider>
   );
 

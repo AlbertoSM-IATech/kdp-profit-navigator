@@ -80,9 +80,7 @@ export const NicheComparator = ({
   embedded = false,
 }: NicheComparatorProps) => {
   const [newNicheName, setNewNicheName] = useState('');
-  const [versionNote, setVersionNote] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'analyses' | 'versions'>('analyses');
   const [selectedNicheId, setSelectedNicheId] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>('score');
@@ -100,19 +98,6 @@ export const NicheComparator = ({
     setNewNicheName('');
     setIsDialogOpen(false);
     toast.success('Análisis guardado correctamente');
-  };
-
-  const handleSaveVersion = () => {
-    if (loadedNicheId) {
-      const niche = niches.find(n => n.id === loadedNicheId);
-      const newVersionNumber = (niche?.versions?.length || 0) + 1;
-      onUpdateNicheVersion(loadedNicheId, versionNote.trim() || undefined);
-      setVersionNote('');
-      setIsVersionDialogOpen(false);
-      toast.success(`Versión ${newVersionNumber} guardada`, {
-        description: `Análisis "${niche?.name}" actualizado correctamente`,
-      });
-    }
   };
 
   const handleSort = (field: SortField) => {
