@@ -232,7 +232,7 @@ const Index = () => {
                 </div>}
 
               {/* Saved Analyses Button - always visible */}
-              <Dialog>
+              <Dialog open={savedDialogOpen} onOpenChange={setSavedDialogOpen}>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm">
                     <Save className="h-4 w-4 mr-2" />
