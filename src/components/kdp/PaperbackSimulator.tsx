@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PaperbackData, GlobalData, InteriorType, BookSize, SimulatorData } from '@/types/kdp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -72,6 +72,27 @@ export const PaperbackSimulator = ({
   useEffect(() => {
     onStateChange?.(simState);
   }, [simState, onStateChange]);
+
+  // Sync internal state when a new initialSimState reference is provided
+  // (e.g. user restores a saved version or applies sim to base which clears it).
+  const lastInitialRef = useRef(initialSimState);
+  useEffect(() => {
+    if (initialSimState && initialSimState !== lastInitialRef.current) {
+      lastInitialRef.current = initialSimState;
+      setSimState(initialSimState);
+    } else if (!initialSimState && lastInitialRef.current) {
+      // Base data was updated (sim cleared) — resync from data/globalData
+      lastInitialRef.current = undefined;
+      setSimState({
+        interior: data.interior || 'BN',
+        size: data.size || 'SMALL',
+        pvp: data.pvp || 9.99,
+        pages: data.pages || 100,
+        cpc: globalData.cpc || 0.35,
+        margenObjetivo: globalData.margenObjetivoPct || 30,
+      });
+    }
+  }, [initialSimState, data.interior, data.size, data.pvp, data.pages, globalData.cpc, globalData.margenObjetivoPct]);
 
   useEffect(() => {
     if (data.interior && data.size && !initialSimState) {
