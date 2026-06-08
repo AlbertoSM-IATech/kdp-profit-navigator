@@ -189,7 +189,7 @@ const Index = () => {
               <img src={publifyIcon} alt="Publify" className="h-8 w-8 md:hidden" />
               <div className="hidden sm:block">
                 <h1 className="text-lg font-heading font-bold text-foreground">
-                  Calculadora de Viabilidad y Optimización de libro
+                  Viabilidad y Optimización de libro
                 </h1>
                 <p className="text-xs text-muted-foreground">
                   Análisis profesional para publishers
