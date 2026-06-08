@@ -35,6 +35,8 @@ const Index = () => {
   const [loadedNicheId, setLoadedNicheId] = useState<string | null>(null);
   const [simulatorState, setSimulatorState] = useState<SimulatorData | undefined>(undefined);
   const [hydrated, setHydrated] = useState(false);
+  const [savedDialogOpen, setSavedDialogOpen] = useState(false);
+  const [pendingNicheSnapshot, setPendingNicheSnapshot] = useState<string | null>(null);
   const activeResults = globalData.selectedFormat === 'EBOOK' ? ebookResults : paperbackResults;
   const inversionDiaria = positioningResults?.inversionDiaria || 0;
 
@@ -149,8 +151,23 @@ const Index = () => {
     });
     // Reset simulator state so it syncs from updated base
     setSimulatorState(undefined);
-    toast.success('Datos base actualizados con los valores del simulador');
-  }, [globalData, paperbackData, setGlobalData, setPaperbackData]);
+
+    if (loadedNicheId) {
+      // Defer the snapshot until results recalculate with the new base data
+      setPendingNicheSnapshot('Aplicado desde el simulador');
+      toast.success('Datos base actualizados y nueva versión creada en el análisis guardado');
+    } else {
+      toast.success('Datos base actualizados con los valores del simulador');
+    }
+  }, [globalData, paperbackData, setGlobalData, setPaperbackData, loadedNicheId]);
+
+  // After applying sim to base, wait for recalculated results, then snapshot the niche
+  useEffect(() => {
+    if (!pendingNicheSnapshot || !loadedNicheId) return;
+    handleUpdateNicheVersion(loadedNicheId, pendingNicheSnapshot);
+    setPendingNicheSnapshot(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingNicheSnapshot, loadedNicheId, paperbackResults, ebookResults]);
   const handleStartNew = useCallback(() => {
     setGlobalData({
       marketplace: null,
