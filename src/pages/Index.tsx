@@ -125,6 +125,8 @@ const Index = () => {
     const restored = restoreVersion(nicheId, versionId);
     if (restored) {
       handleLoadNiche(restored);
+      // Close the dialog so the user sees the wizard update underneath
+      setSavedDialogOpen(false);
     }
   }, [restoreVersion, handleLoadNiche]);
   const handleApplySimulatorAsVersion = useCallback(() => {
