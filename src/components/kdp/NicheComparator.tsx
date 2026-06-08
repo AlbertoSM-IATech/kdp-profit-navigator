@@ -3,7 +3,7 @@ import { SavedNiche, MARKETPLACE_CONFIGS } from '@/types/kdp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+
 import {
   Table,
   TableBody,
@@ -80,9 +80,7 @@ export const NicheComparator = ({
   embedded = false,
 }: NicheComparatorProps) => {
   const [newNicheName, setNewNicheName] = useState('');
-  const [versionNote, setVersionNote] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'analyses' | 'versions'>('analyses');
   const [selectedNicheId, setSelectedNicheId] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>('score');
@@ -100,19 +98,6 @@ export const NicheComparator = ({
     setNewNicheName('');
     setIsDialogOpen(false);
     toast.success('Análisis guardado correctamente');
-  };
-
-  const handleSaveVersion = () => {
-    if (loadedNicheId) {
-      const niche = niches.find(n => n.id === loadedNicheId);
-      const newVersionNumber = (niche?.versions?.length || 0) + 1;
-      onUpdateNicheVersion(loadedNicheId, versionNote.trim() || undefined);
-      setVersionNote('');
-      setIsVersionDialogOpen(false);
-      toast.success(`Versión ${newVersionNumber} guardada`, {
-        description: `Análisis "${niche?.name}" actualizado correctamente`,
-      });
-    }
   };
 
   const handleSort = (field: SortField) => {
@@ -240,34 +225,7 @@ export const NicheComparator = ({
             </DialogContent>
           </Dialog>
 
-          {loadedNicheId && (
-            <Dialog open={isVersionDialogOpen} onOpenChange={setIsVersionDialogOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm" variant="secondary" disabled={!hasCurrentData}>
-                  <Save className="h-4 w-4 mr-2" />
-                  Guardar nueva versión
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Guardar nueva versión</DialogTitle>
-                  <DialogDescription>
-                    Añade el estado actual como nueva versión del análisis cargado.
-                  </DialogDescription>
-                </DialogHeader>
-                <Textarea
-                  placeholder="Nota opcional (ej: 'Probado con precio más alto')"
-                  value={versionNote}
-                  onChange={e => setVersionNote(e.target.value)}
-                  rows={3}
-                />
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsVersionDialogOpen(false)}>Cancelar</Button>
-                  <Button onClick={handleSaveVersion}>Guardar versión</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
+          {/* Guardar nueva versión vive ahora en el simulador (paso Resultados) */}
 
           {niches.length > 0 && (
             <>
@@ -516,23 +474,22 @@ export const NicheComparator = ({
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => onLoadNiche(selectedNiche)}
-                    >
-                      Cargar análisis
-                    </Button>
-                    {!isActive && (
+                    {isActive ? (
+                      <Button size="sm" variant="outline" disabled>
+                        Versión activa
+                      </Button>
+                    ) : (
                       <Button
                         size="sm"
-                        variant="secondary"
+                        variant="default"
                         onClick={() => {
                           onRestoreVersion(selectedNiche.id, version.id);
-                          toast.success(`Restaurado a versión ${versionNumber}`);
+                          toast.success(`Versión ${versionNumber} aplicada`, {
+                            description: 'Resultados y pasos anteriores actualizados con esta versión.',
+                          });
                         }}
                       >
-                        Restaurar
+                        Aplicar cambios
                       </Button>
                     )}
                   </div>

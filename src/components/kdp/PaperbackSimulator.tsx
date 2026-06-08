@@ -325,13 +325,44 @@ export const PaperbackSimulator = ({
       {/* RESULTADOS SIMULADOS — debajo de los controles */}
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-            Resultados simulados
-          </h4>
-          <div className="flex items-center gap-2">
-            <span className={`w-2 h-2 rounded-full ${riskDot}`} />
-            <span className="text-xs font-semibold text-foreground">{riskLabel}</span>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              Resultados simulados
+            </h4>
+            <div className="flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full ${riskDot}`} />
+              <span className="text-xs font-semibold text-foreground">{riskLabel}</span>
+            </div>
           </div>
+
+          {/* Acción primaria: Guardar versión (siempre visible en el simulador) */}
+          {onApplyAsVersion && (
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span tabIndex={0}>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="gap-2"
+                      disabled={!loadedNicheId}
+                      onClick={onApplyAsVersion}
+                    >
+                      <Save className="h-4 w-4" />
+                      Guardar versión
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs">
+                  <p className="text-xs">
+                    {loadedNicheId
+                      ? 'Crea una nueva versión del análisis con los valores actuales del simulador. Podrás volver a ella desde "Análisis guardados".'
+                      : 'Primero guarda este análisis (botón "Guardar análisis" arriba) para empezar a crear versiones.'}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -377,40 +408,23 @@ export const PaperbackSimulator = ({
         </div>
       </div>
 
-      {/* Sticky action bar */}
-      {showStickyBar && hasChanges && (onApplyToBase || onApplyAsVersion) && (
+      {/* Sticky action bar — solo "Aplicar al análisis" (guardar versión vive arriba) */}
+      {showStickyBar && hasChanges && onApplyToBase && (
         <div className="sticky bottom-0 -mx-6 -mb-6 px-6 py-3 bg-card/95 backdrop-blur border-t border-border flex flex-wrap items-center justify-between gap-3 z-10">
           <p className="text-xs text-muted-foreground">
             Tienes cambios sin aplicar en el simulador.
           </p>
-          <div className="flex items-center gap-2">
-            {onApplyToBase && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button onClick={() => onApplyToBase(simState)} className="gap-2">
-                      <ArrowUpFromLine className="h-4 w-4" />
-                      Aplicar al análisis
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p className="text-xs">Sustituye los datos base del análisis actual con los valores del simulador.</p></TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-            {onApplyAsVersion && loadedNicheId && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button onClick={onApplyAsVersion} variant="secondary" className="gap-2">
-                      <Save className="h-4 w-4" />
-                      Guardar como nueva versión
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p className="text-xs">Añade el estado actual como nueva versión del análisis cargado.</p></TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button onClick={() => onApplyToBase(simState)} className="gap-2">
+                  <ArrowUpFromLine className="h-4 w-4" />
+                  Aplicar al análisis
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent><p className="text-xs">Sustituye los datos base del análisis (precio, páginas, CPC, margen) con los valores del simulador.</p></TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       )}
     </div>
