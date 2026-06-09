@@ -15,11 +15,16 @@ const loadNiches = (): SavedNiche[] => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) return [];
     const parsed = JSON.parse(stored);
-    return parsed.map(({ versions, activeVersionId, ...n }: any) => ({
-      ...n,
-      createdAt: new Date(n.createdAt),
-      updatedAt: new Date(n.updatedAt),
-    }));
+    return parsed.map((n: any) => {
+      const clean = { ...n };
+      delete clean.versions;
+      delete clean.activeVersionId;
+      return {
+        ...clean,
+        createdAt: new Date(n.createdAt),
+        updatedAt: new Date(n.updatedAt),
+      };
+    });
   } catch {
     return [];
   }
