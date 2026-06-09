@@ -135,7 +135,7 @@ export interface SavedNiche {
   name: string;
   createdAt: Date;
   updatedAt: Date;
-  // Current version data
+  // Saved analysis data
   globalData: GlobalData;
   ebookData: EbookData | null;
   paperbackData: PaperbackData | null;
