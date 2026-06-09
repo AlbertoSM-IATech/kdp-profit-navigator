@@ -19,10 +19,6 @@ const loadNiches = (): SavedNiche[] => {
       ...n,
       createdAt: new Date(n.createdAt),
       updatedAt: new Date(n.updatedAt),
-      versions: (n.versions || []).map((v: any) => ({
-        ...v,
-        createdAt: new Date(v.createdAt),
-      })),
     }));
   } catch {
     return [];
@@ -121,8 +117,6 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
       precioMinRecomendado,
       regalias: activeResults?.regalias || 0,
       scoreBreakdown,
-      versions: [],
-      activeVersionId: undefined,
       simulatorData,
     };
 
@@ -172,8 +166,6 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
       precioMinRecomendado,
       regalias: activeResults?.regalias || 0,
       scoreBreakdown,
-      versions: existingNiche.versions || [],
-      activeVersionId: undefined,
       simulatorData,
     };
 

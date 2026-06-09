@@ -130,28 +130,6 @@ export interface ScoreBreakdown {
 // NICHE COMPARATOR
 // ============================================
 
-// Niche Version for history tracking
-export interface NicheVersion {
-  id: string;
-  createdAt: Date;
-  note?: string;
-  // Data snapshot
-  globalData: GlobalData;
-  ebookData: EbookData | null;
-  paperbackData: PaperbackData | null;
-  // Results snapshot
-  clicsMaxPorVenta: number;
-  bacos: number;
-  inversionDiaria: number;
-  pvp: number;
-  precioMinRecomendado: number | null;
-  regalias: number;
-  // Score
-  scoreBreakdown: ScoreBreakdown;
-  // Simulator data
-  simulatorData?: SimulatorData;
-}
-
 export interface SavedNiche {
   id: string;
   name: string;
@@ -170,10 +148,6 @@ export interface SavedNiche {
   regalias: number;
   // Score
   scoreBreakdown: ScoreBreakdown;
-  // Version history
-  versions: NicheVersion[];
-  // Active version ID (which version is currently loaded)
-  activeVersionId?: string;
   // Simulator data
   simulatorData?: SimulatorData;
 }

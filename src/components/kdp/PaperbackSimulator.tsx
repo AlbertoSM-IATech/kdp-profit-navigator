@@ -70,8 +70,7 @@ export const PaperbackSimulator = ({
     onStateChange?.(simState);
   }, [simState, onStateChange]);
 
-  // Sync internal state when a new initialSimState reference is provided
-  // (e.g. user restores a saved version or applies sim to base which clears it).
+  // Sync internal state when an external simulator state is provided or cleared.
   const lastInitialRef = useRef(initialSimState);
   useEffect(() => {
     if (initialSimState && initialSimState !== lastInitialRef.current) {
