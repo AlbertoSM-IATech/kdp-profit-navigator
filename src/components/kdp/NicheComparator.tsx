@@ -3,7 +3,6 @@ import { SavedNiche, MARKETPLACE_CONFIGS } from '@/types/kdp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-
 import {
   Table,
   TableBody,
@@ -21,8 +20,6 @@ import {
   Star,
   Filter,
   X,
-  ChevronLeft,
-  Save,
 } from 'lucide-react';
 import { NicheSideBySide } from './NicheSideBySide';
 import { NicheRadarChart } from './NicheRadarChart';
@@ -42,8 +39,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
 interface NicheComparatorProps {
@@ -52,8 +47,6 @@ interface NicheComparatorProps {
   onDeleteNiche: (id: string) => void;
   onClearAll: () => void;
   onLoadNiche: (niche: SavedNiche) => void;
-  onUpdateNicheVersion: (nicheId: string, note?: string) => void;
-  onRestoreVersion: (nicheId: string, versionId: string) => void;
   onStartNew: () => void;
   bestNiche: SavedNiche | null;
   hasCurrentData: boolean;
@@ -71,8 +64,6 @@ export const NicheComparator = ({
   onDeleteNiche,
   onClearAll,
   onLoadNiche,
-  onUpdateNicheVersion,
-  onRestoreVersion,
   onStartNew,
   bestNiche,
   hasCurrentData,
@@ -81,13 +72,9 @@ export const NicheComparator = ({
 }: NicheComparatorProps) => {
   const [newNicheName, setNewNicheName] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'analyses' | 'versions'>('analyses');
-  const [selectedNicheId, setSelectedNicheId] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>('score');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [filter, setFilter] = useState<FilterType>('all');
-
-  const selectedNiche = niches.find(n => n.id === selectedNicheId) || null;
 
   const handleSave = () => {
     if (!newNicheName.trim()) {
@@ -107,11 +94,6 @@ export const NicheComparator = ({
       setSortField(field);
       setSortDirection('desc');
     }
-  };
-
-  const openVersionsTab = (niche: SavedNiche) => {
-    setSelectedNicheId(niche.id);
-    setActiveTab('versions');
   };
 
   const filteredNiches = niches.filter(n => {
@@ -193,9 +175,8 @@ export const NicheComparator = ({
         : 'bg-warning'
       : 'bg-destructive';
 
-  const analysesTab = (
+  const mainContent = (
     <div className="space-y-4">
-      {/* Actions bar */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex gap-2 flex-wrap">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -224,8 +205,6 @@ export const NicheComparator = ({
               </DialogFooter>
             </DialogContent>
           </Dialog>
-
-          {/* Guardar nueva versión vive ahora en el simulador (paso Resultados) */}
 
           {niches.length > 0 && (
             <>
@@ -277,7 +256,6 @@ export const NicheComparator = ({
             </div>
           )}
 
-          {/* Filters */}
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex items-center gap-2">
               <Filter className="h-4 w-4 text-muted-foreground" />
@@ -304,7 +282,6 @@ export const NicheComparator = ({
             )}
           </div>
 
-          {/* Table */}
           <div className="rounded-lg border border-border overflow-hidden">
             <div className="overflow-x-auto">
               <Table>
@@ -334,16 +311,12 @@ export const NicheComparator = ({
                     const config = niche.globalData.marketplace ? MARKETPLACE_CONFIGS[niche.globalData.marketplace] : null;
                     const isBest = bestNiche?.id === niche.id && niches.length > 1;
                     const isLoaded = loadedNicheId === niche.id;
-                    const versionsCount = niche.versions?.length || 1;
                     return (
                       <TableRow key={niche.id} className={isLoaded ? 'bg-primary/5 border-l-2 border-l-primary' : ''}>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
                             {isBest && <Star className="h-4 w-4 text-success" />}
                             <span>{niche.name}</span>
-                            {versionsCount > 1 && (
-                              <Badge variant="outline" className="text-xs font-normal">v{versionsCount}</Badge>
-                            )}
                           </div>
                         </TableCell>
                         <TableCell className="text-muted-foreground">{config?.name || 'N/A'}</TableCell>
@@ -374,14 +347,6 @@ export const NicheComparator = ({
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="h-7 text-xs"
-                              onClick={() => openVersionsTab(niche)}
-                            >
-                              Versiones ({versionsCount})
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
                               onClick={() => onDeleteNiche(niche.id)}
                               className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
                               title="Eliminar"
@@ -406,113 +371,6 @@ export const NicheComparator = ({
         </div>
       )}
     </div>
-  );
-
-  const versionsTab = (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <Button variant="ghost" size="sm" onClick={() => setActiveTab('analyses')} className="gap-1">
-          <ChevronLeft className="h-4 w-4" />
-          Volver a análisis
-        </Button>
-        {selectedNiche && (
-          <div className="text-sm text-muted-foreground">
-            Versiones de <span className="font-semibold text-foreground">"{selectedNiche.name}"</span>
-          </div>
-        )}
-      </div>
-
-      {!selectedNiche ? (
-        <div className="flex flex-col items-center justify-center h-40 bg-muted/30 rounded-lg text-center p-6">
-          <p className="text-sm text-muted-foreground">
-            Selecciona un análisis desde la pestaña "Análisis" para ver sus versiones.
-          </p>
-        </div>
-      ) : selectedNiche.versions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-40 bg-muted/30 rounded-lg text-center p-6">
-          <p className="text-sm text-muted-foreground">
-            Este análisis no tiene versiones guardadas todavía.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {selectedNiche.versions.map((version, index) => {
-            const isActive = selectedNiche.activeVersionId
-              ? version.id === selectedNiche.activeVersionId
-              : index === 0;
-            const versionNumber = selectedNiche.versions.length - index;
-            return (
-              <div key={version.id} className="rounded-lg border border-border bg-card p-4">
-                <div className="flex items-start justify-between gap-4 flex-wrap">
-                  <div className="flex-1 min-w-[200px]">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="text-sm font-semibold text-foreground">
-                        Versión {versionNumber}
-                      </span>
-                      <span className="text-xs text-muted-foreground">·</span>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(version.createdAt).toLocaleDateString('es-ES', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </span>
-                      {isActive && (
-                        <Badge variant="secondary" className="text-xs">Actual</Badge>
-                      )}
-                    </div>
-                    {version.note && (
-                      <p className="text-sm text-muted-foreground italic mb-2">"{version.note}"</p>
-                    )}
-                    <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                      <span>Score: <strong className="text-foreground">{version.scoreBreakdown.totalScore}</strong></span>
-                      <span>Clics máximos: <strong className="text-foreground">{version.clicsMaxPorVenta}</strong></span>
-                      <span>BACOS: <strong className="text-foreground">{version.bacos.toFixed(1)}%</strong></span>
-                      <span>Precio: <strong className="text-foreground">{version.pvp.toFixed(2)}€</strong></span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {isActive ? (
-                      <Button size="sm" variant="outline" disabled>
-                        Versión activa
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="default"
-                        onClick={() => {
-                          onRestoreVersion(selectedNiche.id, version.id);
-                          toast.success(`Versión ${versionNumber} aplicada`, {
-                            description: 'Resultados y pasos anteriores actualizados con esta versión.',
-                          });
-                        }}
-                      >
-                        Aplicar cambios
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-
-  const mainContent = (
-    <Tabs value={activeTab} onValueChange={v => setActiveTab(v as 'analyses' | 'versions')}>
-      <TabsList className="mb-4">
-        <TabsTrigger value="analyses">Análisis</TabsTrigger>
-        <TabsTrigger value="versions" disabled={!selectedNicheId}>
-          Versiones {selectedNiche ? `· ${selectedNiche.name}` : ''}
-        </TabsTrigger>
-      </TabsList>
-      <TabsContent value="analyses">{analysesTab}</TabsContent>
-      <TabsContent value="versions">{versionsTab}</TabsContent>
-    </Tabs>
   );
 
   if (embedded) return mainContent;

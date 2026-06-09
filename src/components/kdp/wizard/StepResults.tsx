@@ -26,7 +26,6 @@ interface StepResultsProps {
   ebookData: EbookData;
   initialSimulatorState?: SimulatorData;
   onSimulatorStateChange?: (state: SimulatorData) => void;
-  onApplySimulatorAsVersion?: () => void;
   onApplySimulatorToBase?: (simData: SimulatorData) => void;
 }
 
@@ -43,7 +42,6 @@ export const StepResults = ({
   ebookData,
   initialSimulatorState,
   onSimulatorStateChange,
-  onApplySimulatorAsVersion,
   onApplySimulatorToBase,
 }: StepResultsProps) => {
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
@@ -139,7 +137,6 @@ export const StepResults = ({
         </DialogContent>
       </Dialog>
 
-      {/* "Nueva versión" vive ahora dentro del simulador */}
     </TooltipProvider>
   );
 
@@ -180,9 +177,7 @@ export const StepResults = ({
               globalData={globalData}
               initialSimState={initialSimulatorState}
               onStateChange={handleSimStateChange}
-              onApplyAsVersion={onApplySimulatorAsVersion}
               onApplyToBase={onApplySimulatorToBase}
-              loadedNicheId={loadedNicheId}
               showStickyBar
               embedded
             />

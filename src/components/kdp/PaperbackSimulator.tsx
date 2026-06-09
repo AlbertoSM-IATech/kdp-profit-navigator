@@ -6,7 +6,7 @@ import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { SlidersHorizontal, Euro, FileText, Percent, HelpCircle, Palette, Ruler, Save, ArrowUpFromLine } from 'lucide-react';
+import { SlidersHorizontal, Euro, FileText, Percent, HelpCircle, Palette, Ruler, ArrowUpFromLine } from 'lucide-react';
 import { calculatePrintingCost, getMinPages } from '@/data/printingCosts';
 
 interface PaperbackSimulatorProps {
@@ -14,9 +14,7 @@ interface PaperbackSimulatorProps {
   globalData: GlobalData;
   initialSimState?: SimulatorData;
   onStateChange?: (state: SimulatorData) => void;
-  onApplyAsVersion?: () => void;
   onApplyToBase?: (simData: SimulatorData) => void;
-  loadedNicheId?: string | null;
   showStickyBar?: boolean;
   embedded?: boolean;
 }
@@ -50,31 +48,29 @@ export const PaperbackSimulator = ({
   globalData,
   initialSimState,
   onStateChange,
-  onApplyAsVersion,
   onApplyToBase,
-  loadedNicheId,
   showStickyBar = false,
   embedded = false,
 }: PaperbackSimulatorProps) => {
   const currencySymbol = globalData.marketplace === 'COM' ? '$' : '€';
+  const getBaseSimState = (): SimulatorData => ({
+    interior: data.interior || 'BN',
+    size: data.size || 'SMALL',
+    pvp: data.pvp || 9.99,
+    pages: data.pages || 100,
+    cpc: globalData.cpc || 0.35,
+    margenObjetivo: globalData.margenObjetivoPct || 30,
+  });
   const [simState, setSimState] = useState<SimulatorData>(() => {
     if (initialSimState) return initialSimState;
-    return {
-      interior: data.interior || 'BN',
-      size: data.size || 'SMALL',
-      pvp: data.pvp || 9.99,
-      pages: data.pages || 100,
-      cpc: globalData.cpc || 0.35,
-      margenObjetivo: globalData.margenObjetivoPct || 30,
-    };
+    return getBaseSimState();
   });
 
   useEffect(() => {
     onStateChange?.(simState);
   }, [simState, onStateChange]);
 
-  // Sync internal state when a new initialSimState reference is provided
-  // (e.g. user restores a saved version or applies sim to base which clears it).
+  // Sync internal state when an external simulator state is provided or cleared.
   const lastInitialRef = useRef(initialSimState);
   useEffect(() => {
     if (initialSimState && initialSimState !== lastInitialRef.current) {
@@ -83,19 +79,12 @@ export const PaperbackSimulator = ({
     } else if (!initialSimState && lastInitialRef.current) {
       // Base data was updated (sim cleared) — resync from data/globalData
       lastInitialRef.current = undefined;
-      setSimState({
-        interior: data.interior || 'BN',
-        size: data.size || 'SMALL',
-        pvp: data.pvp || 9.99,
-        pages: data.pages || 100,
-        cpc: globalData.cpc || 0.35,
-        margenObjetivo: globalData.margenObjetivoPct || 30,
-      });
+      setSimState(getBaseSimState());
     }
   }, [initialSimState, data.interior, data.size, data.pvp, data.pages, globalData.cpc, globalData.margenObjetivoPct]);
 
   useEffect(() => {
-    if (data.interior && data.size && !initialSimState) {
+    if (data.interior && data.size) {
       setSimState(prev => ({
         ...prev,
         interior: data.interior!,
@@ -104,16 +93,16 @@ export const PaperbackSimulator = ({
         pages: data.pages || prev.pages,
       }));
     }
-  }, [data.interior, data.size, data.pvp, data.pages, initialSimState]);
+  }, [data.interior, data.size, data.pvp, data.pages]);
 
   useEffect(() => {
-    if (globalData.cpc !== null && !initialSimState) {
+    if (globalData.cpc !== null) {
       setSimState(prev => ({ ...prev, cpc: globalData.cpc! }));
     }
-    if (globalData.margenObjetivoPct !== null && !initialSimState) {
+    if (globalData.margenObjetivoPct !== null) {
       setSimState(prev => ({ ...prev, margenObjetivo: globalData.margenObjetivoPct! }));
     }
-  }, [globalData.cpc, globalData.margenObjetivoPct, initialSimState]);
+  }, [globalData.cpc, globalData.margenObjetivoPct]);
 
   if (!data.interior || !data.size) {
     const empty = (
@@ -176,14 +165,14 @@ export const PaperbackSimulator = ({
       : 'Campaña sana, buen margen de maniobra para escalar.';
 
   // Detect changes vs initial state for sticky bar
+  const baseSimState = getBaseSimState();
   const hasChanges =
-    initialSimState &&
-    (initialSimState.interior !== simState.interior ||
-      initialSimState.size !== simState.size ||
-      initialSimState.pvp !== simState.pvp ||
-      initialSimState.pages !== simState.pages ||
-      initialSimState.cpc !== simState.cpc ||
-      initialSimState.margenObjetivo !== simState.margenObjetivo);
+    baseSimState.interior !== simState.interior ||
+    baseSimState.size !== simState.size ||
+    baseSimState.pvp !== simState.pvp ||
+    baseSimState.pages !== simState.pages ||
+    baseSimState.cpc !== simState.cpc ||
+    baseSimState.margenObjetivo !== simState.margenObjetivo;
 
   const Metric = ({
     label,
@@ -356,34 +345,6 @@ export const PaperbackSimulator = ({
             </div>
           </div>
 
-          {/* Acción primaria: Guardar versión (siempre visible en el simulador) */}
-          {onApplyAsVersion && (
-            <TooltipProvider delayDuration={200}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span tabIndex={0}>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="gap-2"
-                      disabled={!loadedNicheId}
-                      onClick={onApplyAsVersion}
-                    >
-                      <Save className="h-4 w-4" />
-                      Guardar versión
-                    </Button>
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-xs">
-                  <p className="text-xs">
-                    {loadedNicheId
-                      ? 'Crea una nueva versión del análisis con los valores actuales del simulador. Podrás volver a ella desde "Análisis guardados".'
-                      : 'Primero guarda este análisis (botón "Guardar análisis" arriba) para empezar a crear versiones.'}
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
