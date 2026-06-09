@@ -15,8 +15,7 @@ const loadNiches = (): SavedNiche[] => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) return [];
     const parsed = JSON.parse(stored);
-    return parsed.map((n: any) => ({
-      ...n,
+    return parsed.map(({ versions, activeVersionId, ...n }: any) => ({
       createdAt: new Date(n.createdAt),
       updatedAt: new Date(n.updatedAt),
     }));
@@ -154,7 +153,9 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
     
     const existingNiche = niches[nicheIndex];
     const updatedNiche: SavedNiche = {
-      ...existingNiche,
+      id: existingNiche.id,
+      name: existingNiche.name,
+      createdAt: existingNiche.createdAt,
       updatedAt: now,
       globalData: { ...globalData },
       ebookData: ebookData ? { ...ebookData } : null,
