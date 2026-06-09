@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { SavedNiche, NicheVersion, GlobalData, EbookData, PaperbackData, EbookResults, PaperbackResults, ScoreBreakdown, SimulatorData } from '@/types/kdp';
+import { SavedNiche, GlobalData, EbookData, PaperbackData, EbookResults, PaperbackResults, ScoreBreakdown, SimulatorData } from '@/types/kdp';
 import { calculateScore } from './useScoring';
 
 const STORAGE_KEY = 'publify_saved_niches';
@@ -65,7 +65,7 @@ export interface UseNicheComparatorReturn {
   ) => SavedNiche;
   deleteNiche: (id: string) => void;
   updateNiche: (id: string, name: string) => void;
-  updateNicheWithNewVersion: (
+  updateSavedNiche: (
     id: string,
     globalData: GlobalData,
     ebookData: EbookData | null,
@@ -73,11 +73,9 @@ export interface UseNicheComparatorReturn {
     ebookResults: EbookResults | null,
     paperbackResults: PaperbackResults | null,
     inversionDiaria: number,
-    note?: string,
     simulatorData?: SimulatorData
   ) => SavedNiche | null;
   loadNicheData: (id: string) => SavedNiche | null;
-  restoreVersion: (nicheId: string, versionId: string) => SavedNiche | null;
   clearAllNiches: () => void;
   getBestNiche: () => SavedNiche | null;
 }
@@ -108,23 +106,6 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
 
     const now = new Date();
     
-    // Create initial version
-    const initialVersion: NicheVersion = {
-      id: generateId(),
-      createdAt: now,
-      globalData: { ...globalData },
-      ebookData: ebookData ? { ...ebookData } : null,
-      paperbackData: paperbackData ? { ...paperbackData } : null,
-      clicsMaxPorVenta: activeResults?.clicsMaxPorVenta || 0,
-      bacos: activeResults?.margenPct || 0,
-      inversionDiaria,
-      pvp: pvp || 0,
-      precioMinRecomendado,
-      regalias: activeResults?.regalias || 0,
-      scoreBreakdown,
-      simulatorData,
-    };
-
     const newNiche: SavedNiche = {
       id: generateId(),
       name,
@@ -140,8 +121,8 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
       precioMinRecomendado,
       regalias: activeResults?.regalias || 0,
       scoreBreakdown,
-      versions: [initialVersion],
-      activeVersionId: initialVersion.id,
+      versions: [],
+      activeVersionId: undefined,
       simulatorData,
     };
 
@@ -151,7 +132,7 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
     return newNiche;
   }, [niches]);
 
-  const updateNicheWithNewVersion = useCallback((
+  const updateSavedNiche = useCallback((
     id: string,
     globalData: GlobalData,
     ebookData: EbookData | null,
@@ -159,7 +140,6 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
     ebookResults: EbookResults | null,
     paperbackResults: PaperbackResults | null,
     inversionDiaria: number,
-    note?: string,
     simulatorData?: SimulatorData
   ): SavedNiche | null => {
     const nicheIndex = niches.findIndex(n => n.id === id);
@@ -178,24 +158,6 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
 
     const now = new Date();
     
-    // Create new version
-    const newVersion: NicheVersion = {
-      id: generateId(),
-      createdAt: now,
-      note,
-      globalData: { ...globalData },
-      ebookData: ebookData ? { ...ebookData } : null,
-      paperbackData: paperbackData ? { ...paperbackData } : null,
-      clicsMaxPorVenta: activeResults?.clicsMaxPorVenta || 0,
-      bacos: activeResults?.margenPct || 0,
-      inversionDiaria,
-      pvp: pvp || 0,
-      precioMinRecomendado,
-      regalias: activeResults?.regalias || 0,
-      scoreBreakdown,
-      simulatorData,
-    };
-
     const existingNiche = niches[nicheIndex];
     const updatedNiche: SavedNiche = {
       ...existingNiche,
@@ -210,8 +172,8 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
       precioMinRecomendado,
       regalias: activeResults?.regalias || 0,
       scoreBreakdown,
-      versions: [...(existingNiche.versions || []), newVersion],
-      activeVersionId: newVersion.id,
+      versions: existingNiche.versions || [],
+      activeVersionId: undefined,
       simulatorData,
     };
 
@@ -224,43 +186,6 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
 
   const loadNicheData = useCallback((id: string): SavedNiche | null => {
     return niches.find(n => n.id === id) || null;
-  }, [niches]);
-
-  const restoreVersion = useCallback((nicheId: string, versionId: string): SavedNiche | null => {
-    const nicheIndex = niches.findIndex(n => n.id === nicheId);
-    if (nicheIndex === -1) return null;
-
-    const niche = niches[nicheIndex];
-    const version = niche.versions?.find(v => v.id === versionId);
-    if (!version) return null;
-
-    // Just update the niche with the version data WITHOUT creating a new version entry
-    // This restores the niche to that version's state and marks this version as active
-    const updatedNiche: SavedNiche = {
-      ...niche,
-      updatedAt: new Date(),
-      globalData: { ...version.globalData },
-      ebookData: version.ebookData ? { ...version.ebookData } : null,
-      paperbackData: version.paperbackData ? { ...version.paperbackData } : null,
-      clicsMaxPorVenta: version.clicsMaxPorVenta,
-      bacos: version.bacos,
-      inversionDiaria: version.inversionDiaria,
-      pvp: version.pvp,
-      precioMinRecomendado: version.precioMinRecomendado,
-      regalias: version.regalias,
-      scoreBreakdown: version.scoreBreakdown,
-      simulatorData: version.simulatorData,
-      // Keep the same versions array - don't add a new entry
-      versions: niche.versions || [],
-      // Mark this version as the active one
-      activeVersionId: version.id,
-    };
-
-    const updated = [...niches];
-    updated[nicheIndex] = updatedNiche;
-    setNiches(updated);
-    saveNichesToStorage(updated);
-    return updatedNiche;
   }, [niches]);
 
   const deleteNiche = useCallback((id: string) => {
@@ -294,9 +219,8 @@ export const useNicheComparator = (): UseNicheComparatorReturn => {
     saveCurrentAsNiche,
     deleteNiche,
     updateNiche,
-    updateNicheWithNewVersion,
+    updateSavedNiche,
     loadNicheData,
-    restoreVersion,
     clearAllNiches,
     getBestNiche,
   };
