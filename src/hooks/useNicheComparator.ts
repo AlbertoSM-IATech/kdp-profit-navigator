@@ -16,6 +16,7 @@ const loadNiches = (): SavedNiche[] => {
     if (!stored) return [];
     const parsed = JSON.parse(stored);
     return parsed.map(({ versions, activeVersionId, ...n }: any) => ({
+      ...n,
       createdAt: new Date(n.createdAt),
       updatedAt: new Date(n.updatedAt),
     }));
