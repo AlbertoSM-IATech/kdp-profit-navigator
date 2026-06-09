@@ -6,7 +6,7 @@ import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { SlidersHorizontal, Euro, FileText, Percent, HelpCircle, Palette, Ruler, Save, ArrowUpFromLine } from 'lucide-react';
+import { SlidersHorizontal, Euro, FileText, Percent, HelpCircle, Palette, Ruler, ArrowUpFromLine } from 'lucide-react';
 import { calculatePrintingCost, getMinPages } from '@/data/printingCosts';
 
 interface PaperbackSimulatorProps {
@@ -14,9 +14,7 @@ interface PaperbackSimulatorProps {
   globalData: GlobalData;
   initialSimState?: SimulatorData;
   onStateChange?: (state: SimulatorData) => void;
-  onApplyAsVersion?: () => void;
   onApplyToBase?: (simData: SimulatorData) => void;
-  loadedNicheId?: string | null;
   showStickyBar?: boolean;
   embedded?: boolean;
 }
@@ -50,23 +48,22 @@ export const PaperbackSimulator = ({
   globalData,
   initialSimState,
   onStateChange,
-  onApplyAsVersion,
   onApplyToBase,
-  loadedNicheId,
   showStickyBar = false,
   embedded = false,
 }: PaperbackSimulatorProps) => {
   const currencySymbol = globalData.marketplace === 'COM' ? '$' : '€';
+  const getBaseSimState = (): SimulatorData => ({
+    interior: data.interior || 'BN',
+    size: data.size || 'SMALL',
+    pvp: data.pvp || 9.99,
+    pages: data.pages || 100,
+    cpc: globalData.cpc || 0.35,
+    margenObjetivo: globalData.margenObjetivoPct || 30,
+  });
   const [simState, setSimState] = useState<SimulatorData>(() => {
     if (initialSimState) return initialSimState;
-    return {
-      interior: data.interior || 'BN',
-      size: data.size || 'SMALL',
-      pvp: data.pvp || 9.99,
-      pages: data.pages || 100,
-      cpc: globalData.cpc || 0.35,
-      margenObjetivo: globalData.margenObjetivoPct || 30,
-    };
+    return getBaseSimState();
   });
 
   useEffect(() => {
@@ -83,14 +80,7 @@ export const PaperbackSimulator = ({
     } else if (!initialSimState && lastInitialRef.current) {
       // Base data was updated (sim cleared) — resync from data/globalData
       lastInitialRef.current = undefined;
-      setSimState({
-        interior: data.interior || 'BN',
-        size: data.size || 'SMALL',
-        pvp: data.pvp || 9.99,
-        pages: data.pages || 100,
-        cpc: globalData.cpc || 0.35,
-        margenObjetivo: globalData.margenObjetivoPct || 30,
-      });
+      setSimState(getBaseSimState());
     }
   }, [initialSimState, data.interior, data.size, data.pvp, data.pages, globalData.cpc, globalData.margenObjetivoPct]);
 
