@@ -93,7 +93,7 @@ export const PaperbackSimulator = ({
         pages: data.pages || prev.pages,
       }));
     }
-  }, [data.interior, data.size, data.pvp, data.pages, initialSimState]);
+  }, [data.interior, data.size, data.pvp, data.pages]);
 
   useEffect(() => {
     if (globalData.cpc !== null) {
@@ -102,7 +102,7 @@ export const PaperbackSimulator = ({
     if (globalData.margenObjetivoPct !== null) {
       setSimState(prev => ({ ...prev, margenObjetivo: globalData.margenObjetivoPct! }));
     }
-  }, [globalData.cpc, globalData.margenObjetivoPct, initialSimState]);
+  }, [globalData.cpc, globalData.margenObjetivoPct]);
 
   if (!data.interior || !data.size) {
     const empty = (
