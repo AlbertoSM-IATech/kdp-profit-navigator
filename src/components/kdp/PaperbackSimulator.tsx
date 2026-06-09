@@ -346,34 +346,6 @@ export const PaperbackSimulator = ({
             </div>
           </div>
 
-          {/* Acción primaria: Guardar versión (siempre visible en el simulador) */}
-          {onApplyAsVersion && (
-            <TooltipProvider delayDuration={200}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span tabIndex={0}>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="gap-2"
-                      disabled={!loadedNicheId}
-                      onClick={onApplyAsVersion}
-                    >
-                      <Save className="h-4 w-4" />
-                      Guardar versión
-                    </Button>
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-xs">
-                  <p className="text-xs">
-                    {loadedNicheId
-                      ? 'Crea una nueva versión del análisis con los valores actuales del simulador. Podrás volver a ella desde "Análisis guardados".'
-                      : 'Primero guarda este análisis (botón "Guardar análisis" arriba) para empezar a crear versiones.'}
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
