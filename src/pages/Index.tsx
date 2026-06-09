@@ -36,7 +36,7 @@ const Index = () => {
   const [simulatorState, setSimulatorState] = useState<SimulatorData | undefined>(undefined);
   const [hydrated, setHydrated] = useState(false);
   const [savedDialogOpen, setSavedDialogOpen] = useState(false);
-  const [pendingNicheSnapshot, setPendingNicheSnapshot] = useState<string | null>(null);
+  const [pendingSavedNicheUpdate, setPendingSavedNicheUpdate] = useState(false);
   const activeResults = globalData.selectedFormat === 'EBOOK' ? ebookResults : paperbackResults;
   const inversionDiaria = positioningResults?.inversionDiaria || 0;
 
@@ -91,9 +91,7 @@ const Index = () => {
     niches,
     saveCurrentAsNiche,
     deleteNiche,
-    updateNicheWithNewVersion,
-    loadNicheData,
-    restoreVersion,
+    updateSavedNiche,
     clearAllNiches,
     getBestNiche
   } = useNicheComparator();
@@ -110,31 +108,12 @@ const Index = () => {
       setPaperbackData(niche.paperbackData);
     }
     setLoadedNicheId(niche.id);
-    // Load simulator state if available
-    if (niche.simulatorData) {
-      setSimulatorState(niche.simulatorData);
-    } else {
-      setSimulatorState(undefined);
-    }
+    setSimulatorState(undefined);
     toast.success(`Nicho "${niche.name}" cargado para editar`);
   }, [setGlobalData, setEbookData, setPaperbackData]);
-  const handleUpdateNicheVersion = useCallback((nicheId: string, note?: string) => {
-    updateNicheWithNewVersion(nicheId, globalData, globalData.selectedFormat === 'EBOOK' ? ebookData : null, globalData.selectedFormat === 'PAPERBACK' ? paperbackData : null, ebookResults, paperbackResults, inversionDiaria, note, simulatorState);
-  }, [globalData, ebookData, paperbackData, ebookResults, paperbackResults, inversionDiaria, updateNicheWithNewVersion, simulatorState]);
-  const handleRestoreVersion = useCallback((nicheId: string, versionId: string) => {
-    const restored = restoreVersion(nicheId, versionId);
-    if (restored) {
-      handleLoadNiche(restored);
-      // Close the dialog so the user sees the wizard update underneath
-      setSavedDialogOpen(false);
-    }
-  }, [restoreVersion, handleLoadNiche]);
-  const handleApplySimulatorAsVersion = useCallback(() => {
-    if (loadedNicheId && simulatorState) {
-      handleUpdateNicheVersion(loadedNicheId, 'Aplicado desde simulador');
-      toast.success('Nueva versión creada con datos del simulador');
-    }
-  }, [loadedNicheId, simulatorState, handleUpdateNicheVersion]);
+  const handleUpdateSavedNiche = useCallback((nicheId: string, simData?: SimulatorData) => {
+    updateSavedNiche(nicheId, globalData, globalData.selectedFormat === 'EBOOK' ? ebookData : null, globalData.selectedFormat === 'PAPERBACK' ? paperbackData : null, ebookResults, paperbackResults, inversionDiaria, simData ?? simulatorState);
+  }, [globalData, ebookData, paperbackData, ebookResults, paperbackResults, inversionDiaria, updateSavedNiche, simulatorState]);
 
   const handleApplySimulatorToBase = useCallback((simData: SimulatorData) => {
     // Update globalData with simulator CPC and margin
@@ -155,21 +134,20 @@ const Index = () => {
     setSimulatorState(undefined);
 
     if (loadedNicheId) {
-      // Defer the snapshot until results recalculate with the new base data
-      setPendingNicheSnapshot('Aplicado desde el simulador');
-      toast.success('Datos base actualizados y nueva versión creada en el análisis guardado');
+      setPendingSavedNicheUpdate(true);
+      toast.success('Datos base actualizados en el wizard y el análisis guardado');
     } else {
       toast.success('Datos base actualizados con los valores del simulador');
     }
   }, [globalData, paperbackData, setGlobalData, setPaperbackData, loadedNicheId]);
 
-  // After applying sim to base, wait for recalculated results, then snapshot the niche
+  // After applying sim to base, wait for recalculated results, then update the saved analysis
   useEffect(() => {
-    if (!pendingNicheSnapshot || !loadedNicheId) return;
-    handleUpdateNicheVersion(loadedNicheId, pendingNicheSnapshot);
-    setPendingNicheSnapshot(null);
+    if (!pendingSavedNicheUpdate || !loadedNicheId) return;
+    handleUpdateSavedNiche(loadedNicheId, undefined);
+    setPendingSavedNicheUpdate(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingNicheSnapshot, loadedNicheId, paperbackResults, ebookResults]);
+  }, [pendingSavedNicheUpdate, loadedNicheId, paperbackResults, ebookResults]);
   const handleStartNew = useCallback(() => {
     setGlobalData({
       marketplace: null,
