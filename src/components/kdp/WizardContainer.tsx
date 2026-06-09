@@ -29,7 +29,6 @@ interface WizardContainerProps {
   onStartNew: () => void;
   simulatorState?: SimulatorData;
   onSimulatorStateChange?: (state: SimulatorData) => void;
-  onApplySimulatorAsVersion?: () => void;
   onApplySimulatorToBase?: (simData: SimulatorData) => void;
 }
 
@@ -85,7 +84,6 @@ export const WizardContainer = ({
   onStartNew,
   simulatorState,
   onSimulatorStateChange,
-  onApplySimulatorAsVersion,
   onApplySimulatorToBase,
 }: WizardContainerProps) => {
   const [currentStep, setCurrentStep] = useState<number>(() => {
@@ -206,7 +204,6 @@ export const WizardContainer = ({
             ebookData={ebookData}
             initialSimulatorState={simulatorState}
             onSimulatorStateChange={onSimulatorStateChange}
-            onApplySimulatorAsVersion={onApplySimulatorAsVersion}
             onApplySimulatorToBase={onApplySimulatorToBase}
           />
         );
