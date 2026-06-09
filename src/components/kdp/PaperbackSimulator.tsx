@@ -85,7 +85,7 @@ export const PaperbackSimulator = ({
   }, [initialSimState, data.interior, data.size, data.pvp, data.pages, globalData.cpc, globalData.margenObjetivoPct]);
 
   useEffect(() => {
-    if (data.interior && data.size && !initialSimState) {
+    if (data.interior && data.size) {
       setSimState(prev => ({
         ...prev,
         interior: data.interior!,
@@ -97,10 +97,10 @@ export const PaperbackSimulator = ({
   }, [data.interior, data.size, data.pvp, data.pages, initialSimState]);
 
   useEffect(() => {
-    if (globalData.cpc !== null && !initialSimState) {
+    if (globalData.cpc !== null) {
       setSimState(prev => ({ ...prev, cpc: globalData.cpc! }));
     }
-    if (globalData.margenObjetivoPct !== null && !initialSimState) {
+    if (globalData.margenObjetivoPct !== null) {
       setSimState(prev => ({ ...prev, margenObjetivo: globalData.margenObjetivoPct! }));
     }
   }, [globalData.cpc, globalData.margenObjetivoPct, initialSimState]);
@@ -166,14 +166,14 @@ export const PaperbackSimulator = ({
       : 'Campaña sana, buen margen de maniobra para escalar.';
 
   // Detect changes vs initial state for sticky bar
+  const baseSimState = getBaseSimState();
   const hasChanges =
-    initialSimState &&
-    (initialSimState.interior !== simState.interior ||
-      initialSimState.size !== simState.size ||
-      initialSimState.pvp !== simState.pvp ||
-      initialSimState.pages !== simState.pages ||
-      initialSimState.cpc !== simState.cpc ||
-      initialSimState.margenObjetivo !== simState.margenObjetivo);
+    baseSimState.interior !== simState.interior ||
+    baseSimState.size !== simState.size ||
+    baseSimState.pvp !== simState.pvp ||
+    baseSimState.pages !== simState.pages ||
+    baseSimState.cpc !== simState.cpc ||
+    baseSimState.margenObjetivo !== simState.margenObjetivo;
 
   const Metric = ({
     label,
