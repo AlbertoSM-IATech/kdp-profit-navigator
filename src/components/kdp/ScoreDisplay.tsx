@@ -16,6 +16,7 @@ interface ScoreDisplayProps {
   loadedNicheId?: string | null;
   onQuickSave?: () => void;
   headerActions?: React.ReactNode;
+  hideScoreSummary?: boolean;
 }
 
 type Tier = 'success' | 'warning' | 'destructive';
