@@ -44,6 +44,7 @@ export const calculateScore = ({
   const bacos = margenPct; // BACOS = Margen real
 
   // A) Clics máx./Venta — 50 points (CRITICAL)
+  // 10 clics = umbral mínimo operativo; por debajo, la campaña deja de ser viable.
   let clicsScore = 0;
   if (clicsMaxPorVenta >= 14) {
     clicsScore = 50;
@@ -53,8 +54,10 @@ export const calculateScore = ({
     clicsScore = 25;
   } else if (clicsMaxPorVenta === 11) {
     clicsScore = 15;
+  } else if (clicsMaxPorVenta === 10) {
+    clicsScore = 8; // umbral mínimo: aún puntúa, pero al límite
   } else {
-    clicsScore = 0; // <10 clicks
+    clicsScore = 0; // < 10 clics: no viable para Ads
   }
 
   // B) BACOS (ACoS de equilibrio) — 40 points
