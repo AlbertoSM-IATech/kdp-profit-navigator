@@ -845,6 +845,7 @@ export const ScoreDisplay = ({
             tier={pvpInfo.tier}
             tierLabel={pvpInfo.tierLabel}
             explanation={pvpInfo.explanation}
+            advice={pvpInfo.advice}
             realValue={activeResults && activeResults.precioMinObjetivo ? `Mínimo: ${activeResults.precioMinObjetivo.toFixed(2)}${currencySymbol}` : undefined}
           />
         </div>
