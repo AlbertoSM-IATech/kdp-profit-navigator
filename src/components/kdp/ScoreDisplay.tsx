@@ -16,6 +16,7 @@ interface ScoreDisplayProps {
   loadedNicheId?: string | null;
   onQuickSave?: () => void;
   headerActions?: React.ReactNode;
+  hideScoreSummary?: boolean;
 }
 
 type Tier = 'success' | 'warning' | 'destructive';
@@ -107,7 +108,8 @@ export const ScoreDisplay = ({
   positioningResults,
   loadedNicheId,
   onQuickSave,
-  headerActions
+  headerActions,
+  hideScoreSummary = false
 }: ScoreDisplayProps) => {
   const handleExportPDF = () => {
     if (!score || !globalData || !activeResults) {
@@ -595,23 +597,25 @@ export const ScoreDisplay = ({
   const content = (
     <div className="space-y-6">
       {/* Score number + interpretation */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-5 rounded-xl border border-border bg-card">
-        <div className="flex items-center gap-5">
-          <div className="flex items-baseline gap-1">
-            <span className="text-5xl font-extrabold text-foreground">{score.totalScore}</span>
-            <span className="text-xl text-muted-foreground">/100</span>
+      {!hideScoreSummary && (
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-5 rounded-xl border border-border bg-card">
+          <div className="flex items-center gap-5">
+            <div className="flex items-baseline gap-1">
+              <span className="text-5xl font-extrabold text-foreground">{score.totalScore}</span>
+              <span className="text-xl text-muted-foreground">/100</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={`w-2.5 h-2.5 rounded-full ${statusDot}`} />
+              <span className="text-base font-semibold text-foreground">{score.statusLabel}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className={`w-2.5 h-2.5 rounded-full ${statusDot}`} />
-            <span className="text-base font-semibold text-foreground">{score.statusLabel}</span>
-          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed md:max-w-md md:text-right">
+            {score.status === 'excellent' && 'Excelente configuración para escalar campañas de Amazon Ads. Margen de maniobra amplio.'}
+            {score.status === 'viable' && 'Configuración viable pero requiere ajustes. Optimiza precio, coste por clic o busca palabras clave menos competidas.'}
+            {score.status === 'not-recommended' && 'No recomendable para Amazon Ads en las condiciones actuales. Reformula antes de invertir.'}
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground leading-relaxed md:max-w-md md:text-right">
-          {score.status === 'excellent' && 'Excelente configuración para escalar campañas de Amazon Ads. Margen de maniobra amplio.'}
-          {score.status === 'viable' && 'Configuración viable pero requiere ajustes. Optimiza precio, coste por clic o busca palabras clave menos competidas.'}
-          {score.status === 'not-recommended' && 'No recomendable para Amazon Ads en las condiciones actuales. Reformula antes de invertir.'}
-        </p>
-      </div>
+      )}
 
       {/* Breakdown — 3 explanatory cards */}
       <div className="space-y-3">
