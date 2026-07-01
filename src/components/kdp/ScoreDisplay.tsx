@@ -832,6 +832,7 @@ export const ScoreDisplay = ({
             tier={bacosInfo.tier}
             tierLabel={bacosInfo.tierLabel}
             explanation={bacosInfo.explanation}
+            advice={bacosInfo.advice}
             realValue={activeResults ? `${activeResults.margenPct.toFixed(1)}% real` : undefined}
           />
           <ScoreCard
