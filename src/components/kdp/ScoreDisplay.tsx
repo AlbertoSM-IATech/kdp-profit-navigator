@@ -819,6 +819,7 @@ export const ScoreDisplay = ({
             tier={clicsInfo.tier}
             tierLabel={clicsInfo.tierLabel}
             explanation={clicsInfo.explanation}
+            advice={clicsInfo.advice}
             realValue={activeResults ? `${activeResults.clicsMaxPorVenta} clics reales` : undefined}
           />
           <ScoreCard
