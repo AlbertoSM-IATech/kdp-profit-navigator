@@ -21,6 +21,13 @@ interface ScoreDisplayProps {
 
 type Tier = 'success' | 'warning' | 'destructive';
 
+interface TierInfo {
+  tier: Tier;
+  tierLabel: string;
+  explanation: string;
+  advice: string;
+}
+
 interface ScoreCardProps {
   label: string;
   value: number;
@@ -31,6 +38,7 @@ interface ScoreCardProps {
   tier: Tier;
   tierLabel: string;
   explanation: string;
+  advice: string;
   realValue?: string;
 }
 
@@ -40,63 +48,230 @@ const tierDotClass: Record<Tier, string> = {
   destructive: 'bg-destructive',
 };
 
-const ScoreCard = ({ label, value, max, icon, definition, origin, tier, tierLabel, explanation, realValue }: ScoreCardProps) => (
-  <div className="rounded-xl border border-border bg-card p-4 space-y-3 h-full flex flex-col">
-    <div className="flex items-start justify-between gap-3">
-      <div className="flex items-center gap-2 min-w-0">
-        <div className="p-1.5 bg-muted rounded-md shrink-0">{icon}</div>
-        <TooltipProvider delayDuration={200}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="text-sm font-medium text-foreground flex items-center gap-1 cursor-help">
-                {label}
-                <HelpCircle className="h-3 w-3 text-muted-foreground shrink-0" />
+const tierAccentClass: Record<Tier, string> = {
+  success: 'from-success/15 via-transparent to-transparent',
+  warning: 'from-warning/15 via-transparent to-transparent',
+  destructive: 'from-destructive/15 via-transparent to-transparent',
+};
+
+const tierBarClass: Record<Tier, string> = {
+  success: 'bg-gradient-to-r from-success/80 to-success',
+  warning: 'bg-gradient-to-r from-warning/80 to-warning',
+  destructive: 'bg-gradient-to-r from-destructive/80 to-destructive',
+};
+
+const ScoreCard = ({
+  label,
+  value,
+  max,
+  icon,
+  definition,
+  origin,
+  tier,
+  tierLabel,
+  explanation,
+  advice,
+  realValue,
+}: ScoreCardProps) => {
+  const pct = Math.max(0, Math.min(100, (value / max) * 100));
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card via-card to-muted/30 shadow-sm h-full flex flex-col">
+      {/* Accent blur en la esquina, según el tier */}
+      <div
+        aria-hidden
+        className={`pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full blur-3xl bg-gradient-to-br ${tierAccentClass[tier]}`}
+      />
+      <div className="relative p-5 flex flex-col gap-4 flex-1">
+        {/* Cabecera */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="p-1.5 bg-muted rounded-md shrink-0">{icon}</div>
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-sm font-semibold text-foreground flex items-center gap-1 cursor-help">
+                    {label}
+                    <HelpCircle className="h-3 w-3 text-muted-foreground shrink-0" />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs space-y-2">
+                  <p className="text-xs font-semibold text-foreground">Definición</p>
+                  <p className="text-xs text-muted-foreground">{definition}</p>
+                  <p className="text-xs font-semibold text-foreground pt-1">Cómo se calcula</p>
+                  <p className="text-xs text-muted-foreground">{origin}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <div className="flex items-baseline gap-0.5 shrink-0 tabular-nums">
+            <span className="font-heading text-3xl font-extrabold text-foreground leading-none">
+              {value}
+            </span>
+            <span className="text-xs text-muted-foreground">/{max}</span>
+          </div>
+        </div>
+
+        {/* Barra de progreso interna */}
+        <div className="space-y-1.5">
+          <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+            <div
+              className={`h-full rounded-full ${tierBarClass[tier]} transition-[width] duration-700 ease-out`}
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className={`w-2 h-2 rounded-full ${tierDotClass[tier]}`} />
+            <span className="text-xs font-semibold text-foreground">{tierLabel}</span>
+            {realValue && (
+              <span className="text-xs text-muted-foreground ml-auto tabular-nums">
+                {realValue}
               </span>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-xs space-y-2">
-              <p className="text-xs font-medium text-foreground">Definición</p>
-              <p className="text-xs text-muted-foreground">{definition}</p>
-              <p className="text-xs font-medium text-foreground pt-1">Origen</p>
-              <p className="text-xs text-muted-foreground">{origin}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-      <div className="flex items-baseline gap-0.5 shrink-0">
-        <span className="text-2xl font-bold text-foreground leading-none">{value}</span>
-        <span className="text-xs text-muted-foreground">/{max}</span>
+            )}
+          </div>
+        </div>
+
+        {/* Explicación */}
+        <p className="text-xs text-muted-foreground leading-relaxed">{explanation}</p>
+
+        {/* Divisor */}
+        <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+        {/* Consejo accionable */}
+        <div className="flex items-start gap-2">
+          <Lightbulb className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">
+              Recomendación
+            </p>
+            <p className="text-xs text-foreground/90 leading-relaxed">{advice}</p>
+          </div>
+        </div>
       </div>
     </div>
-    <div className="flex items-center gap-1.5">
-      <span className={`w-2 h-2 rounded-full ${tierDotClass[tier]}`} />
-      <span className="text-xs font-semibold text-foreground">{tierLabel}</span>
-      {realValue && (
-        <span className="text-xs text-muted-foreground ml-auto">{realValue}</span>
-      )}
-    </div>
-    <p className="text-xs text-muted-foreground leading-relaxed">{explanation}</p>
-  </div>
-);
-
-const getClicsInfo = (v: number): { tier: Tier; tierLabel: string; explanation: string } => {
-  if (v >= 50) return { tier: 'success', tierLabel: 'Excelente', explanation: 'Puedes pagar 14 o más clics por cada venta. Tienes colchón suficiente para subidas del coste por clic sin perder rentabilidad.' };
-  if (v >= 35) return { tier: 'success', tierLabel: 'Bueno', explanation: 'Puedes pagar hasta 13 clics por venta. Margen suficiente para una campaña sana, aunque sin mucha holgura.' };
-  if (v >= 25) return { tier: 'warning', tierLabel: 'Aceptable', explanation: 'Solo 12 clics por venta. Funciona, pero cualquier subida del coste por clic empieza a comprometer el margen.' };
-  if (v >= 15) return { tier: 'warning', tierLabel: 'Ajustado', explanation: 'Únicamente 11 clics por venta. Estás al límite: optimiza precio o palabras clave antes de escalar.' };
-  return { tier: 'destructive', tierLabel: 'En riesgo', explanation: 'Menos de 10 clics por venta. Cualquier subida del coste por clic convierte la campaña en pérdida directa.' };
+  );
 };
 
-const getBacosInfo = (v: number): { tier: Tier; tierLabel: string; explanation: string } => {
-  if (v >= 40) return { tier: 'success', tierLabel: 'Excelente', explanation: 'Puedes destinar más del 40% del precio a publicidad manteniendo rentabilidad. Margen amplio para escalar.' };
-  if (v >= 25) return { tier: 'success', tierLabel: 'Bueno', explanation: 'Entre 35% y 40% disponible para publicidad. Margen razonable, pero vigila el coste por clic.' };
-  if (v >= 15) return { tier: 'warning', tierLabel: 'Ajustado', explanation: 'Entre 30% y 35%. Margen estrecho: prioriza palabras clave eficientes y campañas exactas.' };
-  return { tier: 'destructive', tierLabel: 'En riesgo', explanation: 'Menos del 30% disponible para publicidad. Apenas queda margen para invertir en Amazon Ads.' };
+const getClicsInfo = (v: number): TierInfo => {
+  if (v >= 50)
+    return {
+      tier: 'success',
+      tierLabel: 'Excelente',
+      explanation:
+        'Puedes pagar 14 o más clics por cada venta manteniendo la rentabilidad objetivo. Tienes colchón amplio ante subidas de coste por clic o caídas de conversión.',
+      advice:
+        'Escala presupuesto en las palabras clave con mejor CTR. Prueba pujas agresivas para ganar posiciones sin comprometer margen.',
+    };
+  if (v >= 35)
+    return {
+      tier: 'success',
+      tierLabel: 'Bueno',
+      explanation:
+        'Puedes asumir hasta 13 clics por venta. Margen sano para una campaña estable, aunque sin gran holgura si el coste por clic sube de forma sostenida.',
+      advice:
+        'Mantén pujas controladas y vigila el coste por clic semanalmente. Descarta términos con más de 15 clics sin venta para proteger el margen.',
+    };
+  if (v >= 25)
+    return {
+      tier: 'warning',
+      tierLabel: 'Aceptable',
+      explanation:
+        'Solo dispones de 12 clics por venta. La campaña funciona, pero cualquier subida del coste por clic reduce el margen muy rápido.',
+      advice:
+        'Prioriza concordancia exacta y palabras clave long-tail con menor competencia. Considera subir 1-2 € el precio de venta para ganar respiración.',
+    };
+  if (v >= 15)
+    return {
+      tier: 'warning',
+      tierLabel: 'Ajustado',
+      explanation:
+        'Únicamente 11 clics por venta. Estás en el filo: sin optimización previa, escalar presupuesto convertirá la campaña en pérdida.',
+      advice:
+        'Antes de invertir: sube precio, reduce páginas si es posible o busca un nicho con coste por clic menor. Empieza con presupuestos diarios bajos.',
+    };
+  if (v >= 8)
+    return {
+      tier: 'warning',
+      tierLabel: 'Al límite',
+      explanation:
+        'Justo en 10 clics por venta, el umbral mínimo operativo. No hay margen para imprevistos: una décima más de coste por clic ya te lleva a pérdidas.',
+      advice:
+        'No lances Ads sin optimizar antes. Sube precio, mejora la portada para elevar el CTR y reduce el coste por clic buscando keywords de menor competencia.',
+    };
+  return {
+    tier: 'destructive',
+    tierLabel: 'En riesgo',
+    explanation:
+      'Menos de 10 clics por venta. La estructura de costes actual no permite Amazon Ads: cada venta atribuida a anuncios se paga en pérdidas.',
+    advice:
+      'Reformula antes de invertir: sube precio de venta, baja páginas o cambia de marketplace / nicho. No actives campañas hasta llegar mínimo a 11-12 clics.',
+  };
 };
 
-const getPvpInfo = (v: number): { tier: Tier; tierLabel: string; explanation: string } => {
-  if (v >= 8) return { tier: 'success', tierLabel: 'Por encima del mínimo', explanation: 'Tu precio supera con holgura el precio mínimo viable. Tienes margen para promociones puntuales sin comprometer la rentabilidad.' };
-  if (v >= 4) return { tier: 'warning', tierLabel: 'Cerca del mínimo', explanation: 'Tu precio está próximo al mínimo necesario para alcanzar tu margen objetivo. Poco colchón para bajadas o descuentos.' };
-  return { tier: 'destructive', tierLabel: 'Por debajo del mínimo', explanation: 'Tu precio actual no cubre el margen objetivo definido. Sube el precio o reduce costes antes de lanzar campañas.' };
+const getBacosInfo = (v: number): TierInfo => {
+  if (v >= 40)
+    return {
+      tier: 'success',
+      tierLabel: 'Excelente',
+      explanation:
+        'Más del 40% del precio de venta queda disponible para publicidad manteniendo rentabilidad. Es el margen ideal para escalar de forma agresiva.',
+      advice:
+        'Puedes probar campañas Sponsored Brands y Product Targeting. Aprovecha para invertir en visibilidad de marca sin comprometer beneficio.',
+    };
+  if (v >= 25)
+    return {
+      tier: 'success',
+      tierLabel: 'Bueno',
+      explanation:
+        'Entre 35% y 40% del precio disponible para Ads. Margen razonable para una campaña sostenible, pero controla que el coste por clic no suba.',
+      advice:
+        'Mantén el ACoS objetivo por debajo del BACOS. Revisa keywords perdedoras cada 15 días y reasigna presupuesto a las ganadoras.',
+    };
+  if (v >= 15)
+    return {
+      tier: 'warning',
+      tierLabel: 'Ajustado',
+      explanation:
+        'Solo entre 30% y 35% del precio queda para publicidad. Margen estrecho: cada euro mal invertido pesa mucho sobre el beneficio final.',
+      advice:
+        'Usa exclusivamente concordancia exacta y frase. Descarta broad match. Añade negativas de forma proactiva para no quemar presupuesto en clics irrelevantes.',
+    };
+  return {
+    tier: 'destructive',
+    tierLabel: 'En riesgo',
+    explanation:
+      'Menos del 30% del precio disponible para Ads. Prácticamente no queda margen para invertir en publicidad de forma rentable.',
+    advice:
+      'Sube precio de venta, reduce costes de impresión (menos páginas, blanco y negro) o cambia de formato. Sin ampliar margen, Ads dará pérdidas.',
+  };
+};
+
+const getPvpInfo = (v: number): TierInfo => {
+  if (v >= 8)
+    return {
+      tier: 'success',
+      tierLabel: 'Por encima del mínimo',
+      explanation:
+        'Tu precio supera con holgura el precio mínimo viable calculado. Tienes margen para promociones puntuales y descuentos sin comprometer la rentabilidad objetivo.',
+      advice:
+        'Puedes plantear descuentos de lanzamiento del 10-20% o cupones de Amazon sin quedarte por debajo del umbral rentable.',
+    };
+  if (v >= 4)
+    return {
+      tier: 'warning',
+      tierLabel: 'Cerca del mínimo',
+      explanation:
+        'Tu precio está muy próximo al mínimo necesario para alcanzar tu margen objetivo. Cualquier descuento o subida de coste te deja por debajo.',
+      advice:
+        'Evita promociones agresivas. Sube el precio 1-2 € para ganar colchón antes de activar campañas o cupones.',
+    };
+  return {
+    tier: 'destructive',
+    tierLabel: 'Por debajo del mínimo',
+    explanation:
+      'Tu precio actual no cubre el margen objetivo definido. Vendes por debajo del umbral rentable que marcaste al iniciar el análisis.',
+    advice:
+      'Sube el precio hasta alcanzar el mínimo recomendado o revisa costes (páginas, interior, formato). Lanzar Ads así amplifica las pérdidas.',
+  };
 };
 export const ScoreDisplay = ({
   score,
