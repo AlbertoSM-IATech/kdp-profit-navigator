@@ -1,7 +1,7 @@
 import { ScoreBreakdown, GlobalData, EbookResults, PaperbackResults, PositioningResults } from '@/types/kdp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Gauge, MousePointer, TrendingUp, Tag, HelpCircle, Download } from 'lucide-react';
+import { Gauge, MousePointer, TrendingUp, Tag, HelpCircle, Download, Lightbulb } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 interface ScoreDisplayProps {
