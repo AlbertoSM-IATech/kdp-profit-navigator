@@ -4,6 +4,7 @@ import { ScoreDisplay } from '@/components/kdp/ScoreDisplay';
 import { ResultsTable } from '@/components/kdp/ResultsTable';
 import { PositioningSection } from '@/components/kdp/PositioningSection';
 import { PaperbackSimulator } from '@/components/kdp/PaperbackSimulator';
+import { ResultsHeader } from '@/components/kdp/wizard/ResultsHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, SlidersHorizontal, Link2 } from 'lucide-react';
