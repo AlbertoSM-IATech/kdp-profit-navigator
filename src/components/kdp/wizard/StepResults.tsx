@@ -143,12 +143,23 @@ export const StepResults = ({
 
   return (
     <div className="space-y-5">
-      {/* Score: ahora ocupa la fila completa; acciones viven en la cabecera del desglose */}
+      {/* Premium header: resumen de inputs + score con barra animada */}
+      <ResultsHeader
+        globalData={globalData}
+        ebookData={ebookData}
+        paperbackData={paperbackData}
+        score={scoreBreakdown}
+        activeResults={activeResults}
+        currencySymbol={globalData.marketplace === 'COM' ? '$' : '€'}
+      />
+
+      {/* Desglose del score + acciones (guardar / compartir / PDF) */}
       <section className="rounded-xl border border-border bg-card p-5">
         <ScoreDisplay
           score={scoreBreakdown}
           currencySymbol={globalData.marketplace === 'COM' ? '$' : '€'}
           embedded
+          hideScoreSummary
           globalData={globalData}
           activeResults={activeResults}
           positioningResults={positioningResults}
