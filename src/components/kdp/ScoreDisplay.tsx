@@ -75,8 +75,12 @@ const ScoreCard = ({
 }: ScoreCardProps) => {
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card via-card to-muted/30 shadow-sm h-full flex flex-col">
-      {/* Accent blur en la esquina, según el tier */}
+    <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card via-card to-primary/[0.06] shadow-sm h-full flex flex-col transition-shadow hover:shadow-md">
+      {/* Accent blur naranja base + tier overlay */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-20 -left-16 h-40 w-40 rounded-full bg-primary/15 blur-3xl"
+      />
       <div
         aria-hidden
         className={`pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full blur-3xl bg-gradient-to-br ${tierAccentClass[tier]}`}
