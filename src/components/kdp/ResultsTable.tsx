@@ -77,11 +77,16 @@ export const ResultsTable = ({ data, globalData, embedded = false }: ResultsTabl
   const renderContent = () => (
     data.length > 0 ? (
       <>
-        <div className="overflow-x-auto rounded-lg border border-border">
-          <Table className="min-w-[960px]">
-            <TableHeader>
-              <TRow className="bg-muted/50">
-                <TableHead className="font-heading font-semibold w-[140px] py-3">Tipo</TableHead>
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card via-card to-primary/[0.06] shadow-sm">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full bg-primary/15 blur-3xl"
+          />
+          <div className="relative overflow-x-auto">
+            <Table className="min-w-[960px]">
+              <TableHeader>
+                <TRow className="bg-muted/40">
+                  <TableHead className="font-heading font-semibold w-[140px] py-3">Tipo</TableHead>
                 <TableHead className="font-heading font-semibold text-right w-[90px] py-3">PVP</TableHead>
                 <TableHead className="font-heading font-semibold text-right w-[110px] py-3">Regalías</TableHead>
                 <TableHead className="font-heading font-semibold text-right w-[180px] py-3">
