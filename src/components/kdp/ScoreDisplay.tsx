@@ -822,7 +822,16 @@ export const ScoreDisplay = ({
 
   const clicsInfo = getClicsInfo(score.clicsScore);
   const bacosInfo = getBacosInfo(score.bacosScore);
-  const pvpInfo = getPvpInfo(score.pvpVsMinScore);
+  const pvpInfo = getPvpInfo(score.pvpVsMinScore, {
+    currentPvp,
+    minPvp: activeResults?.precioMinObjetivo ?? null,
+    clicsScore: score.clicsScore,
+    bacosScore: score.bacosScore,
+    clicsMaxReal: activeResults?.clicsMaxPorVenta ?? 0,
+    bacosReal: activeResults?.margenPct ?? 0,
+    currencySymbol,
+    isPaperback: globalData?.selectedFormat === 'PAPERBACK',
+  });
 
   const content = (
     <div className="space-y-6">
