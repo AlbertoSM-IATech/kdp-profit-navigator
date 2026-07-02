@@ -249,16 +249,65 @@ const getBacosInfo = (v: number): TierInfo => {
   };
 };
 
-const getPvpInfo = (v: number): TierInfo => {
-  if (v >= 8)
+interface PvpCtx {
+  currentPvp: number | null;
+  minPvp: number | null;
+  clicsScore: number; // 0-50
+  bacosScore: number; // 0-40
+  clicsMaxReal: number;
+  bacosReal: number;
+  currencySymbol: string;
+  isPaperback: boolean;
+}
+
+const getPvpInfo = (v: number, ctx: PvpCtx): TierInfo => {
+  const {
+    currentPvp,
+    minPvp,
+    clicsScore,
+    bacosScore,
+    clicsMaxReal,
+    bacosReal,
+    currencySymbol,
+    isPaperback,
+  } = ctx;
+
+  const gap =
+    currentPvp != null && minPvp != null ? Math.max(0, currentPvp - minPvp) : null;
+  const cushion = gap != null ? `${gap.toFixed(2)}${currencySymbol}` : 'holgura';
+
+  if (v >= 8) {
+    const clicsHasRoom = clicsScore < 50; // no está en excelente máximo
+    const bacosHasRoom = bacosScore < 40;
+
+    // Todo excelente: solo recomendar descuentos de lanzamiento
+    if (!clicsHasRoom && !bacosHasRoom) {
+      return {
+        tier: 'success',
+        tierLabel: 'Por encima del mínimo',
+        explanation: `Tu precio supera al mínimo viable en ${cushion} y el resto de indicadores están en zona óptima. Configuración muy sólida para escalar campañas.`,
+        advice:
+          'Puedes plantear descuentos de lanzamiento del 10-20% o cupones de Amazon sin bajar del umbral rentable, y activar Ads con confianza desde el día uno.',
+      };
+    }
+
+    // Construir consejos accionables ordenados por impacto
+    const suggestions: string[] = [];
+    suggestions.push(
+      `sube 1-2${currencySymbol} el precio de venta para elevar BACOS (${bacosReal.toFixed(1)}%) y clics máximos por venta (${clicsMaxReal})`,
+    );
+    if (isPaperback) {
+      suggestions.push('reduce páginas si el contenido lo permite (bajan costes de impresión y sube la regalía neta)');
+    }
+    suggestions.push('busca palabras clave con menor coste por clic para ampliar el margen publicitario');
+
     return {
       tier: 'success',
       tierLabel: 'Por encima del mínimo',
-      explanation:
-        'Tu precio supera con holgura el precio mínimo viable calculado. Tienes margen para promociones puntuales y descuentos sin comprometer la rentabilidad objetivo.',
-      advice:
-        'Puedes plantear descuentos de lanzamiento del 10-20% o cupones de Amazon sin quedarte por debajo del umbral rentable.',
+      explanation: `Tu precio supera al mínimo viable en ${cushion}, pero la puntuación global aún tiene margen de mejora: subir precio o recortar costes elevaría el BACOS y los clics máximos por venta, ampliando tu seguridad en Amazon Ads.`,
+      advice: `Antes de aplicar descuentos de lanzamiento, optimiza en este orden: ${suggestions.join('; ')}. Después reserva ese colchón adicional para promociones del 10-20% sin comprometer rentabilidad.`,
     };
+  }
   if (v >= 4)
     return {
       tier: 'warning',
@@ -266,7 +315,7 @@ const getPvpInfo = (v: number): TierInfo => {
       explanation:
         'Tu precio está muy próximo al mínimo necesario para alcanzar tu margen objetivo. Cualquier descuento o subida de coste te deja por debajo.',
       advice:
-        'Evita promociones agresivas. Sube el precio 1-2 € para ganar colchón antes de activar campañas o cupones.',
+        `Evita promociones agresivas. Sube el precio 1-2${currencySymbol} o reduce costes (páginas, interior) para ganar colchón antes de activar campañas o cupones.`,
     };
   return {
     tier: 'destructive',
