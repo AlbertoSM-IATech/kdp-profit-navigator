@@ -338,7 +338,8 @@ export const ScoreDisplay = ({
   loadedNicheId,
   onQuickSave,
   headerActions,
-  hideScoreSummary = false
+  hideScoreSummary = false,
+  currentPvp = null,
 }: ScoreDisplayProps) => {
   const handleExportPDF = () => {
     if (!score || !globalData || !activeResults) {
