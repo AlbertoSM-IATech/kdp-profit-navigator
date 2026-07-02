@@ -17,6 +17,7 @@ interface ScoreDisplayProps {
   onQuickSave?: () => void;
   headerActions?: React.ReactNode;
   hideScoreSummary?: boolean;
+  currentPvp?: number | null;
 }
 
 type Tier = 'success' | 'warning' | 'destructive';
