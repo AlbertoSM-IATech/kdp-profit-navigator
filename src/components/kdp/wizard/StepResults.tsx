@@ -166,6 +166,7 @@ export const StepResults = ({
           loadedNicheId={loadedNicheId}
           onQuickSave={onQuickSave}
           headerActions={headerActions}
+          currentPvp={globalData.selectedFormat === 'EBOOK' ? ebookData.pvp : paperbackData.pvp}
         />
       </section>
 
