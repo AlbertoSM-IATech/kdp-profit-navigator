@@ -42,87 +42,103 @@ export const PositioningSection = ({
 
     return (
       <div className="space-y-5">
-        {/* Metrics row — 3 cards horizontally with explanation */}
+        {/* Metrics row — 3 premium cards con acento naranja */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className="rounded-xl p-4 border border-border bg-card space-y-2">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                Conversión de referencia
-              </span>
+          {[
+            {
+              icon: <TrendingUp className="h-4 w-4 text-primary" />,
+              label: 'Conversión de referencia',
+              value: '10%',
+              hint: `Tasa media del sector: aproximadamente 1 venta por cada 10 clics de usuarios interesados.`,
+            },
+            {
+              icon: <MousePointer className="h-4 w-4 text-primary" />,
+              label: 'Clics diarios necesarios',
+              value: `${Math.ceil(results.clicsDiarios)}`,
+              hint: `Tráfico diario que necesitas hacia tu ficha para conseguir ${ventasDiarias} ventas al día y competir en el nicho.`,
+            },
+            {
+              icon: <Euro className="h-4 w-4 text-primary" />,
+              label: 'Inversión diaria estimada',
+              value: `${results.inversionDiaria.toFixed(2)}${currencySymbol}`,
+              hint: `Presupuesto diario aproximado en Amazon Ads asumiendo un coste por clic de ${cpc.toFixed(2)}${currencySymbol}.`,
+            },
+          ].map((m) => (
+            <div
+              key={m.label}
+              className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card via-card to-primary/[0.06] shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full bg-primary/15 blur-3xl"
+              />
+              <div className="relative p-5 space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-primary/10 rounded-md">{m.icon}</div>
+                  <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+                    {m.label}
+                  </span>
+                </div>
+                <p className="font-heading text-3xl font-extrabold text-foreground tabular-nums">
+                  {m.value}
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{m.hint}</p>
+              </div>
             </div>
-            <p className="text-2xl font-bold text-foreground">10%</p>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Tasa media del sector: aproximadamente 1 venta por cada 10 clics de usuarios interesados.
-            </p>
-          </div>
-
-          <div className="rounded-xl p-4 border border-border bg-card space-y-2">
-            <div className="flex items-center gap-2">
-              <MousePointer className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                Clics diarios necesarios
-              </span>
-            </div>
-            <p className="text-2xl font-bold text-foreground">{Math.ceil(results.clicsDiarios)}</p>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Tráfico diario que necesitas hacia tu ficha para conseguir {ventasDiarias} ventas al día y competir en el nicho.
-            </p>
-          </div>
-
-          <div className="rounded-xl p-4 border border-border bg-card space-y-2">
-            <div className="flex items-center gap-2">
-              <Euro className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                Inversión diaria estimada
-              </span>
-            </div>
-            <p className="text-2xl font-bold text-foreground">{results.inversionDiaria.toFixed(2)}{currencySymbol}</p>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Presupuesto diario aproximado en Amazon Ads asumiendo un coste por clic de {cpc.toFixed(2)}{currencySymbol}.
-            </p>
-          </div>
+          ))}
         </div>
 
-        {/* Strategic advice card */}
-        <div className="rounded-xl p-5 border border-border bg-card">
-          <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2 text-base">
-            <Target className="h-5 w-5 text-secondary shrink-0" />
-            Consejo estratégico
-          </h4>
-
-          <div className="space-y-4 text-sm leading-relaxed">
-            <p className="text-muted-foreground">
-              Para competir con los libros mejor posicionados de tu nicho, necesitarás conseguir aproximadamente <span className="text-foreground font-semibold">{ventasDiarias} copias vendidas al día</span>. Este es el umbral mínimo para entrar en el radar del algoritmo de Amazon y empezar a ganar visibilidad orgánica.
-            </p>
-
-            <p className="text-muted-foreground">
-              Asumiendo una tasa de conversión del 10% (1 venta por cada 10 clics de usuarios interesados), necesitarás generar <span className="text-foreground font-semibold">{clicsDiarios} clics diarios</span> hacia tu página de producto. Esto se traduce en una inversión publicitaria estimada de <span className="text-foreground font-semibold">{inversionDiaria.toFixed(2)}{currencySymbol} al día</span> si utilizas Amazon Ads como canal principal.
-            </p>
-
-            <p className="font-medium text-foreground pt-3 border-t border-border/50">
-              Este dato te permite decidir si el nicho es viable para tu presupuesto antes de producir el libro. Si la inversión diaria supera tu capacidad, considera nichos menos competidos o estrategias de posicionamiento orgánico a largo plazo.
-            </p>
-          </div>
-
-          {activeResults && clicsMaxBase > 0 && (
-            <div className="mt-4 pt-4 border-t border-border/50">
-              <div className="flex items-center gap-2 mb-2">
-                <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-semibold text-foreground">Punto de equilibrio publicitario</span>
+        {/* Strategic advice — premium card */}
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card via-card to-primary/[0.06] shadow-sm">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/15 blur-3xl"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-24 -left-16 h-56 w-56 rounded-full bg-secondary/10 blur-3xl"
+          />
+          <div className="relative p-6">
+            <h4 className="font-heading font-semibold text-foreground mb-3 flex items-center gap-2 text-base">
+              <div className="p-1.5 rounded-md bg-primary/10">
+                <Target className="h-4 w-4 text-primary shrink-0" />
               </div>
-              <p className="text-sm text-muted-foreground">
-                Con tu configuración actual de márgenes y coste por clic, necesitas conseguir al menos <span className="font-semibold text-foreground">1 pedido por cada {clicsMaxBase} clics</span> para que la campaña no genere pérdidas.
+              Consejo estratégico
+            </h4>
+
+            <div className="space-y-4 text-sm leading-relaxed">
+              <p className="text-muted-foreground">
+                Para competir con los libros mejor posicionados de tu nicho, necesitarás conseguir aproximadamente <span className="text-foreground font-semibold">{ventasDiarias} copias vendidas al día</span>. Este es el umbral mínimo para entrar en el radar del algoritmo de Amazon y empezar a ganar visibilidad orgánica.
+              </p>
+
+              <p className="text-muted-foreground">
+                Asumiendo una tasa de conversión del 10% (1 venta por cada 10 clics de usuarios interesados), necesitarás generar <span className="text-foreground font-semibold">{clicsDiarios} clics diarios</span> hacia tu página de producto. Esto se traduce en una inversión publicitaria estimada de <span className="text-foreground font-semibold">{inversionDiaria.toFixed(2)}{currencySymbol} al día</span> si utilizas Amazon Ads como canal principal.
+              </p>
+
+              <p className="font-medium text-foreground pt-3 border-t border-border/50">
+                Este dato te permite decidir si el nicho es viable para tu presupuesto antes de producir el libro. Si la inversión diaria supera tu capacidad, considera nichos menos competidos o estrategias de posicionamiento orgánico a largo plazo.
               </p>
             </div>
-          )}
 
-          <div className="mt-4 pt-4 border-t border-border/50">
-            <div className="flex items-start gap-2">
-              <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-              <p className="text-xs text-muted-foreground/80 leading-relaxed italic">
-                {DISCLAIMER_TEXT}
-              </p>
+            {activeResults && clicsMaxBase > 0 && (
+              <div className="mt-4 pt-4 border-t border-border/50">
+                <div className="flex items-center gap-2 mb-2">
+                  <BarChart3 className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-semibold text-foreground">Punto de equilibrio publicitario</span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Con tu configuración actual de márgenes y coste por clic, necesitas conseguir al menos <span className="font-semibold text-foreground">1 pedido por cada {clicsMaxBase} clics</span> para que la campaña no genere pérdidas.
+                </p>
+              </div>
+            )}
+
+            <div className="mt-4 pt-4 border-t border-border/50">
+              <div className="flex items-start gap-2">
+                <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                <p className="text-xs text-muted-foreground/80 leading-relaxed italic">
+                  {DISCLAIMER_TEXT}
+                </p>
+              </div>
             </div>
           </div>
         </div>
