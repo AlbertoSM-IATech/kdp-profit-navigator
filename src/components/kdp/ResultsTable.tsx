@@ -161,6 +161,7 @@ export const ResultsTable = ({ data, globalData, embedded = false }: ResultsTabl
               ))}
             </TableBody>
           </Table>
+          </div>
         </div>
 
         {/* Legend */}
