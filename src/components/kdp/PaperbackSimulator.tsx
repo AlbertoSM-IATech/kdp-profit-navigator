@@ -432,7 +432,8 @@ export const PaperbackSimulator = ({
           </div>
         </div>
       </div>
-      </div>
+
+
 
       {/* RESULTADOS SIMULADOS — debajo de los controles */}
       <div className="space-y-3">
