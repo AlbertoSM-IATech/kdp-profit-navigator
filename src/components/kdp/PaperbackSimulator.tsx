@@ -322,17 +322,26 @@ export const PaperbackSimulator = ({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-5 pt-1">
           {/* Precio de venta */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center gap-2">
               <Label className="flex items-center gap-1.5 text-sm font-medium">
                 <Euro className="h-4 w-4 text-muted-foreground" />
                 Precio de venta
                 <Help text="Precio final con IVA al que se vende el libro en Amazon. Cambia la regalía y el margen." />
               </Label>
-              <span className="font-mono font-semibold">{simState.pvp.toFixed(2)}{currencySymbol}</span>
+              <NumField
+                value={simState.pvp}
+                min={0.99}
+                max={99.99}
+                step={0.01}
+                decimals={2}
+                suffix={currencySymbol}
+                ariaLabel="Precio de venta"
+                onCommit={v => setSimState(prev => ({ ...prev, pvp: v }))}
+              />
             </div>
-            <Slider className="[&>span:first-child]:bg-muted" value={[simState.pvp]} min={4.99} max={29.99} step={0.5}
-              onValueChange={([v]) => setSimState(prev => ({ ...prev, pvp: v }))} />
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <Slider className="[&>span:first-child]:bg-muted" value={[simState.pvp]} min={4.99} max={29.99} step={0.01}
+              onValueChange={([v]) => setSimState(prev => ({ ...prev, pvp: Math.round(v * 100) / 100 }))} />
+            <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
               <span>4.99{currencySymbol}</span>
               <span>Regalía: {(royaltyRate * 100).toFixed(0)}%</span>
               <span>29.99{currencySymbol}</span>
@@ -341,17 +350,26 @@ export const PaperbackSimulator = ({
 
           {/* Páginas */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center gap-2">
               <Label className="flex items-center gap-1.5 text-sm font-medium">
                 <FileText className="h-4 w-4 text-muted-foreground" />
                 Número de páginas
                 <Help text="Páginas interiores. Afecta directamente al coste de impresión por unidad." />
               </Label>
-              <span className="font-mono font-semibold">{simState.pages}</span>
+              <NumField
+                value={simState.pages}
+                min={minPages}
+                max={828}
+                step={1}
+                decimals={0}
+                ariaLabel="Número de páginas"
+                width="w-20"
+                onCommit={v => setSimState(prev => ({ ...prev, pages: Math.round(v) }))}
+              />
             </div>
             <Slider className="[&>span:first-child]:bg-muted" value={[simState.pages]} min={minPages} max={400} step={1}
               onValueChange={([v]) => setSimState(prev => ({ ...prev, pages: v }))} />
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
               <span>{minPages}</span>
               <span>Impresión: {gastosImpresion.toFixed(2)}{currencySymbol}</span>
               <span>400</span>
@@ -360,17 +378,26 @@ export const PaperbackSimulator = ({
 
           {/* Coste por clic */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center gap-2">
               <Label className="flex items-center gap-1.5 text-sm font-medium">
                 <Euro className="h-4 w-4 text-muted-foreground" />
                 Coste por clic
                 <Help text="Lo que pagas en Amazon Ads por cada clic. Determina cuántos clics puedes permitirte por venta." />
               </Label>
-              <span className="font-mono font-semibold">{simState.cpc.toFixed(2)}{currencySymbol}</span>
+              <NumField
+                value={simState.cpc}
+                min={0.01}
+                max={5}
+                step={0.01}
+                decimals={2}
+                suffix={currencySymbol}
+                ariaLabel="Coste por clic"
+                onCommit={v => setSimState(prev => ({ ...prev, cpc: v }))}
+              />
             </div>
             <Slider className="[&>span:first-child]:bg-muted" value={[simState.cpc]} min={0.05} max={1.5} step={0.01}
-              onValueChange={([v]) => setSimState(prev => ({ ...prev, cpc: v }))} />
-            <div className="flex justify-between text-xs text-muted-foreground">
+              onValueChange={([v]) => setSimState(prev => ({ ...prev, cpc: Math.round(v * 100) / 100 }))} />
+            <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
               <span>0.05{currencySymbol}</span>
               <span>Máximo rentable: {cpcMaxRentable.toFixed(2)}{currencySymbol}</span>
               <span>1.50{currencySymbol}</span>
@@ -379,22 +406,32 @@ export const PaperbackSimulator = ({
 
           {/* Margen objetivo */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center gap-2">
               <Label className="flex items-center gap-1.5 text-sm font-medium">
                 <Percent className="h-4 w-4 text-muted-foreground" />
                 Margen objetivo
                 <Help text="Margen neto mínimo que quieres asegurar por venta. Recomendado: 30% o superior." />
               </Label>
-              <span className="font-mono font-semibold">{simState.margenObjetivo}%</span>
+              <NumField
+                value={simState.margenObjetivo}
+                min={0}
+                max={90}
+                step={0.01}
+                decimals={2}
+                suffix="%"
+                ariaLabel="Margen objetivo"
+                onCommit={v => setSimState(prev => ({ ...prev, margenObjetivo: v }))}
+              />
             </div>
-            <Slider className="[&>span:first-child]:bg-muted" value={[simState.margenObjetivo]} min={10} max={60} step={5}
-              onValueChange={([v]) => setSimState(prev => ({ ...prev, margenObjetivo: v }))} />
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <Slider className="[&>span:first-child]:bg-muted" value={[simState.margenObjetivo]} min={10} max={60} step={0.5}
+              onValueChange={([v]) => setSimState(prev => ({ ...prev, margenObjetivo: Math.round(v * 100) / 100 }))} />
+            <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
               <span>10%</span>
               <span>60%</span>
             </div>
           </div>
         </div>
+      </div>
       </div>
 
       {/* RESULTADOS SIMULADOS — debajo de los controles */}
