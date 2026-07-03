@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { SlidersHorizontal, Euro, FileText, Percent, HelpCircle, Palette, Ruler, ArrowUpFromLine } from 'lucide-react';
@@ -174,6 +175,70 @@ export const PaperbackSimulator = ({
     baseSimState.cpc !== simState.cpc ||
     baseSimState.margenObjetivo !== simState.margenObjetivo;
 
+  // Editable numeric field: allows keyboard input with decimals, clamps on blur.
+  const NumField = ({
+    value,
+    min,
+    max,
+    step,
+    decimals = 2,
+    suffix,
+    onCommit,
+    ariaLabel,
+    width = 'w-24',
+  }: {
+    value: number;
+    min: number;
+    max: number;
+    step: number;
+    decimals?: number;
+    suffix?: string;
+    onCommit: (v: number) => void;
+    ariaLabel: string;
+    width?: string;
+  }) => {
+    const [text, setText] = useState<string>(value.toFixed(decimals));
+    const lastPropRef = useRef(value);
+    useEffect(() => {
+      if (value !== lastPropRef.current) {
+        lastPropRef.current = value;
+        setText(value.toFixed(decimals));
+      }
+    }, [value, decimals]);
+
+    const commit = () => {
+      const normalized = text.replace(',', '.').trim();
+      const parsed = parseFloat(normalized);
+      if (isNaN(parsed)) {
+        setText(value.toFixed(decimals));
+        return;
+      }
+      const clamped = Math.min(max, Math.max(min, parsed));
+      const rounded = Math.round(clamped * Math.pow(10, decimals)) / Math.pow(10, decimals);
+      setText(rounded.toFixed(decimals));
+      if (rounded !== value) onCommit(rounded);
+    };
+
+    return (
+      <div className="flex items-center gap-1">
+        <Input
+          type="text"
+          inputMode="decimal"
+          aria-label={ariaLabel}
+          value={text}
+          onChange={e => setText(e.target.value)}
+          onBlur={commit}
+          onKeyDown={e => {
+            if (e.key === 'Enter') { (e.target as HTMLInputElement).blur(); }
+            if (e.key === 'Escape') { setText(value.toFixed(decimals)); (e.target as HTMLInputElement).blur(); }
+          }}
+          className={`h-8 ${width} text-right font-mono font-semibold tabular-nums px-2 py-1 text-sm`}
+        />
+        {suffix && <span className="text-xs text-muted-foreground w-3">{suffix}</span>}
+      </div>
+    );
+  };
+
   const Metric = ({
     label,
     tooltip,
@@ -191,7 +256,7 @@ export const PaperbackSimulator = ({
         <Help text={tooltip} />
       </div>
       <div className="flex items-baseline gap-2">
-        <span className="text-xl font-bold text-foreground">{value}</span>
+        <span className="text-xl font-bold text-foreground tabular-nums">{value}</span>
         {accent && <span className={`w-2 h-2 rounded-full bg-${accent}`} />}
       </div>
     </div>
@@ -257,17 +322,26 @@ export const PaperbackSimulator = ({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-5 pt-1">
           {/* Precio de venta */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center gap-2">
               <Label className="flex items-center gap-1.5 text-sm font-medium">
                 <Euro className="h-4 w-4 text-muted-foreground" />
                 Precio de venta
                 <Help text="Precio final con IVA al que se vende el libro en Amazon. Cambia la regalía y el margen." />
               </Label>
-              <span className="font-mono font-semibold">{simState.pvp.toFixed(2)}{currencySymbol}</span>
+              <NumField
+                value={simState.pvp}
+                min={0.99}
+                max={99.99}
+                step={0.01}
+                decimals={2}
+                suffix={currencySymbol}
+                ariaLabel="Precio de venta"
+                onCommit={v => setSimState(prev => ({ ...prev, pvp: v }))}
+              />
             </div>
-            <Slider className="[&>span:first-child]:bg-muted" value={[simState.pvp]} min={4.99} max={29.99} step={0.5}
-              onValueChange={([v]) => setSimState(prev => ({ ...prev, pvp: v }))} />
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <Slider className="[&>span:first-child]:bg-muted" value={[simState.pvp]} min={4.99} max={29.99} step={0.01}
+              onValueChange={([v]) => setSimState(prev => ({ ...prev, pvp: Math.round(v * 100) / 100 }))} />
+            <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
               <span>4.99{currencySymbol}</span>
               <span>Regalía: {(royaltyRate * 100).toFixed(0)}%</span>
               <span>29.99{currencySymbol}</span>
@@ -276,17 +350,26 @@ export const PaperbackSimulator = ({
 
           {/* Páginas */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center gap-2">
               <Label className="flex items-center gap-1.5 text-sm font-medium">
                 <FileText className="h-4 w-4 text-muted-foreground" />
                 Número de páginas
                 <Help text="Páginas interiores. Afecta directamente al coste de impresión por unidad." />
               </Label>
-              <span className="font-mono font-semibold">{simState.pages}</span>
+              <NumField
+                value={simState.pages}
+                min={minPages}
+                max={828}
+                step={1}
+                decimals={0}
+                ariaLabel="Número de páginas"
+                width="w-20"
+                onCommit={v => setSimState(prev => ({ ...prev, pages: Math.round(v) }))}
+              />
             </div>
             <Slider className="[&>span:first-child]:bg-muted" value={[simState.pages]} min={minPages} max={400} step={1}
               onValueChange={([v]) => setSimState(prev => ({ ...prev, pages: v }))} />
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
               <span>{minPages}</span>
               <span>Impresión: {gastosImpresion.toFixed(2)}{currencySymbol}</span>
               <span>400</span>
@@ -295,17 +378,26 @@ export const PaperbackSimulator = ({
 
           {/* Coste por clic */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center gap-2">
               <Label className="flex items-center gap-1.5 text-sm font-medium">
                 <Euro className="h-4 w-4 text-muted-foreground" />
                 Coste por clic
                 <Help text="Lo que pagas en Amazon Ads por cada clic. Determina cuántos clics puedes permitirte por venta." />
               </Label>
-              <span className="font-mono font-semibold">{simState.cpc.toFixed(2)}{currencySymbol}</span>
+              <NumField
+                value={simState.cpc}
+                min={0.01}
+                max={5}
+                step={0.01}
+                decimals={2}
+                suffix={currencySymbol}
+                ariaLabel="Coste por clic"
+                onCommit={v => setSimState(prev => ({ ...prev, cpc: v }))}
+              />
             </div>
             <Slider className="[&>span:first-child]:bg-muted" value={[simState.cpc]} min={0.05} max={1.5} step={0.01}
-              onValueChange={([v]) => setSimState(prev => ({ ...prev, cpc: v }))} />
-            <div className="flex justify-between text-xs text-muted-foreground">
+              onValueChange={([v]) => setSimState(prev => ({ ...prev, cpc: Math.round(v * 100) / 100 }))} />
+            <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
               <span>0.05{currencySymbol}</span>
               <span>Máximo rentable: {cpcMaxRentable.toFixed(2)}{currencySymbol}</span>
               <span>1.50{currencySymbol}</span>
@@ -314,23 +406,34 @@ export const PaperbackSimulator = ({
 
           {/* Margen objetivo */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center gap-2">
               <Label className="flex items-center gap-1.5 text-sm font-medium">
                 <Percent className="h-4 w-4 text-muted-foreground" />
                 Margen objetivo
                 <Help text="Margen neto mínimo que quieres asegurar por venta. Recomendado: 30% o superior." />
               </Label>
-              <span className="font-mono font-semibold">{simState.margenObjetivo}%</span>
+              <NumField
+                value={simState.margenObjetivo}
+                min={0}
+                max={90}
+                step={0.01}
+                decimals={2}
+                suffix="%"
+                ariaLabel="Margen objetivo"
+                onCommit={v => setSimState(prev => ({ ...prev, margenObjetivo: v }))}
+              />
             </div>
-            <Slider className="[&>span:first-child]:bg-muted" value={[simState.margenObjetivo]} min={10} max={60} step={5}
-              onValueChange={([v]) => setSimState(prev => ({ ...prev, margenObjetivo: v }))} />
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <Slider className="[&>span:first-child]:bg-muted" value={[simState.margenObjetivo]} min={10} max={60} step={0.5}
+              onValueChange={([v]) => setSimState(prev => ({ ...prev, margenObjetivo: Math.round(v * 100) / 100 }))} />
+            <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
               <span>10%</span>
               <span>60%</span>
             </div>
           </div>
         </div>
       </div>
+
+
 
       {/* RESULTADOS SIMULADOS — debajo de los controles */}
       <div className="space-y-3">
