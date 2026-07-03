@@ -72,19 +72,32 @@ export const calculateScore = ({
     bacosScore = 0; // <30% no viable para ads
   }
 
-  // C) PVP actual vs Precio mínimo recomendado — 10 points (bonus)
+  // C) PVP actual vs Precio mínimo recomendado — 10 points (bonus PROGRESIVO)
+  // El precio no puntúa por sí solo: refleja cuánto está desbloqueando de Clics y BACOS.
+  // Si el precio permite máx. clics (50) y máx. BACOS (40) → 10/10.
+  // Si aún hay margen para subir clics/BACOS subiendo precio → puntuación proporcional.
+  // Si no supera el mínimo viable → 0.
   let pvpVsMinScore = 0;
-  if (pvp !== null && precioMinRecomendado !== null) {
-    if (pvp > precioMinRecomendado) {
-      pvpVsMinScore = 10;
-    } else if (pvp === precioMinRecomendado || Math.abs(pvp - precioMinRecomendado) < 0.01) {
-      pvpVsMinScore = 5;
-    } else {
-      pvpVsMinScore = 0;
-    }
-  } else if (pvp !== null && precioMinRecomendado === null) {
-    // No min price calculated, assume OK
-    pvpVsMinScore = 10;
+  const superaMinimo =
+    pvp !== null &&
+    (precioMinRecomendado === null || pvp > precioMinRecomendado);
+  const igualMinimo =
+    pvp !== null &&
+    precioMinRecomendado !== null &&
+    Math.abs(pvp - precioMinRecomendado) < 0.01;
+
+  if (superaMinimo) {
+    // Ponderación 50/50 sobre el logro de Clics (max 50) y BACOS (max 40)
+    const clicsRatio = clicsScore / 50;
+    const bacosRatio = bacosScore / 40;
+    const logro = clicsRatio * 0.5 + bacosRatio * 0.5; // 0..1
+    pvpVsMinScore = Math.round(logro * 10);
+    // Suelo mínimo: si supera el mínimo viable, al menos 2 pts
+    if (pvpVsMinScore < 2) pvpVsMinScore = 2;
+  } else if (igualMinimo) {
+    pvpVsMinScore = 1;
+  } else {
+    pvpVsMinScore = 0;
   }
 
   const totalScore = clicsScore + bacosScore + pvpVsMinScore;
