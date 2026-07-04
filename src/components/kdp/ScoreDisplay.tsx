@@ -155,9 +155,10 @@ const ScoreCard = ({
               style={{ width: `${pct}%` }}
             />
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <span className={`w-2 h-2 rounded-full ${tierDotClass[tier]}`} />
             <span className="text-xs font-semibold text-foreground">{tierLabel}</span>
+            <LevelChip level={getLevel(value, max)} className="ml-1" />
             {realValue && (
               <span className="text-xs text-muted-foreground ml-auto tabular-nums">
                 {realValue}
