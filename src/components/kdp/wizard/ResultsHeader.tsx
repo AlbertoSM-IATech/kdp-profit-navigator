@@ -235,6 +235,69 @@ export const ResultsHeader = ({
         {/* Divider */}
         <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
+        {/* Desglose por componente + próximo paso */}
+        <div className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5">
+              Desglose del score
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-background/60 px-2.5 py-1.5">
+                <MousePointer className="h-3 w-3 text-muted-foreground" />
+                <span className="font-semibold text-foreground tabular-nums">{score.clicsScore}/50</span>
+                <span className="text-muted-foreground">Clics</span>
+                <LevelChip level={getLevel(score.clicsScore, 50)} />
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-background/60 px-2.5 py-1.5">
+                <TrendingUp className="h-3 w-3 text-muted-foreground" />
+                <span className="font-semibold text-foreground tabular-nums">{score.bacosScore}/40</span>
+                <span className="text-muted-foreground">BACOS</span>
+                <LevelChip level={getLevel(score.bacosScore, 40)} />
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-background/60 px-2.5 py-1.5">
+                <Tag className="h-3 w-3 text-muted-foreground" />
+                <span className="font-semibold text-foreground tabular-nums">{score.pvpVsMinScore}/10</span>
+                <span className="text-muted-foreground">Optimización</span>
+                <LevelChip level={getLevel(score.pvpVsMinScore, 10)} />
+              </span>
+            </div>
+          </div>
+
+          {(() => {
+            const clicsDeficit = 50 - score.clicsScore;
+            const bacosDeficit = 40 - score.bacosScore;
+            const pvpUnviable = score.pvpVsMinScore === 0;
+            let title = '¡Configuración óptima!';
+            let action = 'Todos los criterios están en zona alta. Puedes escalar Ads con confianza y probar Sponsored Brands o cupones de lanzamiento.';
+            if (pvpUnviable) {
+              title = 'Sube el precio al mínimo viable';
+              action = `Estás por debajo del precio mínimo. Ajusta el PVP para desbloquear puntuación en optimización y proteger el margen.`;
+            } else if (clicsDeficit >= bacosDeficit && clicsDeficit > 0) {
+              title = 'Prioridad: subir clics máx./venta';
+              action = `Faltan ${clicsDeficit} pts en Clics. Sube 1-2${currencySymbol} el PVP u optimiza CPC/público para bajar el coste por clic medio.`;
+            } else if (bacosDeficit > 0) {
+              title = 'Prioridad: mejorar BACOS';
+              action = `Faltan ${bacosDeficit} pts en BACOS. Reduce costes (páginas, interior) o sube PVP para ampliar el % disponible para publicidad.`;
+            }
+            return (
+              <div className="relative overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-br from-primary/[0.06] via-card to-card p-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-1.5 rounded-md bg-primary/10 shrink-0">
+                    <Lightbulb className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-primary mb-1">
+                      Próximo paso recomendado
+                    </div>
+                    <div className="text-sm font-semibold text-foreground mb-1">{title}</div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{action}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+
         {/* Summary chips */}
         <div>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5">
