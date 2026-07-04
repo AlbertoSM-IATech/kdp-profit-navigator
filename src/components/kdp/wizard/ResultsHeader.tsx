@@ -7,7 +7,8 @@ import {
   EbookResults,
   PaperbackResults,
 } from '@/types/kdp';
-import { Store, BookOpen, MousePointer, TrendingUp, Tag, Target, Layers } from 'lucide-react';
+import { Store, BookOpen, MousePointer, TrendingUp, Tag, Target, Layers, Lightbulb } from 'lucide-react';
+import { LevelChip, getLevel } from '@/components/kdp/ScoreDisplay';
 
 interface ResultsHeaderProps {
   globalData: GlobalData;
