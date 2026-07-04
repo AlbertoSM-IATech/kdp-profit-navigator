@@ -47,7 +47,36 @@ const tierDotClass: Record<Tier, string> = {
   success: 'bg-success',
   warning: 'bg-warning',
   destructive: 'bg-destructive',
+export type Level = 'low' | 'mid' | 'high';
+
+export const getLevel = (value: number, max: number): Level => {
+  const r = max > 0 ? value / max : 0;
+  if (r < 0.34) return 'low';
+  if (r < 0.67) return 'mid';
+  return 'high';
 };
+
+export const LEVEL_LABEL: Record<Level, string> = {
+  low: 'Bajo',
+  mid: 'Medio',
+  high: 'Alto',
+};
+
+const LEVEL_CHIP: Record<Level, string> = {
+  low: 'bg-destructive/10 text-destructive border-destructive/20',
+  mid: 'bg-warning/10 text-warning-foreground border-warning/30',
+  high: 'bg-success/10 text-success border-success/20',
+};
+
+export const LevelChip = ({ level, className = '' }: { level: Level; className?: string }) => (
+  <span
+    className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${LEVEL_CHIP[level]} ${className}`}
+  >
+    <span className={`h-1.5 w-1.5 rounded-full ${level === 'low' ? 'bg-destructive' : level === 'mid' ? 'bg-warning' : 'bg-success'}`} />
+    {LEVEL_LABEL[level]}
+  </span>
+);
+
 
 const tierAccentClass: Record<Tier, string> = {
   success: 'from-success/15 via-transparent to-transparent',
