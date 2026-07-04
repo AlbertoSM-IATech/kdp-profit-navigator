@@ -1,108 +1,85 @@
 import { useMemo } from 'react';
 import { ScoreBreakdown, EbookResults, PaperbackResults, GlobalData } from '@/types/kdp';
+import {
+  DEFAULT_SCORING_THRESHOLDS,
+  MAX_BACOS_POINTS,
+  MAX_CLICKS_POINTS,
+  MAX_OPTIMIZATION_POINTS,
+  ScoringThresholds,
+  scoreBacos,
+  scoreClicks,
+} from '@/lib/scoringConfig';
+import { useScoringConfig } from '@/contexts/ScoringConfigContext';
 
 interface ScoringInput {
   activeResults: EbookResults | PaperbackResults | null;
   pvp: number | null;
   precioMinRecomendado: number | null;
+  thresholds?: ScoringThresholds;
 }
 
 /**
- * Calculate the global viability score (0-100) based on 2 weighted components
- * 
- * SCORING v5:
- * - Clics máx./Venta: 50 pts (CRITICAL - dominant criterion)
- * - BACOS: 40 pts 
- * - PVP vs Precio mínimo: 10 pts (bonus)
- * 
- * CLICK SCORING:
- * <10 clicks = 0 pts (En riesgo)
- * 11 clicks = 15 pts (Aceptable)
- * 12 clicks = 25 pts (Aceptable)
- * 13 clicks = 35 pts (Bueno)
- * ≥14 clicks = 50 pts (Excelente)
- * 
- * BACOS SCORING:
- * <30% = 0 pts (no viable para ads)
- * ≥30% = 15 pts (Viable pero justo)
- * ≥35% = 25 pts (Viable)
- * ≥40% = 40 pts (Excelente)
- * 
- * STATUS RANGES:
- * 80-100 = Excelente
- * 50-79 = Aceptable
- * <50 = En riesgo
+ * Calculate the global viability score (0-100).
+ *
+ * SCORING v6:
+ *  - Clics máx./Venta: 50 pts (configurable via thresholds.clicks)
+ *  - BACOS: 40 pts (configurable via thresholds.bacos)
+ *  - Optimization bonus: 10 pts — reflects HOW MUCH the current price is
+ *    already unlocking of the click/BACOS potential. It's a weighted average
+ *    of (clicsScore/50) and (bacosScore/40), NOT a flat "above minimum" reward.
+ *
+ * The PVP only acts as a **viability gate** for the bonus:
+ *  - pvp < precioMin  → bonus = 0 (unviable)
+ *  - pvp ≈ precioMin  → bonus = 1 (bare minimum)
+ *  - pvp > precioMin OR no minimum known → bonus proportional to clicks+bacos
+ *
+ * This guarantees the bonus is NEVER a fixed 10/10 just for exceeding the
+ * minimum — it always reflects real optimization of the global criteria.
  */
 export const calculateScore = ({
   activeResults,
   pvp,
   precioMinRecomendado,
+  thresholds = DEFAULT_SCORING_THRESHOLDS,
 }: ScoringInput): ScoreBreakdown | null => {
   if (!activeResults) return null;
 
   const { clicsMaxPorVenta, margenPct } = activeResults;
-  const bacos = margenPct; // BACOS = Margen real
+  const bacos = margenPct;
 
-  // A) Clics máx./Venta — 50 points (CRITICAL)
-  // 10 clics = umbral mínimo operativo; por debajo, la campaña deja de ser viable.
-  let clicsScore = 0;
-  if (clicsMaxPorVenta >= 14) {
-    clicsScore = 50;
-  } else if (clicsMaxPorVenta === 13) {
-    clicsScore = 35;
-  } else if (clicsMaxPorVenta === 12) {
-    clicsScore = 25;
-  } else if (clicsMaxPorVenta === 11) {
-    clicsScore = 15;
-  } else if (clicsMaxPorVenta === 10) {
-    clicsScore = 8; // umbral mínimo: aún puntúa, pero al límite
-  } else {
-    clicsScore = 0; // < 10 clics: no viable para Ads
-  }
+  const clicsScore = scoreClicks(clicsMaxPorVenta, thresholds);
+  const bacosScore = scoreBacos(bacos, thresholds);
 
-  // B) BACOS (ACoS de equilibrio) — 40 points
-  let bacosScore = 0;
-  if (bacos >= 40) {
-    bacosScore = 40;
-  } else if (bacos >= 35) {
-    bacosScore = 25;
-  } else if (bacos >= 30) {
-    bacosScore = 15;
-  } else {
-    bacosScore = 0; // <30% no viable para ads
-  }
+  // Optimization bonus — always proportional to real clicks/BACOS attainment
+  const clicsRatio = clicsScore / MAX_CLICKS_POINTS;
+  const bacosRatio = bacosScore / MAX_BACOS_POINTS;
+  const attainment = clicsRatio * 0.5 + bacosRatio * 0.5; // 0..1
+  const proportionalBonus = Math.round(attainment * MAX_OPTIMIZATION_POINTS);
 
-  // C) PVP actual vs Precio mínimo recomendado — 10 points (bonus PROGRESIVO)
-  // El precio no puntúa por sí solo: refleja cuánto está desbloqueando de Clics y BACOS.
-  // Si el precio permite máx. clics (50) y máx. BACOS (40) → 10/10.
-  // Si aún hay margen para subir clics/BACOS subiendo precio → puntuación proporcional.
-  // Si no supera el mínimo viable → 0.
-  let pvpVsMinScore = 0;
-  const superaMinimo =
-    pvp !== null &&
-    (precioMinRecomendado === null || pvp > precioMinRecomendado);
-  const igualMinimo =
+  let pvpVsMinScore: number;
+  const noMinKnown = precioMinRecomendado === null;
+  const belowMin =
+    pvp !== null && precioMinRecomendado !== null && pvp < precioMinRecomendado - 0.005;
+  const atMin =
     pvp !== null &&
     precioMinRecomendado !== null &&
     Math.abs(pvp - precioMinRecomendado) < 0.01;
 
-  if (superaMinimo) {
-    // Ponderación 50/50 sobre el logro de Clics (max 50) y BACOS (max 40)
-    const clicsRatio = clicsScore / 50;
-    const bacosRatio = bacosScore / 40;
-    const logro = clicsRatio * 0.5 + bacosRatio * 0.5; // 0..1
-    pvpVsMinScore = Math.round(logro * 10);
-    // Suelo mínimo: si supera el mínimo viable, al menos 2 pts
-    if (pvpVsMinScore < 2) pvpVsMinScore = 2;
-  } else if (igualMinimo) {
-    pvpVsMinScore = 1;
-  } else {
+  if (belowMin) {
     pvpVsMinScore = 0;
+  } else if (atMin) {
+    pvpVsMinScore = 1;
+  } else if (noMinKnown && pvp === null) {
+    pvpVsMinScore = 0;
+  } else {
+    // pvp > min, or no min known → proportional to real attainment
+    pvpVsMinScore = proportionalBonus;
+    // Floor: si supera el mínimo, al menos 2 pts
+    if (!noMinKnown && pvpVsMinScore < 2) pvpVsMinScore = 2;
   }
 
   const totalScore = clicsScore + bacosScore + pvpVsMinScore;
 
-  // Interpretation - NEW THRESHOLDS
   let status: ScoreBreakdown['status'];
   let statusLabel: string;
   let statusEmoji: string;
@@ -130,7 +107,7 @@ export const calculateScore = ({
     bacosScore,
     pvpVsMinScore,
     totalScore,
-    clicsCapped: false, // No longer used in v5
+    clicsCapped: false,
     status,
     statusLabel,
     statusEmoji,
@@ -138,9 +115,6 @@ export const calculateScore = ({
   };
 };
 
-/**
- * Hook to calculate the scoring based on current state
- */
 export const useScoring = (
   globalData: GlobalData,
   ebookResults: EbookResults | null,
@@ -148,6 +122,7 @@ export const useScoring = (
   ebookPvp: number | null,
   paperbackPvp: number | null
 ): ScoreBreakdown | null => {
+  const { thresholds } = useScoringConfig();
   return useMemo(() => {
     const isEbook = globalData.selectedFormat === 'EBOOK';
     const activeResults = isEbook ? ebookResults : paperbackResults;
@@ -158,6 +133,7 @@ export const useScoring = (
       activeResults,
       pvp,
       precioMinRecomendado,
+      thresholds,
     });
-  }, [globalData.selectedFormat, ebookResults, paperbackResults, ebookPvp, paperbackPvp]);
+  }, [globalData.selectedFormat, ebookResults, paperbackResults, ebookPvp, paperbackPvp, thresholds]);
 };

@@ -13,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { toast } from 'sonner';
 import { buildShareUrl } from '@/lib/wizardShare';
+import { ScoringThresholdsEditor } from '@/components/kdp/wizard/ScoringThresholdsEditor';
 
 interface StepResultsProps {
   globalData: GlobalData;
@@ -223,6 +224,10 @@ export const StepResults = ({
                 activeResults={activeResults}
                 embedded
               />
+
+              <div className="pt-2 border-t border-border">
+                <ScoringThresholdsEditor />
+              </div>
             </div>
           </AccordionContent>
         </AccordionItem>
