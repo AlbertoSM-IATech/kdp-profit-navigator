@@ -4,12 +4,12 @@ import { DEFAULT_SCORING_THRESHOLDS, scoreClicks, scoreBacos } from '@/lib/scori
 import type { PaperbackResults } from '@/types/kdp';
 
 const baseResults = (overrides: Partial<PaperbackResults> = {}): PaperbackResults => ({
-  iva: 0,
-  ivaPct: 4,
-  precioSinIva: 10,
   royaltyRate: 60,
+  fixedCost: 1,
+  perPageCost: 0.01,
+  gastosImpresion: 2,
+  precioSinIva: 10,
   regalias: 3,
-  costeImpresion: 2,
   margenPct: 30,
   margenAbsoluto: 3,
   beneficioNeto: 3,
@@ -22,7 +22,7 @@ const baseResults = (overrides: Partial<PaperbackResults> = {}): PaperbackResult
   riskLevel: 'medium',
   viabilityStatus: 'adjustable',
   ...overrides,
-}) as PaperbackResults;
+});
 
 describe('calculateScore', () => {
   it('grows monotonically as clics increase (with pvp above min)', () => {
