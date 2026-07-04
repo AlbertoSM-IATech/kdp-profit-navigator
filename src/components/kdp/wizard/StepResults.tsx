@@ -224,6 +224,10 @@ export const StepResults = ({
                 activeResults={activeResults}
                 embedded
               />
+
+              <div className="pt-2 border-t border-border">
+                <ScoringThresholdsEditor />
+              </div>
             </div>
           </AccordionContent>
         </AccordionItem>
