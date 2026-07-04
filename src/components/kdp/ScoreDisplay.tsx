@@ -47,6 +47,8 @@ const tierDotClass: Record<Tier, string> = {
   success: 'bg-success',
   warning: 'bg-warning',
   destructive: 'bg-destructive',
+};
+
 export type Level = 'low' | 'mid' | 'high';
 
 export const getLevel = (value: number, max: number): Level => {
