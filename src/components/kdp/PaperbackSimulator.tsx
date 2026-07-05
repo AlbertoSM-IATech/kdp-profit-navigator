@@ -373,8 +373,9 @@ export const PaperbackSimulator = ({
                 onCommit={v => setSimState(prev => ({ ...prev, pages: Math.round(v) }))}
               />
             </div>
-            <Slider className="[&>span:first-child]:bg-muted" value={[simState.pages]} min={minPages} max={400} step={1}
-              onValueChange={([v]) => setSimState(prev => ({ ...prev, pages: v }))} />
+            <Slider className="[&>span:first-child]:bg-muted" defaultValue={[simState.pages]} key={`pages-${simState.pages}`} min={minPages} max={400} step={1}
+              onValueCommit={([v]) => setSimState(prev => ({ ...prev, pages: v }))} />
+
             <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
               <span>{minPages}</span>
               <span>Impresión: {gastosImpresion.toFixed(2)}{currencySymbol}</span>
