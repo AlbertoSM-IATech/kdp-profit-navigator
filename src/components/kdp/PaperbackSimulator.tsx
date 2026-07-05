@@ -551,17 +551,29 @@ export const PaperbackSimulator = ({
   if (embedded) return content;
 
   return (
-    <Card className="animate-fade-in border-secondary/30">
-      <CardHeader className="pb-4">
-        <CardTitle className="section-header">
-          <SlidersHorizontal className="h-5 w-5 text-secondary" />
-          Simulador de optimización
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Optimiza tu libro probando variaciones de precio, páginas, coste por clic y margen objetivo.
-        </p>
+    <Card className="animate-fade-in border-secondary/40 shadow-[var(--shadow-blue)] overflow-hidden">
+      <CardHeader className="pb-5 border-b border-secondary/20 bg-gradient-to-r from-secondary/10 via-secondary/5 to-transparent">
+        <div className="flex items-start gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-secondary/15 text-secondary ring-1 ring-secondary/30">
+            <SlidersHorizontal className="h-5 w-5" />
+          </span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <CardTitle className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground leading-tight">
+                Simulador de optimización
+              </CardTitle>
+              <span className="inline-flex items-center rounded-full border border-secondary/40 bg-secondary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-secondary">
+                Interactivo
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1.5">
+              Optimiza tu libro probando variaciones de precio, páginas, coste por clic y margen objetivo.
+            </p>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent>{content}</CardContent>
+      <CardContent className="pt-6">{content}</CardContent>
     </Card>
   );
 };
+
