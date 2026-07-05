@@ -181,17 +181,25 @@ export const PaperbackSimulator = ({
     );
     if (embedded) return empty;
     return (
-      <Card className="border-border/50">
-        <CardHeader className="pb-4">
-          <CardTitle className="section-header">
-            <SlidersHorizontal className="h-5 w-5 text-secondary" />
-            Simulador de optimización
-          </CardTitle>
+      <Card className="border-secondary/40 shadow-[var(--shadow-blue)]">
+        <CardHeader className="pb-4 border-b border-secondary/20 bg-gradient-to-r from-secondary/10 to-transparent">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-secondary/15 text-secondary ring-1 ring-secondary/30">
+              <SlidersHorizontal className="h-5 w-5" />
+            </span>
+            <div>
+              <CardTitle className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+                Simulador de optimización
+              </CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">Zona interactiva para explorar escenarios.</p>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>{empty}</CardContent>
+        <CardContent className="pt-6">{empty}</CardContent>
       </Card>
     );
   }
+
 
   const minPages = getMinPages(simState.interior);
   const printingResult = calculatePrintingCost(simState.interior, simState.size, simState.pages);
@@ -270,15 +278,25 @@ export const PaperbackSimulator = ({
   const content = (
     <div className="space-y-6">
       {/* CONTROLES — protagonistas, arriba a todo el ancho */}
-      <div className="rounded-xl border border-border bg-muted/20 p-5 space-y-5">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-            Controles del simulador
-          </h4>
-          <p className="text-xs text-muted-foreground">
-            Ajusta cualquier variable para ver el impacto en los resultados.
-          </p>
+      <div className="relative rounded-2xl border border-secondary/30 bg-gradient-to-br from-secondary/10 via-secondary/5 to-transparent p-6 space-y-6 shadow-[0_1px_0_hsl(var(--secondary)/0.15)_inset]">
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-3">
+            <span className="h-8 w-1.5 rounded-full bg-secondary" aria-hidden />
+            <div>
+              <h4 className="font-heading text-lg sm:text-xl font-bold text-foreground tracking-tight leading-tight">
+                Controles del simulador
+              </h4>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Ajusta cualquier variable para ver el impacto en los resultados.
+              </p>
+            </div>
+          </div>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-secondary/30 bg-secondary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-secondary">
+            <SlidersHorizontal className="h-3 w-3" />
+            Interactivo
+          </span>
         </div>
+
 
         {/* Selects: formato + tamaño */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -445,19 +463,25 @@ export const PaperbackSimulator = ({
 
 
       {/* RESULTADOS SIMULADOS — debajo de los controles */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-3 flex-wrap">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-              Resultados simulados
-            </h4>
-            <div className="flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${riskDot}`} />
-              <span className="text-xs font-semibold text-foreground">{riskLabel}</span>
+          <div className="flex items-center gap-3">
+            <span className="h-8 w-1.5 rounded-full bg-secondary/60" aria-hidden />
+            <div>
+              <h4 className="font-heading text-lg sm:text-xl font-bold text-foreground tracking-tight leading-tight">
+                Resultados simulados
+              </h4>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Impacto en tiempo real de los cambios que estás probando.
+              </p>
             </div>
           </div>
-
+          <div className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5">
+            <span className={`w-2 h-2 rounded-full ${riskDot}`} />
+            <span className="text-xs font-semibold text-foreground">{riskLabel}</span>
+          </div>
         </div>
+
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <Metric
@@ -527,17 +551,29 @@ export const PaperbackSimulator = ({
   if (embedded) return content;
 
   return (
-    <Card className="animate-fade-in border-secondary/30">
-      <CardHeader className="pb-4">
-        <CardTitle className="section-header">
-          <SlidersHorizontal className="h-5 w-5 text-secondary" />
-          Simulador de optimización
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Optimiza tu libro probando variaciones de precio, páginas, coste por clic y margen objetivo.
-        </p>
+    <Card className="animate-fade-in border-secondary/40 shadow-[var(--shadow-blue)] overflow-hidden">
+      <CardHeader className="pb-5 border-b border-secondary/20 bg-gradient-to-r from-secondary/10 via-secondary/5 to-transparent">
+        <div className="flex items-start gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-secondary/15 text-secondary ring-1 ring-secondary/30">
+            <SlidersHorizontal className="h-5 w-5" />
+          </span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <CardTitle className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground leading-tight">
+                Simulador de optimización
+              </CardTitle>
+              <span className="inline-flex items-center rounded-full border border-secondary/40 bg-secondary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-secondary">
+                Interactivo
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1.5">
+              Optimiza tu libro probando variaciones de precio, páginas, coste por clic y margen objetivo.
+            </p>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent>{content}</CardContent>
+      <CardContent className="pt-6">{content}</CardContent>
     </Card>
   );
 };
+
