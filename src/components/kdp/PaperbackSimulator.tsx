@@ -44,6 +44,72 @@ const Help = ({ text }: { text: string }) => (
   </TooltipProvider>
 );
 
+// Editable numeric field: defined OUTSIDE the parent to preserve focus across renders.
+const NumField = ({
+  value,
+  min,
+  max,
+  decimals = 2,
+  suffix,
+  onCommit,
+  ariaLabel,
+  width = 'w-24',
+}: {
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  decimals?: number;
+  suffix?: string;
+  onCommit: (v: number) => void;
+  ariaLabel: string;
+  width?: string;
+}) => {
+  const [text, setText] = useState<string>(value.toFixed(decimals));
+  const focusedRef = useRef(false);
+  const lastPropRef = useRef(value);
+  useEffect(() => {
+    if (value !== lastPropRef.current) {
+      lastPropRef.current = value;
+      if (!focusedRef.current) setText(value.toFixed(decimals));
+    }
+  }, [value, decimals]);
+
+  const commit = () => {
+    focusedRef.current = false;
+    const normalized = text.replace(',', '.').trim();
+    const parsed = parseFloat(normalized);
+    if (isNaN(parsed)) {
+      setText(value.toFixed(decimals));
+      return;
+    }
+    const clamped = Math.min(max, Math.max(min, parsed));
+    const rounded = Math.round(clamped * Math.pow(10, decimals)) / Math.pow(10, decimals);
+    setText(rounded.toFixed(decimals));
+    if (rounded !== value) onCommit(rounded);
+  };
+
+  return (
+    <div className="flex items-center gap-1">
+      <Input
+        type="text"
+        inputMode="decimal"
+        aria-label={ariaLabel}
+        value={text}
+        onFocus={() => { focusedRef.current = true; }}
+        onChange={e => setText(e.target.value)}
+        onBlur={commit}
+        onKeyDown={e => {
+          if (e.key === 'Enter') { (e.target as HTMLInputElement).blur(); }
+          if (e.key === 'Escape') { setText(value.toFixed(decimals)); (e.target as HTMLInputElement).blur(); }
+        }}
+        className={`h-8 ${width} text-right font-mono font-semibold tabular-nums px-2 py-1 text-sm`}
+      />
+      {suffix && <span className="text-xs text-muted-foreground w-3">{suffix}</span>}
+    </div>
+  );
+};
+
 export const PaperbackSimulator = ({
   data,
   globalData,
@@ -175,69 +241,8 @@ export const PaperbackSimulator = ({
     baseSimState.cpc !== simState.cpc ||
     baseSimState.margenObjetivo !== simState.margenObjetivo;
 
-  // Editable numeric field: allows keyboard input with decimals, clamps on blur.
-  const NumField = ({
-    value,
-    min,
-    max,
-    step,
-    decimals = 2,
-    suffix,
-    onCommit,
-    ariaLabel,
-    width = 'w-24',
-  }: {
-    value: number;
-    min: number;
-    max: number;
-    step: number;
-    decimals?: number;
-    suffix?: string;
-    onCommit: (v: number) => void;
-    ariaLabel: string;
-    width?: string;
-  }) => {
-    const [text, setText] = useState<string>(value.toFixed(decimals));
-    const lastPropRef = useRef(value);
-    useEffect(() => {
-      if (value !== lastPropRef.current) {
-        lastPropRef.current = value;
-        setText(value.toFixed(decimals));
-      }
-    }, [value, decimals]);
 
-    const commit = () => {
-      const normalized = text.replace(',', '.').trim();
-      const parsed = parseFloat(normalized);
-      if (isNaN(parsed)) {
-        setText(value.toFixed(decimals));
-        return;
-      }
-      const clamped = Math.min(max, Math.max(min, parsed));
-      const rounded = Math.round(clamped * Math.pow(10, decimals)) / Math.pow(10, decimals);
-      setText(rounded.toFixed(decimals));
-      if (rounded !== value) onCommit(rounded);
-    };
 
-    return (
-      <div className="flex items-center gap-1">
-        <Input
-          type="text"
-          inputMode="decimal"
-          aria-label={ariaLabel}
-          value={text}
-          onChange={e => setText(e.target.value)}
-          onBlur={commit}
-          onKeyDown={e => {
-            if (e.key === 'Enter') { (e.target as HTMLInputElement).blur(); }
-            if (e.key === 'Escape') { setText(value.toFixed(decimals)); (e.target as HTMLInputElement).blur(); }
-          }}
-          className={`h-8 ${width} text-right font-mono font-semibold tabular-nums px-2 py-1 text-sm`}
-        />
-        {suffix && <span className="text-xs text-muted-foreground w-3">{suffix}</span>}
-      </div>
-    );
-  };
 
   const Metric = ({
     label,
