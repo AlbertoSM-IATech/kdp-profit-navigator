@@ -431,8 +431,9 @@ export const PaperbackSimulator = ({
                 onCommit={v => setSimState(prev => ({ ...prev, margenObjetivo: v }))}
               />
             </div>
-            <Slider className="[&>span:first-child]:bg-muted" value={[simState.margenObjetivo]} min={10} max={60} step={0.5}
-              onValueChange={([v]) => setSimState(prev => ({ ...prev, margenObjetivo: Math.round(v * 100) / 100 }))} />
+            <Slider className="[&>span:first-child]:bg-muted" defaultValue={[simState.margenObjetivo]} key={`mo-${simState.margenObjetivo}`} min={10} max={60} step={0.5}
+              onValueCommit={([v]) => setSimState(prev => ({ ...prev, margenObjetivo: Math.round(v * 100) / 100 }))} />
+
             <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
               <span>10%</span>
               <span>60%</span>
