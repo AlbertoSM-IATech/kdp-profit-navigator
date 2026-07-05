@@ -181,17 +181,25 @@ export const PaperbackSimulator = ({
     );
     if (embedded) return empty;
     return (
-      <Card className="border-border/50">
-        <CardHeader className="pb-4">
-          <CardTitle className="section-header">
-            <SlidersHorizontal className="h-5 w-5 text-secondary" />
-            Simulador de optimización
-          </CardTitle>
+      <Card className="border-secondary/40 shadow-[var(--shadow-blue)]">
+        <CardHeader className="pb-4 border-b border-secondary/20 bg-gradient-to-r from-secondary/10 to-transparent">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-secondary/15 text-secondary ring-1 ring-secondary/30">
+              <SlidersHorizontal className="h-5 w-5" />
+            </span>
+            <div>
+              <CardTitle className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+                Simulador de optimización
+              </CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">Zona interactiva para explorar escenarios.</p>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>{empty}</CardContent>
+        <CardContent className="pt-6">{empty}</CardContent>
       </Card>
     );
   }
+
 
   const minPages = getMinPages(simState.interior);
   const printingResult = calculatePrintingCost(simState.interior, simState.size, simState.pages);
