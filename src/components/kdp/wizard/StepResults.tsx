@@ -173,19 +173,26 @@ export const StepResults = ({
 
       {/* SIMULATOR — pieza central */}
       {canShowSimulator && (
-        <section className="rounded-xl border-2 border-secondary/30 bg-card shadow-sm overflow-hidden">
-          <header className="px-5 py-3 border-b border-border bg-muted/20 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-secondary/10">
-              <SlidersHorizontal className="h-4 w-4 text-secondary" />
+        <section className="rounded-2xl border-2 border-secondary/40 bg-card shadow-[var(--shadow-blue)] overflow-hidden">
+          <header className="px-6 py-5 border-b border-secondary/25 bg-gradient-to-r from-secondary/12 via-secondary/6 to-transparent flex items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary/15 text-secondary ring-1 ring-secondary/30">
+              <SlidersHorizontal className="h-5 w-5" />
             </div>
-            <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-foreground">Simulador de optimización</h3>
-              <p className="text-xs text-muted-foreground truncate">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground leading-tight">
+                  Simulador de optimización
+                </h3>
+                <span className="inline-flex items-center rounded-full border border-secondary/40 bg-secondary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-secondary">
+                  Interactivo
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground mt-1.5">
                 Prueba variaciones de precio, páginas, coste por clic y margen objetivo.
               </p>
             </div>
           </header>
-          <div className="p-5">
+          <div className="p-6">
             <PaperbackSimulator
               data={paperbackData}
               globalData={globalData}
@@ -197,6 +204,7 @@ export const StepResults = ({
             />
           </div>
         </section>
+
       )}
 
       {/* Información complementaria (colapsada) */}
