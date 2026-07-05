@@ -344,8 +344,9 @@ export const PaperbackSimulator = ({
                 onCommit={v => setSimState(prev => ({ ...prev, pvp: v }))}
               />
             </div>
-            <Slider className="[&>span:first-child]:bg-muted" value={[simState.pvp]} min={4.99} max={29.99} step={0.01}
-              onValueChange={([v]) => setSimState(prev => ({ ...prev, pvp: Math.round(v * 100) / 100 }))} />
+            <Slider className="[&>span:first-child]:bg-muted" defaultValue={[simState.pvp]} key={`pvp-${simState.pvp}`} min={4.99} max={29.99} step={0.01}
+              onValueCommit={([v]) => setSimState(prev => ({ ...prev, pvp: Math.round(v * 100) / 100 }))} />
+
             <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
               <span>4.99{currencySymbol}</span>
               <span>Regalía: {(royaltyRate * 100).toFixed(0)}%</span>
