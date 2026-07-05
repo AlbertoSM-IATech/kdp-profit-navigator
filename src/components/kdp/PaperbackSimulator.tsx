@@ -455,19 +455,25 @@ export const PaperbackSimulator = ({
 
 
       {/* RESULTADOS SIMULADOS — debajo de los controles */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-3 flex-wrap">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-              Resultados simulados
-            </h4>
-            <div className="flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${riskDot}`} />
-              <span className="text-xs font-semibold text-foreground">{riskLabel}</span>
+          <div className="flex items-center gap-3">
+            <span className="h-8 w-1.5 rounded-full bg-secondary/60" aria-hidden />
+            <div>
+              <h4 className="font-heading text-lg sm:text-xl font-bold text-foreground tracking-tight leading-tight">
+                Resultados simulados
+              </h4>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Impacto en tiempo real de los cambios que estás probando.
+              </p>
             </div>
           </div>
-
+          <div className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5">
+            <span className={`w-2 h-2 rounded-full ${riskDot}`} />
+            <span className="text-xs font-semibold text-foreground">{riskLabel}</span>
+          </div>
         </div>
+
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <Metric
