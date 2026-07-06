@@ -176,7 +176,7 @@ export const ResultsHeader = ({
   const progressPct = Math.max(0, Math.min(100, score.totalScore));
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card via-card to-muted/40 shadow-sm">
+    <section className={`relative overflow-hidden bg-gradient-to-br from-card via-card to-muted/40 ${bare ? '' : 'rounded-2xl border border-border shadow-sm'}`}>
       {/* Decorative accent */}
       <div
         aria-hidden
