@@ -347,7 +347,7 @@ export const PaperbackSimulator = ({
             <Select
               value={simState.interior}
               onValueChange={v =>
-                setSimState(prev => ({
+                commitState(prev => ({
                   ...prev,
                   interior: v as InteriorType,
                   pages: Math.max(prev.pages, getMinPages(v as InteriorType)),
@@ -361,6 +361,9 @@ export const PaperbackSimulator = ({
                 <SelectItem value="COLOR_PREMIUM">{interiorLabels.COLOR_PREMIUM}</SelectItem>
               </SelectContent>
             </Select>
+            <p className="text-[11px] text-muted-foreground leading-snug">
+              Cambia el coste de impresión por unidad y las páginas mínimas exigidas por Amazon.
+            </p>
           </div>
           <div className="space-y-1.5">
             <Label className="flex items-center gap-1.5 text-sm font-medium">
@@ -369,7 +372,7 @@ export const PaperbackSimulator = ({
             </Label>
             <Select
               value={simState.size}
-              onValueChange={v => setSimState(prev => ({ ...prev, size: v as BookSize }))}
+              onValueChange={v => commitState(prev => ({ ...prev, size: v as BookSize }))}
             >
               <SelectTrigger className="input-focus"><SelectValue /></SelectTrigger>
               <SelectContent className="bg-popover border border-border">
@@ -377,6 +380,9 @@ export const PaperbackSimulator = ({
                 <SelectItem value="LARGE">{sizeLabels.LARGE}</SelectItem>
               </SelectContent>
             </Select>
+            <p className="text-[11px] text-muted-foreground leading-snug">
+              Los tamaños grandes elevan el coste de impresión, reduciendo la regalía neta.
+            </p>
           </div>
         </div>
 
@@ -398,17 +404,20 @@ export const PaperbackSimulator = ({
                 decimals={2}
                 suffix={currencySymbol}
                 ariaLabel="Precio de venta"
-                onCommit={v => setSimState(prev => ({ ...prev, pvp: v }))}
+                onCommit={v => commitState(prev => ({ ...prev, pvp: v }))}
               />
             </div>
             <Slider className="[&>span:first-child]:bg-muted" defaultValue={[simState.pvp]} key={`pvp-${simState.pvp}`} min={4.99} max={29.99} step={0.01}
-              onValueCommit={([v]) => setSimState(prev => ({ ...prev, pvp: Math.round(v * 100) / 100 }))} />
+              onValueCommit={([v]) => commitState(prev => ({ ...prev, pvp: Math.round(v * 100) / 100 }))} />
 
             <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
               <span>4.99{currencySymbol}</span>
               <span>Regalía: {(royaltyRate * 100).toFixed(0)}%</span>
               <span>29.99{currencySymbol}</span>
             </div>
+            <p className="text-[11px] text-muted-foreground leading-snug">
+              Determina regalías, BACOS y precio mínimo viable. Cruzar 9,99{currencySymbol} activa la regalía del 60%.
+            </p>
           </div>
 
           {/* Páginas */}
@@ -427,17 +436,20 @@ export const PaperbackSimulator = ({
                 decimals={0}
                 ariaLabel="Número de páginas"
                 width="w-20"
-                onCommit={v => setSimState(prev => ({ ...prev, pages: Math.round(v) }))}
+                onCommit={v => commitState(prev => ({ ...prev, pages: Math.round(v) }))}
               />
             </div>
             <Slider className="[&>span:first-child]:bg-muted" defaultValue={[simState.pages]} key={`pages-${simState.pages}`} min={minPages} max={400} step={1}
-              onValueCommit={([v]) => setSimState(prev => ({ ...prev, pages: v }))} />
+              onValueCommit={([v]) => commitState(prev => ({ ...prev, pages: v }))} />
 
             <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
               <span>{minPages}</span>
               <span>Impresión: {gastosImpresion.toFixed(2)}{currencySymbol}</span>
               <span>400</span>
             </div>
+            <p className="text-[11px] text-muted-foreground leading-snug">
+              Más páginas suben el coste de impresión y reducen la regalía por venta.
+            </p>
           </div>
 
           {/* Coste por clic */}
@@ -456,17 +468,20 @@ export const PaperbackSimulator = ({
                 decimals={2}
                 suffix={currencySymbol}
                 ariaLabel="Coste por clic"
-                onCommit={v => setSimState(prev => ({ ...prev, cpc: v }))}
+                onCommit={v => commitState(prev => ({ ...prev, cpc: v }))}
               />
             </div>
             <Slider className="[&>span:first-child]:bg-muted" defaultValue={[simState.cpc]} key={`cpc-${simState.cpc}`} min={0.05} max={1.5} step={0.01}
-              onValueCommit={([v]) => setSimState(prev => ({ ...prev, cpc: Math.round(v * 100) / 100 }))} />
+              onValueCommit={([v]) => commitState(prev => ({ ...prev, cpc: Math.round(v * 100) / 100 }))} />
 
             <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
               <span>0.05{currencySymbol}</span>
               <span>Máximo rentable: {cpcMaxRentable.toFixed(2)}{currencySymbol}</span>
               <span>1.50{currencySymbol}</span>
             </div>
+            <p className="text-[11px] text-muted-foreground leading-snug">
+              Ajusta cuántos clics de Amazon Ads puedes permitirte por venta sin romper el margen.
+            </p>
           </div>
 
           {/* Margen objetivo */}
@@ -485,16 +500,19 @@ export const PaperbackSimulator = ({
                 decimals={2}
                 suffix="%"
                 ariaLabel="Margen objetivo"
-                onCommit={v => setSimState(prev => ({ ...prev, margenObjetivo: v }))}
+                onCommit={v => commitState(prev => ({ ...prev, margenObjetivo: v }))}
               />
             </div>
             <Slider className="[&>span:first-child]:bg-muted" defaultValue={[simState.margenObjetivo]} key={`mo-${simState.margenObjetivo}`} min={10} max={60} step={0.5}
-              onValueCommit={([v]) => setSimState(prev => ({ ...prev, margenObjetivo: Math.round(v * 100) / 100 }))} />
+              onValueCommit={([v]) => commitState(prev => ({ ...prev, margenObjetivo: Math.round(v * 100) / 100 }))} />
 
             <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
               <span>10%</span>
               <span>60%</span>
             </div>
+            <p className="text-[11px] text-muted-foreground leading-snug">
+              Recalcula el precio mínimo viable para asegurar ese margen tras impresión y comisiones.
+            </p>
           </div>
         </div>
       </div>
