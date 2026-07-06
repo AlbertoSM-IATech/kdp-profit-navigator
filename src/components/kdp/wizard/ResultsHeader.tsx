@@ -90,6 +90,7 @@ export const ResultsHeader = ({
   score,
   activeResults,
   currencySymbol,
+  bare = false,
 }: ResultsHeaderProps) => {
   const isEbook = globalData.selectedFormat === 'EBOOK';
   const animatedScore = useCountUp(score.totalScore);
