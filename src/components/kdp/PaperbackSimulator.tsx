@@ -533,9 +533,18 @@ export const PaperbackSimulator = ({
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5">
-            <span className={`w-2 h-2 rounded-full ${riskDot}`} />
-            <span className="text-xs font-semibold text-foreground">{riskLabel}</span>
+          <div className="flex items-center gap-2">
+            <span
+              aria-live="polite"
+              className={`inline-flex items-center gap-1.5 rounded-full border border-secondary/30 bg-secondary/10 px-2.5 py-1 text-[11px] font-semibold text-secondary transition-opacity duration-200 ${isUpdating ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            >
+              <Loader2 className="h-3 w-3 animate-spin" />
+              Actualizando simulación…
+            </span>
+            <div className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5">
+              <span className={`w-2 h-2 rounded-full ${riskDot}`} />
+              <span className="text-xs font-semibold text-foreground">{riskLabel}</span>
+            </div>
           </div>
         </div>
 
