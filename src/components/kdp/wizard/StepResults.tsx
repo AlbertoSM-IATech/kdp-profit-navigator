@@ -138,13 +138,12 @@ export const StepResults = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
     </TooltipProvider>
   );
 
   return (
-    <div className="space-y-5">
-      {/* Premium header: resumen de inputs + score con barra animada */}
+    <article className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+      {/* HERO — score, progreso, desglose y resumen del análisis */}
       <ResultsHeader
         globalData={globalData}
         ebookData={ebookData}
@@ -152,10 +151,13 @@ export const StepResults = ({
         score={scoreBreakdown}
         activeResults={activeResults}
         currencySymbol={globalData.marketplace === 'COM' ? '$' : '€'}
+        bare
       />
 
-      {/* Desglose del score + acciones (guardar / compartir / PDF) */}
-      <section className="rounded-xl border border-border bg-card p-5">
+      <div className="h-px bg-border" />
+
+      {/* SCORE DETALLADO — tarjetas de Clics, BACOS y Optimización */}
+      <div className="p-6">
         <ScoreDisplay
           score={scoreBreakdown}
           currencySymbol={globalData.marketplace === 'COM' ? '$' : '€'}
@@ -166,57 +168,60 @@ export const StepResults = ({
           positioningResults={positioningResults}
           loadedNicheId={loadedNicheId}
           onQuickSave={onQuickSave}
-          headerActions={headerActions}
           currentPvp={globalData.selectedFormat === 'EBOOK' ? ebookData.pvp : paperbackData.pvp}
         />
-      </section>
+      </div>
 
-      {/* SIMULATOR — pieza central */}
+      {/* SIMULADOR — pieza interactiva integrada, con acento azul */}
       {canShowSimulator && (
-        <section className="rounded-2xl border-2 border-secondary/40 bg-card shadow-[var(--shadow-blue)] overflow-hidden">
-          <header className="px-6 py-5 border-b border-secondary/25 bg-gradient-to-r from-secondary/12 via-secondary/6 to-transparent flex items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary/15 text-secondary ring-1 ring-secondary/30">
-              <SlidersHorizontal className="h-5 w-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground leading-tight">
-                  Simulador de optimización
-                </h3>
-                <span className="inline-flex items-center rounded-full border border-secondary/40 bg-secondary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-secondary">
-                  Interactivo
-                </span>
+        <>
+          <div className="h-px bg-border" />
+          <div className="relative bg-gradient-to-b from-secondary/[0.06] via-transparent to-transparent">
+            <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-secondary/60 to-transparent" aria-hidden />
+            <div className="px-6 pt-6 pb-2 flex items-start gap-4">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-secondary/15 text-secondary ring-1 ring-secondary/30">
+                <SlidersHorizontal className="h-5 w-5" />
               </div>
-              <p className="text-sm text-muted-foreground mt-1.5">
-                Prueba variaciones de precio, páginas, coste por clic y margen objetivo.
-              </p>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground leading-tight">
+                    Simulador de optimización
+                  </h3>
+                  <span className="inline-flex items-center rounded-full border border-secondary/40 bg-secondary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-secondary">
+                    Interactivo
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1.5">
+                  Prueba variaciones de precio, páginas, coste por clic y margen objetivo.
+                </p>
+              </div>
             </div>
-          </header>
-          <div className="p-6">
-            <PaperbackSimulator
-              data={paperbackData}
-              globalData={globalData}
-              initialSimState={initialSimulatorState}
-              onStateChange={handleSimStateChange}
-              onApplyToBase={onApplySimulatorToBase}
-              showStickyBar
-              embedded
-            />
+            <div className="p-6 pt-4">
+              <PaperbackSimulator
+                data={paperbackData}
+                globalData={globalData}
+                initialSimState={initialSimulatorState}
+                onStateChange={handleSimStateChange}
+                onApplyToBase={onApplySimulatorToBase}
+                showStickyBar
+                embedded
+              />
+            </div>
           </div>
-        </section>
-
+        </>
       )}
 
-      {/* Información complementaria (colapsada) */}
-      <Accordion type="single" collapsible className="border border-border rounded-xl bg-card">
+      {/* INFORMACIÓN COMPLEMENTARIA — colapsable inline, sin tarjeta anidada */}
+      <div className="h-px bg-border" />
+      <Accordion type="single" collapsible>
         <AccordionItem value="complementary" className="border-none">
-          <AccordionTrigger className="px-5 py-3 hover:no-underline">
+          <AccordionTrigger className="px-6 py-4 hover:no-underline">
             <span className="text-sm font-semibold text-foreground">
               Información complementaria
             </span>
           </AccordionTrigger>
-          <AccordionContent className="px-5 pb-5">
-            <div className="space-y-6 pt-2">
+          <AccordionContent className="px-6 pb-6">
+            <div className="space-y-6 pt-1">
               {tableData.length > 0 && (
                 <div className="space-y-3">
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
@@ -240,6 +245,17 @@ export const StepResults = ({
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-    </div>
+
+      {/* FOOTER — acciones al final, como pidió el usuario */}
+      <div className="h-px bg-border" />
+      <footer className="px-6 py-4 bg-muted/20 flex items-center justify-between gap-3 flex-wrap">
+        <p className="text-xs text-muted-foreground max-w-md">
+          Guarda este análisis para compararlo más tarde o comparte esta configuración con un enlace.
+        </p>
+        <div className="flex items-center gap-2">
+          {headerActions}
+        </div>
+      </footer>
+    </article>
   );
 };
