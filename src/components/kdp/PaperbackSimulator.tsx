@@ -311,10 +311,29 @@ export const PaperbackSimulator = ({
               </p>
             </div>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-secondary/30 bg-secondary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-secondary">
-            <SlidersHorizontal className="h-3 w-3" />
-            Interactivo
-          </span>
+          <div className="flex items-center gap-2">
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleReset}
+                    className="h-8 gap-1.5 border-secondary/40 text-secondary hover:bg-secondary/10 hover:text-secondary"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    Reiniciar
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent><p className="text-xs">Vuelve el simulador a los valores actuales del análisis sin recargar la página.</p></TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-secondary/30 bg-secondary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-secondary">
+              <SlidersHorizontal className="h-3 w-3" />
+              Interactivo
+            </span>
+          </div>
         </div>
 
 
