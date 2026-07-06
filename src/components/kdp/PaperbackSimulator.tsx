@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { SlidersHorizontal, Euro, FileText, Percent, HelpCircle, Palette, Ruler, ArrowUpFromLine } from 'lucide-react';
+import { SlidersHorizontal, Euro, FileText, Percent, HelpCircle, Palette, Ruler, ArrowUpFromLine, RotateCcw, Loader2 } from 'lucide-react';
 import { calculatePrintingCost, getMinPages } from '@/data/printingCosts';
 
 interface PaperbackSimulatorProps {
@@ -132,6 +132,26 @@ export const PaperbackSimulator = ({
     if (initialSimState) return initialSimState;
     return getBaseSimState();
   });
+
+  // Transient "Actualizando…" indicator, shown briefly after committing any control.
+  const [isUpdating, setIsUpdating] = useState(false);
+  const updateTimerRef = useRef<number | null>(null);
+  const flashUpdating = () => {
+    setIsUpdating(true);
+    if (updateTimerRef.current) window.clearTimeout(updateTimerRef.current);
+    updateTimerRef.current = window.setTimeout(() => setIsUpdating(false), 450);
+  };
+  useEffect(() => () => { if (updateTimerRef.current) window.clearTimeout(updateTimerRef.current); }, []);
+
+  const commitState = (updater: (prev: SimulatorData) => SimulatorData) => {
+    setSimState(updater);
+    flashUpdating();
+  };
+
+  const handleReset = () => {
+    setSimState(getBaseSimState());
+    flashUpdating();
+  };
 
   useEffect(() => {
     onStateChange?.(simState);
@@ -291,10 +311,29 @@ export const PaperbackSimulator = ({
               </p>
             </div>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-secondary/30 bg-secondary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-secondary">
-            <SlidersHorizontal className="h-3 w-3" />
-            Interactivo
-          </span>
+          <div className="flex items-center gap-2">
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleReset}
+                    className="h-8 gap-1.5 border-secondary/40 text-secondary hover:bg-secondary/10 hover:text-secondary"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    Reiniciar
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent><p className="text-xs">Vuelve el simulador a los valores actuales del análisis sin recargar la página.</p></TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-secondary/30 bg-secondary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-secondary">
+              <SlidersHorizontal className="h-3 w-3" />
+              Interactivo
+            </span>
+          </div>
         </div>
 
 
@@ -308,7 +347,7 @@ export const PaperbackSimulator = ({
             <Select
               value={simState.interior}
               onValueChange={v =>
-                setSimState(prev => ({
+                commitState(prev => ({
                   ...prev,
                   interior: v as InteriorType,
                   pages: Math.max(prev.pages, getMinPages(v as InteriorType)),
@@ -322,6 +361,9 @@ export const PaperbackSimulator = ({
                 <SelectItem value="COLOR_PREMIUM">{interiorLabels.COLOR_PREMIUM}</SelectItem>
               </SelectContent>
             </Select>
+            <p className="text-[11px] text-muted-foreground leading-snug">
+              Cambia el coste de impresión por unidad y las páginas mínimas exigidas por Amazon.
+            </p>
           </div>
           <div className="space-y-1.5">
             <Label className="flex items-center gap-1.5 text-sm font-medium">
@@ -330,7 +372,7 @@ export const PaperbackSimulator = ({
             </Label>
             <Select
               value={simState.size}
-              onValueChange={v => setSimState(prev => ({ ...prev, size: v as BookSize }))}
+              onValueChange={v => commitState(prev => ({ ...prev, size: v as BookSize }))}
             >
               <SelectTrigger className="input-focus"><SelectValue /></SelectTrigger>
               <SelectContent className="bg-popover border border-border">
@@ -338,6 +380,9 @@ export const PaperbackSimulator = ({
                 <SelectItem value="LARGE">{sizeLabels.LARGE}</SelectItem>
               </SelectContent>
             </Select>
+            <p className="text-[11px] text-muted-foreground leading-snug">
+              Los tamaños grandes elevan el coste de impresión, reduciendo la regalía neta.
+            </p>
           </div>
         </div>
 
@@ -359,17 +404,20 @@ export const PaperbackSimulator = ({
                 decimals={2}
                 suffix={currencySymbol}
                 ariaLabel="Precio de venta"
-                onCommit={v => setSimState(prev => ({ ...prev, pvp: v }))}
+                onCommit={v => commitState(prev => ({ ...prev, pvp: v }))}
               />
             </div>
             <Slider className="[&>span:first-child]:bg-muted" defaultValue={[simState.pvp]} key={`pvp-${simState.pvp}`} min={4.99} max={29.99} step={0.01}
-              onValueCommit={([v]) => setSimState(prev => ({ ...prev, pvp: Math.round(v * 100) / 100 }))} />
+              onValueCommit={([v]) => commitState(prev => ({ ...prev, pvp: Math.round(v * 100) / 100 }))} />
 
             <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
               <span>4.99{currencySymbol}</span>
               <span>Regalía: {(royaltyRate * 100).toFixed(0)}%</span>
               <span>29.99{currencySymbol}</span>
             </div>
+            <p className="text-[11px] text-muted-foreground leading-snug">
+              Determina regalías, BACOS y precio mínimo viable. Cruzar 9,99{currencySymbol} activa la regalía del 60%.
+            </p>
           </div>
 
           {/* Páginas */}
@@ -388,17 +436,20 @@ export const PaperbackSimulator = ({
                 decimals={0}
                 ariaLabel="Número de páginas"
                 width="w-20"
-                onCommit={v => setSimState(prev => ({ ...prev, pages: Math.round(v) }))}
+                onCommit={v => commitState(prev => ({ ...prev, pages: Math.round(v) }))}
               />
             </div>
             <Slider className="[&>span:first-child]:bg-muted" defaultValue={[simState.pages]} key={`pages-${simState.pages}`} min={minPages} max={400} step={1}
-              onValueCommit={([v]) => setSimState(prev => ({ ...prev, pages: v }))} />
+              onValueCommit={([v]) => commitState(prev => ({ ...prev, pages: v }))} />
 
             <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
               <span>{minPages}</span>
               <span>Impresión: {gastosImpresion.toFixed(2)}{currencySymbol}</span>
               <span>400</span>
             </div>
+            <p className="text-[11px] text-muted-foreground leading-snug">
+              Más páginas suben el coste de impresión y reducen la regalía por venta.
+            </p>
           </div>
 
           {/* Coste por clic */}
@@ -417,17 +468,20 @@ export const PaperbackSimulator = ({
                 decimals={2}
                 suffix={currencySymbol}
                 ariaLabel="Coste por clic"
-                onCommit={v => setSimState(prev => ({ ...prev, cpc: v }))}
+                onCommit={v => commitState(prev => ({ ...prev, cpc: v }))}
               />
             </div>
             <Slider className="[&>span:first-child]:bg-muted" defaultValue={[simState.cpc]} key={`cpc-${simState.cpc}`} min={0.05} max={1.5} step={0.01}
-              onValueCommit={([v]) => setSimState(prev => ({ ...prev, cpc: Math.round(v * 100) / 100 }))} />
+              onValueCommit={([v]) => commitState(prev => ({ ...prev, cpc: Math.round(v * 100) / 100 }))} />
 
             <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
               <span>0.05{currencySymbol}</span>
               <span>Máximo rentable: {cpcMaxRentable.toFixed(2)}{currencySymbol}</span>
               <span>1.50{currencySymbol}</span>
             </div>
+            <p className="text-[11px] text-muted-foreground leading-snug">
+              Ajusta cuántos clics de Amazon Ads puedes permitirte por venta sin romper el margen.
+            </p>
           </div>
 
           {/* Margen objetivo */}
@@ -446,16 +500,19 @@ export const PaperbackSimulator = ({
                 decimals={2}
                 suffix="%"
                 ariaLabel="Margen objetivo"
-                onCommit={v => setSimState(prev => ({ ...prev, margenObjetivo: v }))}
+                onCommit={v => commitState(prev => ({ ...prev, margenObjetivo: v }))}
               />
             </div>
             <Slider className="[&>span:first-child]:bg-muted" defaultValue={[simState.margenObjetivo]} key={`mo-${simState.margenObjetivo}`} min={10} max={60} step={0.5}
-              onValueCommit={([v]) => setSimState(prev => ({ ...prev, margenObjetivo: Math.round(v * 100) / 100 }))} />
+              onValueCommit={([v]) => commitState(prev => ({ ...prev, margenObjetivo: Math.round(v * 100) / 100 }))} />
 
             <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
               <span>10%</span>
               <span>60%</span>
             </div>
+            <p className="text-[11px] text-muted-foreground leading-snug">
+              Recalcula el precio mínimo viable para asegurar ese margen tras impresión y comisiones.
+            </p>
           </div>
         </div>
       </div>
@@ -476,9 +533,18 @@ export const PaperbackSimulator = ({
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5">
-            <span className={`w-2 h-2 rounded-full ${riskDot}`} />
-            <span className="text-xs font-semibold text-foreground">{riskLabel}</span>
+          <div className="flex items-center gap-2">
+            <span
+              aria-live="polite"
+              className={`inline-flex items-center gap-1.5 rounded-full border border-secondary/30 bg-secondary/10 px-2.5 py-1 text-[11px] font-semibold text-secondary transition-opacity duration-200 ${isUpdating ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            >
+              <Loader2 className="h-3 w-3 animate-spin" />
+              Actualizando simulación…
+            </span>
+            <div className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5">
+              <span className={`w-2 h-2 rounded-full ${riskDot}`} />
+              <span className="text-xs font-semibold text-foreground">{riskLabel}</span>
+            </div>
           </div>
         </div>
 
