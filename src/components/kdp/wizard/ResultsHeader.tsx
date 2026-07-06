@@ -17,6 +17,8 @@ interface ResultsHeaderProps {
   score: ScoreBreakdown;
   activeResults: EbookResults | PaperbackResults | null;
   currencySymbol: string;
+  /** Render without outer border/rounded/shadow (for embedding inside a unified container). */
+  bare?: boolean;
 }
 
 const MARKETPLACE_LABEL: Record<string, string> = {
