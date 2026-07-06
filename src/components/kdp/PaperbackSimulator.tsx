@@ -133,6 +133,26 @@ export const PaperbackSimulator = ({
     return getBaseSimState();
   });
 
+  // Transient "Actualizando…" indicator, shown briefly after committing any control.
+  const [isUpdating, setIsUpdating] = useState(false);
+  const updateTimerRef = useRef<number | null>(null);
+  const flashUpdating = () => {
+    setIsUpdating(true);
+    if (updateTimerRef.current) window.clearTimeout(updateTimerRef.current);
+    updateTimerRef.current = window.setTimeout(() => setIsUpdating(false), 450);
+  };
+  useEffect(() => () => { if (updateTimerRef.current) window.clearTimeout(updateTimerRef.current); }, []);
+
+  const commitState = (updater: (prev: SimulatorData) => SimulatorData) => {
+    setSimState(updater);
+    flashUpdating();
+  };
+
+  const handleReset = () => {
+    setSimState(getBaseSimState());
+    flashUpdating();
+  };
+
   useEffect(() => {
     onStateChange?.(simState);
   }, [simState, onStateChange]);
